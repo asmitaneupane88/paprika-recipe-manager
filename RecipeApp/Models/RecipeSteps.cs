@@ -3,9 +3,17 @@
 public class RecipeSteps
 {
     // Data Type:
-        // Step number
+        // Int stepNumber
         // String StepDescription
         // Picture? if we want pictures to be associated with each step
-        // Integer Length of time per step 
-        // Unit for Time Length
+        // Int stepTimeLength 
+        // String stepTimeUnit
+        // boolean isComplete
+        
+    // Set Methods:
+    
+    // Get Methods:
+    
+    
+    
 }
