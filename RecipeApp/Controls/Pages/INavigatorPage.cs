@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using RecipeApp.Models;
-
-namespace RecipeApp.Controls.Pages;
+﻿namespace RecipeApp.Controls.Pages;
 
 /// <summary>
 /// A basic extension of the Page class to provide a unified way to access and pass along data such as the Navigator field.
@@ -17,14 +13,6 @@ public abstract class NavigatorPage : Page, INotifyPropertyChanged
     /// the "ObservableObject" and the "ObservableProperty" attribute, but applies it to a window instead of a class.
     /// </remarks>
     protected Navigator Navigator { get; set => SetField(ref field, value); }
-    
-    /// <summary>
-    /// For use only by the designer.
-    /// </summary>
-    // public NavigatorPage()
-    // {
-    //     Navigator = new Navigator();
-    // }
     
     /// <summary>
     /// For use by the Navigator.cs class and the Route.cs class.

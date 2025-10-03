@@ -1,7 +1,3 @@
-using RecipeApp.Controls;
-using RecipeApp.Controls.Pages;
-using Uno.Resizetizer;
-
 namespace RecipeApp;
 
 public partial class App : Application
