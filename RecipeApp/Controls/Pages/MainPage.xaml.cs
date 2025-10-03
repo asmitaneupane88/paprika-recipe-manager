@@ -22,19 +22,6 @@ public sealed partial class MainPage : NavigatorPage
 
     private async void MainPage_Loaded(object sender, RoutedEventArgs e)
     {
-        try
-        {
-            var api = new ApiControl();
-            var recipes = await api.SearchRecipesAsync("Chicken");
-            Debug.WriteLine($"Found {recipes.Count} recipes:");
-            foreach (var recipe in recipes)
-            {
-                Debug.WriteLine($"- {recipe.Name} (Ingredients: {recipe.Ingredients})");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Test Error: {ex.Message}");
-        }
+        
     }
 }
