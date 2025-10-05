@@ -4,17 +4,16 @@
 /// <summary>
 /// 
 /// </summary>
-public class Recipe
+public partial class Recipe : ObservableObject
 {
     #region Instance Properties
 
-    public string Title { get; set; }
-    public string Description { get; set; }
-    public string ImageUrl { get; set; }
-    public string? SourceUrl { get; set; }
-    
-    public string UserNote { get; set; }
-    public int Rating { get; set; }
+    [ObservableProperty] public partial string Title { get; set; }
+    [ObservableProperty] public partial string Description { get; set; }
+    [ObservableProperty] public partial string ImageUrl { get; set; }
+    [ObservableProperty] public partial string? SourceUrl { get; set; }
+    [ObservableProperty] public partial string UserNote { get; set; }
+    [ObservableProperty] public partial int Rating { get; set; }
     
     //TODO: implement in sprint 2
     // should be able to look at the steps and add it all up.

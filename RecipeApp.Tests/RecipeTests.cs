@@ -33,7 +33,7 @@ public class RecipeTests
         var removeCount = currentRecipes.Count;
         
         Console.WriteLine();
-        Console.WriteLine("RECIPES WITH TEMP RECIPE REMOVED:");
+        Console.WriteLine(@"RECIPES WITH TEMP RECIPE REMOVED:");
         Console.WriteLine(string.Join(", ", currentRecipes.Select(r => r.Title)));
         
         if (newCount != originalCount + 1 || removeCount != originalCount)
