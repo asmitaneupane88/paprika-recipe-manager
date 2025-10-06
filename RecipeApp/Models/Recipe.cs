@@ -117,6 +117,8 @@ public partial class Recipe : ObservableObject
     
     private static async Task SaveRecipes(bool force = false)
     {
+        RecipesPath ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RecipeApp", "Recipes.json");
+        
         if (InSave)
         {
             RequireResave = true;
@@ -125,7 +127,9 @@ public partial class Recipe : ObservableObject
 
         InSave = true;
         
-        //TODO
+        var json = JsonSerializer.Serialize(Recipes);
+        await File.WriteAllTextAsync(RecipesPath, json);
+        
         InSave = false;
 
         if (RequireResave)
