@@ -22,7 +22,10 @@ public partial class Recipe : ObservableObject
     #endregion
 
     #region Instance Methods
-    private Recipe() {}
+    /// <summary>
+    /// DO NOT USE, only for use by the jsonSerializer.
+    /// </summary>
+    public Recipe() {}
 
     /// <summary>
     /// TODO
@@ -105,11 +108,21 @@ public partial class Recipe : ObservableObject
     {
         RecipesPath ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RecipeApp", "Recipes.json");
 
-        if (File.Exists(RecipesPath))
+        if (File.Exists(RecipesPath) && await File.ReadAllTextAsync(RecipesPath) is { Length: > 0 } fileData)
         {
-            var fileData = await File.ReadAllTextAsync(RecipesPath);
+            for (var i = 0; i < 3 && Recipes is null; i++) 
+            {
+                try
+                {
+                    Recipes = JsonSerializer.Deserialize<List<Recipe>>(fileData);
+                }
+                catch (Exception e)
+                {
+                    //TODO: ignored
+                }
+            }
 
-            Recipes = JsonSerializer.Deserialize<List<Recipe>>(fileData);
+            Recipes ??= [];
         }
         else
             Recipes = [];
@@ -119,13 +132,15 @@ public partial class Recipe : ObservableObject
     {
         RecipesPath ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RecipeApp", "Recipes.json");
         
-        if (InSave)
+        if (InSave && !force)
         {
             RequireResave = true;
             return;
         }
 
         InSave = true;
+
+        Directory.CreateDirectory(Path.GetDirectoryName(RecipesPath)); 
         
         var json = JsonSerializer.Serialize(Recipes);
         await File.WriteAllTextAsync(RecipesPath, json);
