@@ -14,8 +14,14 @@ public partial class Navigator : ObservableObject
         new()
         {
             Icon = Symbol.Home,
-            Name = "Home",
+            Name = "TEST Home",
             PageFactory = nav => new MainPage(nav),
+        },
+        new()
+        {
+            Icon = Symbol.List, //TODO: probably a better icon for this
+            Name = "Saved Recipes",
+            PageFactory = nav => new RecipePage(nav),
         },
         new()
         {
