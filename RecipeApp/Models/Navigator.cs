@@ -23,6 +23,13 @@ public partial class Navigator : ObservableObject
             Name = "Second",
             PageFactory = nav => new SecondPage(nav),
         },
+        new()
+        {
+            Icon = Symbol.Page,
+            Name = "Recipe Details",
+            PageFactory = nav => new RecipeDetails(nav, null),
+            ShowInNavigationView = false
+        },
     ];
     
     /// <summary>
@@ -44,7 +51,7 @@ public partial class Navigator : ObservableObject
     /// <summary>
     /// Current title of the current page.
     /// </summary>
-    [ObservableProperty] public partial string CurrentTitle { get; private set; }
+    [ObservableProperty] public partial string CurrentTitle { get; private set; } = "Home";
 
     /// <summary>
     /// The count of the History stack. Should be one if it is on a root route.

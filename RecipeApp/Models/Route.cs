@@ -25,6 +25,11 @@ public class Route
     /// </summary>
     public required Func<Navigator, NavigatorPage> PageFactory { get; init; }
 
+    /// <summary>
+    /// Determines whether this route should be shown in the navigation view.
+    /// </summary>
+    public bool ShowInNavigationView { get; init; } = true;
+
     // TODO: change this when subroutes are implemented, if subroutes need to be implemented at all.
     /// <summary>
     /// A list of subroutes which will show on the navigation bar when the route is selected.

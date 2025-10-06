@@ -3,17 +3,27 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:utu="using:Uno.Toolkit.UI"
       xmlns:pages="clr-namespace:RecipeApp.Controls.Pages"
+      xmlns:models="using:RecipeApp.Models"
       Background="{ThemeResource BackgroundBrush}">
   <ScrollViewer IsTabStop="True">
-    <Grid utu:SafeArea.Insets="VisibleBounds">
-      <StackPanel
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center">
-        <TextBlock AutomationProperties.AutomationId="HelloTextBlock"
-          Text="Hello Uno Platform!"
-          HorizontalAlignment="Center" />
-        <Button Content="Go to ThirdPage.xaml" Click="ButtonBase_OnClick" Margin="0,20,0,0"/>
-      </StackPanel>
+    <Grid utu:SafeArea.Insets="VisibleBounds" Padding="20">
+        <ListView ItemsSource="{x:Bind Recipes}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:Recipe">
+                    <Button Click="Recipe_Click" HorizontalAlignment="Stretch" Padding="12">
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind Title}" 
+                                     Style="{StaticResource SubtitleTextBlockStyle}"/>
+                            <TextBlock Text="{x:Bind Category}" 
+                                     Style="{StaticResource CaptionTextBlockStyle}" 
+                                     Opacity="0.6"/>
+                            <RatingControl Value="{x:Bind Rating}" 
+                                         IsReadOnly="True"/>
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
   </ScrollViewer>
 </pages:NavigatorPage>

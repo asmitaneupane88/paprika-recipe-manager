@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<local:NavigatorPage
+    x:Class="RecipeApp.Controls.Pages.RecipeDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:RecipeApp.Controls.Pages"
+    mc:Ignorable="d">
+
+    <Grid Padding="20">
+        <ScrollViewer>
+            <StackPanel Spacing="16">
+                <!-- Header -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel>
+                        <TextBlock Text="{x:Bind Recipe.Title}" 
+                                 Style="{StaticResource TitleTextBlockStyle}"/>
+                        <TextBlock Text="{x:Bind Recipe.Category}" 
+                                 Style="{StaticResource BodyTextBlockStyle}" 
+                                 Opacity="0.6"/>
+                        <TextBlock Text="{x:Bind Recipe.Author}" 
+                                 Style="{StaticResource BodyTextBlockStyle}" 
+                                 Opacity="0.6"/>
+                    </StackPanel>
+                    
+                    <!-- Rating -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <RatingControl Value="{x:Bind Recipe.Rating, Mode=OneWay}" 
+                                     IsReadOnly="True"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Recipe Info -->
+                <Grid ColumnSpacing="16" RowSpacing="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Prep" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" Text="{x:Bind Recipe.PrepTimeMinutes, Converter={StaticResource MinutesToTimeConverter}}"/>
+
+                    <TextBlock Grid.Column="1" Text="Cook" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Recipe.CookTimeMinutes, Converter={StaticResource MinutesToTimeConverter}}"/>
+
+                    <TextBlock Grid.Column="2" Text="Servings" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{x:Bind Recipe.Servings}"/>
+
+                    <TextBlock Grid.Column="3" Text="Difficulty" Style="{StaticResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{x:Bind Recipe.Difficulty}"/>
+                </Grid>
+
+                <!-- Ingredients -->
+                <StackPanel>
+                    <TextBlock Text="Ingredients" 
+                             Style="{StaticResource SubtitleTextBlockStyle}"
+                             Margin="0,0,0,8"/>
+                    <ItemsRepeater ItemsSource="{x:Bind Recipe.Ingredients}">
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4">
+                                    <TextBlock Text="{Binding Amount}"/>
+                                    <TextBlock Text="{Binding Unit}"/>
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Notes}" Opacity="0.6"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+
+                <!-- Directions -->
+                <StackPanel>
+                    <TextBlock Text="Directions" 
+                             Style="{StaticResource SubtitleTextBlockStyle}"
+                             Margin="0,0,0,8"/>
+                    <ItemsRepeater ItemsSource="{x:Bind Recipe.Directions}">
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,8">
+                                    <TextBlock Text="{Binding}" 
+                                             TextWrapping="Wrap"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</local:NavigatorPage>
