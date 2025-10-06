@@ -67,7 +67,7 @@ public partial class Recipe : ObservableObject
     /// <param name="imageUrl"></param>
     /// <param name="sourceUrl"></param>
     /// <returns></returns>
-    public static async Task<Recipe> Add(string title, string description, string imageUrl, string? sourceUrl)
+    public static async Task<Recipe> Add(string title, string description, string imageUrl, string? sourceUrl = null)
     {
         if (Recipes is null) await LoadRecipes();
 
