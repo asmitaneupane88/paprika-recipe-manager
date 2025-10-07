@@ -1,5 +1,3 @@
-using RecipeApp.Models;
-
 namespace RecipeApp.Controls.Pages;
 
 public sealed partial class MainPage : NavigatorPage

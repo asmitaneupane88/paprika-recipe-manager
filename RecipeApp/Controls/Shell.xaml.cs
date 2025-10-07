@@ -1,23 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using RecipeApp.Controls.Pages;
-using RecipeApp.Models;
-
-namespace RecipeApp.Controls;
+﻿namespace RecipeApp.Controls;
 
 /// <summary>
 /// The main window of the application.
@@ -63,7 +44,7 @@ public sealed partial class Shell : NavigatorPage
 
     private void ButtonBack_OnClick(object sender, RoutedEventArgs e)
     {
-        Navigator.GoBack();
+        Navigator.TryGoBack();
     }
 }
 
