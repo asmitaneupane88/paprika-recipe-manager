@@ -27,7 +27,7 @@ public partial class Navigator : ObservableObject
         {
             Icon = Symbol.Help,
             Name = "Enter a Recipe Manually",
-            Page = nav => new InputARecipe(nav),
+            PageFactory = nav => new InputARecipe(nav),
         },
         
     ];
