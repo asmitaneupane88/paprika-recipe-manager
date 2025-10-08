@@ -37,5 +37,11 @@
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="PuppeteerSharp" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />
+    </ItemGroup>
 
 </Project>

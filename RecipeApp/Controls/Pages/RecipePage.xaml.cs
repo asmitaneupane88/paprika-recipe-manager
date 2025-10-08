@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using System.Drawing.Printing;
+using System.Text;
 using Windows.Graphics.Printing;
 using Microsoft.UI.Xaml.Input;
+using RecipeApp.Services;
 
 namespace RecipeApp.Controls.Pages;
 
@@ -98,12 +100,19 @@ public sealed partial class RecipePage : NavigatorPage
         sb.AppendLine(Recipe.HtmlHeader);
         
         foreach (var recipe in recipesToPrint)
+        {
             sb.AppendLine(recipe.ConvertToHtml());
+            sb.AppendLine("<hr/>");
+        }
 
         sb.AppendLine(Recipe.HtmlFooter);
 
-        //TODO: how to print in Uno platform???
-        // await PrintManager.ShowPrintUIAsync(); - not implemented in uno platform warning, so this will not work cross-platform.
+        var html = sb.ToString();
+        
+        //TODO: look into moving from save file to print maybe?
+        // I could not find a cross platform library to use and do not want to do each platform and have to test each one.
+
+        await FileHelper.SaveHtmlAsPdf(html);
     }
     
     
