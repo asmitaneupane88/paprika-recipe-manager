@@ -1,4 +1,6 @@
-﻿namespace RecipeApp.Models;
+﻿using System.Text;
+
+namespace RecipeApp.Models;
 
 //TODO: need to get documentation done
 /// <summary>
@@ -30,23 +32,44 @@ public partial class Recipe : ObservableObject
     /// <summary>
     /// TODO
     /// </summary>
-    /// <param name="selfContained">Should be true unless the html will be used in generating a list of recipes</param>
+    /// <param name="selfContained">Should be true unless the html will be used in generating a list of recipes
+    /// (i.e. should a html header and footer be included).</param>
     /// <returns>the html string representation of the recipe</returns>
     public string ConvertToHtml(bool selfContained = true)
     {
-        throw new NotImplementedException();
+        var sb = new StringBuilder();
+        
+        if (selfContained) sb.AppendLine(HtmlHeader);
+        
+        sb.AppendLine($"<img src=\"{ImageUrl}\" alt=\"{Title}\">");
+        sb.AppendLine($"<h1>{Title}</h1>");
+        sb.AppendLine($"<h3>{Rating}/{MaxRating} stars<h3>"); //TODO: render as stars later.
+        
+        sb.AppendLine($"<p>{Description}</p>");
+        
+        //TODO: ingredients and steps here
+        
+        sb.AppendLine("<h2>Notes</h2>");
+        sb.AppendLine($"<p>{UserNote}</p>");
+        
+        if (selfContained) sb.AppendLine(HtmlFooter);
+        
+        return sb.ToString();
     }
 
     #endregion
     
     #region Static Properties
-    // private static bool IsLoaded { get; set; }
-    // private static ulong IdCounter { get; set; }
     private static List<Recipe>? Recipes { get; set; }
     private static string? RecipesPath { get; set; }
     
     private static bool InSave;
     private static bool RequireResave;
+    
+    public const string HtmlHeader = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
+    public const string HtmlFooter = "</body></html>";
+    
+    public const int MaxRating = 5;
     #endregion
     
     #region Static Methods
@@ -94,12 +117,15 @@ public partial class Recipe : ObservableObject
     /// Removes a recipe from the list of recipes.
     /// Saves the list of recipes.
     /// </summary>
-    /// <param name="recipeToRemove"></param>
-    public static async Task Remove(Recipe recipeToRemove)
+    /// <param name="recipesToRemove"></param>
+    public static async Task Remove(params Recipe[] recipesToRemove)
     {
         if (Recipes is null) await LoadRecipes();
-        
-        Recipes!.Remove(recipeToRemove);
+
+        foreach (var recipe in recipesToRemove)
+        {
+            Recipes!.Remove(recipe);
+        }
         
         await SaveRecipes();
     }
