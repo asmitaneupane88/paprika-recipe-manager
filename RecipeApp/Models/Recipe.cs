@@ -38,22 +38,25 @@ public partial class Recipe : ObservableObject
     public string ConvertToHtml(bool selfContained = true)
     {
         var sb = new StringBuilder();
-        
+    
         if (selfContained) sb.AppendLine(HtmlHeader);
-        
-        sb.AppendLine($"<img src=\"{ImageUrl}\" alt=\"{Title}\">");
-        sb.AppendLine($"<h1>{Title}</h1>");
-        sb.AppendLine($"<h3>{Rating}/{MaxRating} stars<h3>"); //TODO: render as stars later.
-        
+    
+        sb.AppendLine("<div style=\"display: flex; gap: 20px; margin-bottom: 20px;\">");
+        sb.AppendLine($"<img src=\"{ImageUrl}\" alt=\"{Title}\" style=\"object-fit: cover; border-radius: 8px; flex-shrink: 0;\">");
+        sb.AppendLine("<div style=\"display: flex; flex-direction: column; justify-content: center;\">");
+        sb.AppendLine($"<h1 style=\"margin: 0;\">{Title}</h1>");
+        sb.AppendLine($"<h3 style=\"margin: 10px 0 0 0;\">{Rating}/{MaxRating} stars</h3>");
+        sb.AppendLine("</div>");
+    
         sb.AppendLine($"<p>{Description}</p>");
-        
-        //TODO: ingredients and steps here
-        
+    
+        //TODO: ingredients and steps here when they are implemented.
+    
         sb.AppendLine("<h2>Notes</h2>");
         sb.AppendLine($"<p>{UserNote}</p>");
-        
+    
         if (selfContained) sb.AppendLine(HtmlFooter);
-        
+    
         return sb.ToString();
     }
 
