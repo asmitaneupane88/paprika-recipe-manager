@@ -19,14 +19,6 @@ public abstract class NavigatorPage : Page, INotifyPropertyChanged
     protected Navigator Navigator { get; set => SetField(ref field, value); }
     
     /// <summary>
-    /// For use only by the designer.
-    /// </summary>
-    // public NavigatorPage()
-    // {
-    //     Navigator = new Navigator();
-    // }
-    
-    /// <summary>
     /// For use by the Navigator.cs class and the Route.cs class.
     /// </summary>
     /// <param name="navigator"></param>
