@@ -264,3 +264,10 @@ mergedstyles.xaml
 
 !build/ci/publish
 /doc/articles/llms/llms-full.txt
+
+# docfx stuff:
+_site/
+
+# other stuff
+/RecipeApp/obj/
+/RecipeApp/bin/
