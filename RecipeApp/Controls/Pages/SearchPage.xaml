@@ -26,7 +26,7 @@
                   ItemsSource="{x:Bind ViewModel.Recipes}"
                   Margin="0,16,0,0">
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:Recipe">
+                <DataTemplate x:DataType="models:MealDbRecipe">
                     <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
                         <Image Source="{x:Bind ImageUrl}" Width="100" Height="100"/>
                         <StackPanel>

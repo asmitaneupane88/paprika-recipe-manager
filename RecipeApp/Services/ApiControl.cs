@@ -12,10 +12,10 @@ namespace RecipeApp.Services
     {
         private readonly HttpClient _httpClient = new();
 
-        public async Task<IReadOnlyList<Recipe>> SearchAsync(string query, CancellationToken ct = default)
+        public async Task<IReadOnlyList<MealDbRecipe>> SearchAsync(string query, CancellationToken ct = default)
         {
             if (string.IsNullOrEmpty(query))
-                return Array.Empty<Recipe>();
+                return Array.Empty<MealDbRecipe>();
 
             try
             {
@@ -27,11 +27,11 @@ namespace RecipeApp.Services
                     PropertyNameCaseInsensitive = true
                 });
                 
-                var recipes = new List<Recipe>();
+                var recipes = new List<MealDbRecipe>();
 
-                foreach (var meal in apiResponse?.Meals ?? new List<Recipe>())
+                foreach (var meal in apiResponse?.Meals ?? [])
                 {
-                    recipes.Add(new Recipe
+                    recipes.Add(new MealDbRecipe
                     {
                         Name        = meal.strMeal ?? "Unknown",
                         ImageUrl    = meal.strMealThumb ?? string.Empty,
@@ -47,13 +47,13 @@ namespace RecipeApp.Services
                 return GetDummyRecipes();
             }
         }
-        private string GetIngredientsFromMeal(Recipe meal)
+        private string GetIngredientsFromMeal(MealDbRecipe meal)
         {
             var ingredients = new List<string>();
             for (int i = 1; i <= 2; i++)
             {
-                var ingredient = typeof(Recipe).GetProperty($"strIngredient{i}")?.GetValue(meal) as string;
-                var measure = typeof(Recipe).GetProperty($"strMeasure{i}")?.GetValue(meal) as string;
+                var ingredient = typeof(MealDbRecipe).GetProperty($"strIngredient{i}")?.GetValue(meal) as string;
+                var measure = typeof(MealDbRecipe).GetProperty($"strMeasure{i}")?.GetValue(meal) as string;
                 if (!string.IsNullOrEmpty(ingredient))
                 {
                     ingredients.Add($"{measure?.Trim() ?? ""} {ingredient.Trim()}".Trim());
@@ -62,23 +62,24 @@ namespace RecipeApp.Services
             return string.Join(", ", ingredients);
         }
 
-        private List<Recipe> GetDummyRecipes() => new()
-        {
-           new Recipe
-           {
-               Name = "Dummy Pasta",
-               Ingredients = "Pasta, Sauce, Cheese",
-               Instructions = "Boil pasta, add sauce.",
-               ImageUrl = "https://www.themealdb.com/images/media/meals/wxywrq1468235067.jpg"
+        private List<MealDbRecipe> GetDummyRecipes() =>
+        [
+            new()
+            {
+                Name = "Dummy Pasta",
+                Ingredients = "Pasta, Sauce, Cheese",
+                Instructions = "Boil pasta, add sauce.",
+                ImageUrl = "https://www.themealdb.com/images/media/meals/wxywrq1468235067.jpg"
             },
-            new Recipe
+
+            new()
             {
                 Name = "Dummy Salad",
                 Ingredients = "Lettuce, Tomato, Dressing",
                 Instructions = "Chop and toss.",
                 ImageUrl = "https://www.themealdb.com/images/media/meals/abc123.jpg"
             }
-        };
+        ];
     }
 }
 

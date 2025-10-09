@@ -10,6 +10,6 @@ namespace RecipeApp.Services
         /// <summary>
         /// Search for recipes using TheMealDB API.
         /// </summary>
-        Task<IReadOnlyList<Recipe>> SearchAsync(string query, CancellationToken ct = default);
+        Task<IReadOnlyList<MealDbRecipe>> SearchAsync(string query, CancellationToken ct = default);
     }
 }

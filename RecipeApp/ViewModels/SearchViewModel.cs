@@ -15,7 +15,7 @@ namespace RecipeApp.ViewModels
         [ObservableProperty] private string? errorMessage;
         [ObservableProperty] private bool isEmpty;
 
-        public ObservableCollection<Recipe> Recipes { get; } = new();
+        public ObservableCollection<MealDbRecipe> Recipes { get; } = new();
         public IAsyncRelayCommand SearchCommand { get; }
 
         public SearchViewModel() : this(new ApiControl()) { }
