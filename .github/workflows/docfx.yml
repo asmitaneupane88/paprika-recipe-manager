@@ -2,7 +2,7 @@ name: Deploy DocFX to GitHub Pages
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, WH_Documentation ]
   workflow_dispatch:
 
 permissions:
