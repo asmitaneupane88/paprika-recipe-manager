@@ -29,11 +29,11 @@ jobs:
       - name: Setup DocFX
         run: dotnet tool update -g docfx
 
-      - name: Build Documentation
-        run: docfx docfx.json
-
       - name: Build Solution
         run: dotnet build --configuration Release
+
+      - name: Build Documentation
+        run: docfx docfx.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
