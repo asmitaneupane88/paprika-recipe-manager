@@ -1,0 +1,75 @@
+### YamlMime:ManagedReference
+items:
+- uid: RecipeApp.Controls.Pages
+  commentId: N:RecipeApp.Controls.Pages
+  id: RecipeApp.Controls.Pages
+  children:
+  - RecipeApp.Controls.Pages.MainPage
+  - RecipeApp.Controls.Pages.NavigatorPage
+  - RecipeApp.Controls.Pages.SecondPage
+  - RecipeApp.Controls.Pages.ThirdPage
+  langs:
+  - csharp
+  - vb
+  name: RecipeApp.Controls.Pages
+  nameWithType: RecipeApp.Controls.Pages
+  fullName: RecipeApp.Controls.Pages
+  type: Namespace
+  assemblies:
+  - RecipeApp
+references:
+- uid: RecipeApp.Controls.Pages.NavigatorPage
+  commentId: T:RecipeApp.Controls.Pages.NavigatorPage
+  parent: RecipeApp.Controls.Pages
+  href: RecipeApp.Controls.Pages.NavigatorPage.html
+  name: NavigatorPage
+  nameWithType: NavigatorPage
+  fullName: RecipeApp.Controls.Pages.NavigatorPage
+- uid: RecipeApp.Controls.Pages.MainPage
+  commentId: T:RecipeApp.Controls.Pages.MainPage
+  href: RecipeApp.Controls.Pages.MainPage.html
+  name: MainPage
+  nameWithType: MainPage
+  fullName: RecipeApp.Controls.Pages.MainPage
+- uid: RecipeApp.Controls.Pages.SecondPage
+  commentId: T:RecipeApp.Controls.Pages.SecondPage
+  href: RecipeApp.Controls.Pages.SecondPage.html
+  name: SecondPage
+  nameWithType: SecondPage
+  fullName: RecipeApp.Controls.Pages.SecondPage
+- uid: RecipeApp.Controls.Pages.ThirdPage
+  commentId: T:RecipeApp.Controls.Pages.ThirdPage
+  href: RecipeApp.Controls.Pages.ThirdPage.html
+  name: ThirdPage
+  nameWithType: ThirdPage
+  fullName: RecipeApp.Controls.Pages.ThirdPage
+- uid: RecipeApp.Controls.Pages
+  commentId: N:RecipeApp.Controls.Pages
+  href: RecipeApp.html
+  name: RecipeApp.Controls.Pages
+  nameWithType: RecipeApp.Controls.Pages
+  fullName: RecipeApp.Controls.Pages
+  spec.csharp:
+  - uid: RecipeApp
+    name: RecipeApp
+    href: RecipeApp.html
+  - name: .
+  - uid: RecipeApp.Controls
+    name: Controls
+    href: RecipeApp.Controls.html
+  - name: .
+  - uid: RecipeApp.Controls.Pages
+    name: Pages
+    href: RecipeApp.Controls.Pages.html
+  spec.vb:
+  - uid: RecipeApp
+    name: RecipeApp
+    href: RecipeApp.html
+  - name: .
+  - uid: RecipeApp.Controls
+    name: Controls
+    href: RecipeApp.Controls.html
+  - name: .
+  - uid: RecipeApp.Controls.Pages
+    name: Pages
+    href: RecipeApp.Controls.Pages.html

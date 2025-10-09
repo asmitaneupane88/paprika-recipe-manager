@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: RecipeApp.Services
+  commentId: N:RecipeApp.Services
+  id: RecipeApp.Services
+  children:
+  - RecipeApp.Services.ApiControl
+  langs:
+  - csharp
+  - vb
+  name: RecipeApp.Services
+  nameWithType: RecipeApp.Services
+  fullName: RecipeApp.Services
+  type: Namespace
+  assemblies:
+  - RecipeApp
+references:
+- uid: RecipeApp.Services.ApiControl
+  commentId: T:RecipeApp.Services.ApiControl
+  href: RecipeApp.Services.ApiControl.html
+  name: ApiControl
+  nameWithType: ApiControl
+  fullName: RecipeApp.Services.ApiControl

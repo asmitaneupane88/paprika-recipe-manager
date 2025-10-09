@@ -1,0 +1,23 @@
+### YamlMime:ManagedReference
+items:
+- uid: RecipeApp.Controls
+  commentId: N:RecipeApp.Controls
+  id: RecipeApp.Controls
+  children:
+  - RecipeApp.Controls.Shell
+  langs:
+  - csharp
+  - vb
+  name: RecipeApp.Controls
+  nameWithType: RecipeApp.Controls
+  fullName: RecipeApp.Controls
+  type: Namespace
+  assemblies:
+  - RecipeApp
+references:
+- uid: RecipeApp.Controls.Shell
+  commentId: T:RecipeApp.Controls.Shell
+  href: RecipeApp.Controls.Shell.html
+  name: Shell
+  nameWithType: Shell
+  fullName: RecipeApp.Controls.Shell
