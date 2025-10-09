@@ -14,6 +14,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
@@ -28,17 +29,31 @@
             Width="300"/>
 
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Margin="10" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}" Click="OnButtonPrintClick">
+            <Button Margin="10"
+                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
+                    Click="OnButtonPrintClick">
                 <SymbolIcon Symbol="Print"/>
             </Button>
-            <Button Margin="10" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}" Click="OnButtonGroceryListClick">
+
+            <!--TODO: remove the visibility=collapsed when implemented-->
+            <Button Margin="10"
+                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
+                    Click="OnButtonGroceryListClick"
+                    Visibility="Collapsed">
                 <SymbolIcon Symbol="Shop"/>
             </Button>
-            <Button Margin="10" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}" Click="OnButtonRemoveClick">
-                <SymbolIcon Symbol="Remove"/>
+
+            <Button Margin="10"
+                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
+                    Click="OnButtonRemoveClick">
+                <SymbolIcon Symbol="Delete"/>
             </Button>
-            <Button Margin="10" Click="OnButtonAddClick">
-                <SymbolIcon Symbol="Add"/>
+
+            <!--TODO: remove the visibility=collapsed when implemented-->
+            <Button Margin="10"
+                    Click="OnButtonAddClick"
+                    Visibility="Collapsed">
+                <SymbolIcon Symbol="Edit"/>
             </Button>
         </StackPanel>
 
@@ -56,7 +71,6 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0"
@@ -65,7 +79,8 @@
                                     VerticalAlignment="Top"
                                     CornerRadius="10"
                                     BorderThickness="2"
-                                    BorderBrush="{ThemeResource PrimaryColor}">
+                                    BorderBrush="{ThemeResource PrimaryColor}"
+                                    Background="{ThemeResource SurfaceVariantColor}">
                                 <Image
                                     Source="{x:Bind Recipe.ImageUrl}"
                                     Width="80" Height="80"
@@ -74,34 +89,37 @@
 
 
                             <StackPanel Grid.Column="1" VerticalAlignment="Center"
-                                        Margin="10" >
+                                        Margin="5" >
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
+
                                     <TextBlock Grid.Column="0"
                                                Text="{x:Bind Recipe.Title}"
                                                FontWeight="Bold"
-                                               FontSize="18" />
+                                               FontSize="18"
+                                               MaxLines="1"
+                                               VerticalAlignment="Center"/>
+
                                     <RatingControl Grid.Column="1"
                                                    Value="{x:Bind Recipe.Rating}"
                                                    MaxRating="{x:Bind Recipe.BindableMaxRating}"
                                                    IsReadOnly="True"/>
+
+                                    <!--Got to use "Binding" here over x:Bind-->
+                                    <CheckBox
+                                        Grid.Column="2"
+                                        IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                        Checked="OnRecipeCardChecked"
+                                        Unchecked="OnRecipeCardChecked"/>
                                 </Grid>
+
                                 <TextBlock Text="{x:Bind Recipe.Description}"
                                            MaxLines="3"/>
                             </StackPanel>
-
-                            <!--Got to use "Binding" here over x:Bind-->
-                            <CheckBox
-                                Grid.Column="2"
-                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                Checked="OnRecipeCardChecked"
-                                Unchecked="OnRecipeCardChecked"
-                                Margin="10"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
                 </DataTemplate>
