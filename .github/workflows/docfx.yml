@@ -29,6 +29,9 @@ jobs:
       - name: Setup DocFX
         run: dotnet tool update -g docfx
 
+      - name: NuGet Restore
+        run: dotnet restore
+
       - name: Build Solution
         run: dotnet build --configuration Release
 

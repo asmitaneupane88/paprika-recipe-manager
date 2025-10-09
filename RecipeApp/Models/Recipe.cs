@@ -1,6 +1,5 @@
 ﻿using System.Text;
-using Newtonsoft.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Text.Json.Serialization;
 
 namespace RecipeApp.Models;
 
