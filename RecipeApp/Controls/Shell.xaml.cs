@@ -1,4 +1,8 @@
-﻿namespace RecipeApp.Controls;
+namespace RecipeApp.Controls;
+using System.Collections.ObjectModel;
+using RecipeApp.Controls.Pages;
+using RecipeApp.Models;
+
 
 /// <summary>
 /// The main window of the application.

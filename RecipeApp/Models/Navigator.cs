@@ -1,4 +1,4 @@
-﻿namespace RecipeApp.Models;
+namespace RecipeApp.Models;
 
 /// <summary>
 /// Handles navigation and where you are in the application. View each field and method for more info. 

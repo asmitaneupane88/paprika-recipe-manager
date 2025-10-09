@@ -1,15 +1,32 @@
+using Microsoft.Extensions.DependencyInjection;
+using RecipeApp.Controls;
+using RecipeApp.Services;
+using RecipeApp.ViewModels;
+
 namespace RecipeApp;
 
 public partial class App : Application
 {
-	/// <summary>
-	/// Initializes the singleton application object. This is the first line of authored code
-	/// executed, and as such is the logical equivalent of main() or WinMain().
-	/// </summary>
-	public App()
-	{
-		this.InitializeComponent();
-	}
+    public static IServiceProvider Services { get; private set; } = null!;
+
+    /// <summary>
+    /// Initializes the singleton application object. This is the first line of authored code
+    /// executed, and as such is the logical equivalent of main() or WinMain().
+    /// </summary>
+    public App()
+    {
+        this.InitializeComponent();
+        ConfigureServices();
+    }
+
+    private static void ConfigureServices()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<IRecipeService, ApiControl>();
+        services.AddTransient<SearchViewModel>();
+
+        Services = services.BuildServiceProvider();
+    }
 
 	protected Window? MainWindow { get; private set; }
 
