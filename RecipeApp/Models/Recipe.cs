@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Newtonsoft.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace RecipeApp.Models;
 
@@ -9,6 +11,8 @@ namespace RecipeApp.Models;
 public partial class Recipe : ObservableObject
 {
     #region Instance Properties
+
+    [JsonIgnore] public int BindableMaxRating => MaxRating;
 
     [ObservableProperty] public partial string Title { get; set; }
     [ObservableProperty] public partial string Description { get; set; }
