@@ -3,6 +3,7 @@ using System.Text;
 using Windows.Graphics.Printing;
 using Microsoft.UI.Xaml.Input;
 using RecipeApp.Services;
+using Uno.Extensions;
 
 namespace RecipeApp.Controls.Pages;
 
