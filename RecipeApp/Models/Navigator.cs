@@ -23,6 +23,12 @@ public partial class Navigator : ObservableObject
             Name = "Second",
             PageFactory = nav => new SecondPage(nav),
         },
+        new()
+        {
+            Icon = Symbol.Scan,
+            Name = "MealDB Recipes",
+            PageFactory = nav => new SearchPage(nav),
+        }
     ];
     
     /// <summary>

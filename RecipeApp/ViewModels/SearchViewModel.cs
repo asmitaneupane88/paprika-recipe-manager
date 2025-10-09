@@ -18,6 +18,8 @@ namespace RecipeApp.ViewModels
         public ObservableCollection<Recipe> Recipes { get; } = new();
         public IAsyncRelayCommand SearchCommand { get; }
 
+        public SearchViewModel() : this(new ApiControl()) { }
+        
         public SearchViewModel(IRecipeService recipeService)
         {
             _recipeService = recipeService;

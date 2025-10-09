@@ -1,9 +1,10 @@
-﻿<Page
+﻿<pages:NavigatorPage
     x:Class="RecipeApp.Controls.Pages.SearchPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:RecipeApp.ViewModels"
-    xmlns:models="using:RecipeApp.Models">
+    xmlns:models="using:RecipeApp.Models"
+    xmlns:pages="clr-namespace:RecipeApp.Controls.Pages">
 
     <Page.DataContext>
         <vm:SearchViewModel x:Name="ViewModel" />
@@ -17,7 +18,7 @@
                      PlaceholderText="Search recipe..."
                      Text="{x:Bind ViewModel.Query, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             <Button Content="Search"
-                    Command="{x:Bind ViewModel.SearchCommand}" />
+                    Command="{x:Bind ViewModel.SearchCommand}"/>
         </StackPanel>
 
         <!-- Results -->
@@ -39,4 +40,4 @@
             </ListView.ItemTemplate>
         </ListView>
     </Grid>
-</Page>
+</pages:NavigatorPage>
