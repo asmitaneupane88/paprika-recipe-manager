@@ -46,12 +46,13 @@ public partial class Recipe : ObservableObject
         if (selfContained) sb.AppendLine(HtmlHeader);
     
         sb.AppendLine("<div style=\"display: flex; gap: 20px; margin-bottom: 20px;\">");
-        sb.AppendLine($"<img src=\"{ImageUrl}\" alt=\"{Title}\" style=\"object-fit: cover; border-radius: 8px; flex-shrink: 0;\">");
+        sb.AppendLine($"<img src=\"{ImageUrl}\" alt=\"{Title}\" style=\"width: 200px; height: 200px; object-fit: cover; border-radius: 8px; flex-shrink: 0;\">");
         sb.AppendLine("<div style=\"display: flex; flex-direction: column; justify-content: center;\">");
         sb.AppendLine($"<h1 style=\"margin: 0;\">{Title}</h1>");
         sb.AppendLine($"<h3 style=\"margin: 10px 0 0 0;\">{Rating}/{MaxRating} stars</h3>");
         sb.AppendLine("</div>");
-    
+        sb.AppendLine("</div>");
+        
         sb.AppendLine($"<p>{Description}</p>");
     
         //TODO: ingredients and steps here when they are implemented.
