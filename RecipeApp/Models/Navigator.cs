@@ -65,7 +65,6 @@ public partial class Navigator : ObservableObject
     private Stack<(NavigatorPage? SavedPage, Route? PageRoute, string Name)> History = [];
     
     /// <summary>
-    /// Constructor.
     /// Navigates to the first route automatically.
     /// </summary>
     public Navigator()

@@ -3,8 +3,17 @@ using PuppeteerSharp;
 
 namespace RecipeApp.Services;
 
+/// <summary>
+/// Helper functions related to file management, file saving, and file converting.
+/// </summary>
 public class FileHelper
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="html"></param>
+    /// <param name="filePath">file to save to if known or null for a file picker to open before saving
+    /// (user can cancel saving when using a file dialog)</param>
     public static async Task SaveHtmlAsPdf(string html, string? filePath = null)
     {
         if (filePath is null)

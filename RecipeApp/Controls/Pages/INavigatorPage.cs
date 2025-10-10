@@ -55,5 +55,4 @@ public abstract class NavigatorPage : Page, INotifyPropertyChanged
         return true;
     }
     #endregion
-    
 }

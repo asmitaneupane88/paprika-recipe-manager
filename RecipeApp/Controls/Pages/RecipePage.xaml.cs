@@ -30,11 +30,11 @@ public sealed partial class RecipePage : NavigatorPage
 
     private async void UpdateShownRecipes()
     {
-        var recipes = await Recipe.GetAll();
+        var recipes = await SavedRecipe.GetAll();
 
         FilteredRecipes = recipes
             .Where(r => r.Title.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase))
-            .Select(r => new RecipeCard { Recipe = r, IsSelected = false })
+            .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
             .ToObservableCollection();
         
         RefreshSelected();
@@ -53,10 +53,10 @@ public sealed partial class RecipePage : NavigatorPage
             .ToArray();
     }
 
-    private Recipe[] GetSelectedRecipes()
+    private SavedRecipe[] GetSelectedRecipes()
     {
         return GetSelectedRecipeCards()
-            .Select(c => c.Recipe)
+            .Select(c => c.SavedRecipe)
             .ToArray();
     }
     
@@ -82,7 +82,7 @@ public sealed partial class RecipePage : NavigatorPage
     {
         var recipesToRemove = GetSelectedRecipes();
         
-        await Recipe.Remove(recipesToRemove);
+        await SavedRecipe.Remove(recipesToRemove);
         
         UpdateShownRecipes();
     }
@@ -98,7 +98,7 @@ public sealed partial class RecipePage : NavigatorPage
 
         var sb = new StringBuilder();
 
-        sb.AppendLine(Recipe.HtmlHeader);
+        sb.AppendLine(SavedRecipe.HtmlHeader);
         
         foreach (var recipe in recipesToPrint)
         {
@@ -106,7 +106,7 @@ public sealed partial class RecipePage : NavigatorPage
             sb.AppendLine("<hr/>");
         }
 
-        sb.AppendLine(Recipe.HtmlFooter);
+        sb.AppendLine(SavedRecipe.HtmlFooter);
 
         var html = sb.ToString();
         

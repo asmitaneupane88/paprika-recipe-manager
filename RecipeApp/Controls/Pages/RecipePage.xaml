@@ -82,7 +82,7 @@
                                     BorderBrush="{ThemeResource PrimaryColor}"
                                     Background="{ThemeResource SurfaceVariantColor}">
                                 <Image
-                                    Source="{x:Bind Recipe.ImageUrl}"
+                                    Source="{x:Bind SavedRecipe.ImageUrl}"
                                     Width="80" Height="80"
                                     Stretch="UniformToFill"/>
                             </Border>
@@ -98,15 +98,15 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Grid.Column="0"
-                                               Text="{x:Bind Recipe.Title}"
+                                               Text="{x:Bind SavedRecipe.Title}"
                                                FontWeight="Bold"
                                                FontSize="18"
                                                MaxLines="1"
                                                VerticalAlignment="Center"/>
 
                                     <RatingControl Grid.Column="1"
-                                                   Value="{x:Bind Recipe.Rating}"
-                                                   MaxRating="{x:Bind Recipe.BindableMaxRating}"
+                                                   Value="{x:Bind SavedRecipe.Rating}"
+                                                   MaxRating="{x:Bind SavedRecipe.BindableMaxRating}"
                                                    IsReadOnly="True"/>
 
                                     <!--Got to use "Binding" here over x:Bind-->
@@ -117,7 +117,7 @@
                                         Unchecked="OnRecipeCardChecked"/>
                                 </Grid>
 
-                                <TextBlock Text="{x:Bind Recipe.Description}"
+                                <TextBlock Text="{x:Bind SavedRecipe.Description}"
                                            MaxLines="3"/>
                             </StackPanel>
                         </Grid>
