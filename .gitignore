@@ -267,6 +267,7 @@ mergedstyles.xaml
 
 # docfx stuff:
 _site/
+api/
 
 # other stuff
 /RecipeApp/obj/
