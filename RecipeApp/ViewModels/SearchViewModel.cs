@@ -27,6 +27,11 @@ namespace RecipeApp.ViewModels
         }
         private bool CanSearch() => !string.IsNullOrWhiteSpace(Query);
 
+        partial void OnQueryChanged(string value)
+        {
+            SearchCommand.NotifyCanExecuteChanged();
+        }
+
         private async Task SearchAsync()
         {
             try
