@@ -11,27 +11,23 @@ public partial class Navigator : ObservableObject
     /// View the <see cref="Route"/> class for more info.
     /// </summary>
     public static readonly IReadOnlyList<Route> Routes = [
-        new()
+        //TODO: maybe add this during sprint 2 or 3?
+        // widgets and whatnot
+        /*new()
         {
             Icon = Symbol.Home,
-            Name = "TEST Home",
+            Name = "Home",
             PageFactory = nav => new MainPage(nav),
-        },
+        },*/
         new()
         {
-            Icon = Symbol.List, //TODO: probably a better icon for this
+            Icon = Symbol.Folder,
             Name = "Saved Recipes",
             PageFactory = nav => new RecipePage(nav),
         },
         new()
         {
-            Icon = Symbol.Help,
-            Name = "Second",
-            PageFactory = nav => new SecondPage(nav),
-        },
-        new()
-        {
-            Icon = Symbol.Scan,
+            Icon = Symbol.Globe,
             Name = "MealDB Recipes",
             PageFactory = nav => new SearchPage(nav),
         }
