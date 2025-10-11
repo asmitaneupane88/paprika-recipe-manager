@@ -9,13 +9,18 @@ namespace RecipeApp.Controls.Pages;
 
 public sealed partial class RecipePage : NavigatorPage
 {
+    private const int AllCategorySortOrder = -20252025;
+    
     private ObservableCollection<RecipeCard> FilteredRecipes { get; set => SetField(ref field, value); } = [];
-
+    
     private string SearchText
     {
         get;
         set { SetField(ref field, value); UpdateShownRecipes(); }
     } = "";
+    
+    private SavedCategory SelectedCategory { get; set { SetField(ref field, value); UpdateShownRecipes(); } }
+    private ObservableCollection<SavedCategory> Categories { get; set => SetField(ref field, value); } = [];
     
     private bool CardsSelected { get; set => SetField(ref field, value); } = false;
     private Visibility ListVisibility { get; set => SetField(ref field, value); } = Visibility.Visible;
@@ -25,15 +30,36 @@ public sealed partial class RecipePage : NavigatorPage
     {
         this.InitializeComponent();
         
-        UpdateShownRecipes();
+        UpdateShownCategories()
+            .ContinueWith(_ => UpdateShownRecipes());
+        
     }
 
-    private async void UpdateShownRecipes()
+    private async Task UpdateShownCategories()
+    {
+        Categories = (await SavedCategory.GetAll()).ToObservableCollection();
+        
+        var allCategory = new SavedCategory
+        {
+            Name = "All Categories",
+            SortOrder = AllCategorySortOrder
+        };
+        
+        Categories.Insert(0, allCategory);
+        SelectedCategory = allCategory;
+    }
+    
+    private async Task UpdateShownRecipes()
     {
         var recipes = await SavedRecipe.GetAll();
 
         FilteredRecipes = recipes
             .Where(r => r.Title.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase))
+            .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
+                        || (r.Category is not null 
+                        && r.Category
+                            .Trim()
+                            .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
             .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
             .ToObservableCollection();
         

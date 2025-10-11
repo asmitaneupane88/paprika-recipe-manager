@@ -1,38 +1,34 @@
-﻿using System.Text;
-using System.Text.Json.Serialization;
-
-namespace RecipeApp.Models;
+﻿namespace RecipeApp.Models;
 
 /// <summary>
 /// Handles the representation of a saved recipe along with loading and saving of the saved recipes.
 /// </summary>
-public partial class SavedRecipe : ObservableObject
-{
-    #region Instance Properties
+public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
+{ 
     [JsonIgnore] public int BindableMaxRating => MaxRating;
 
-    [ObservableProperty] public partial string Title { get; set; }
+    [ObservableProperty] public required partial string Title { get; set; }
     [ObservableProperty] public partial string Description { get; set; }
     [ObservableProperty] public partial string ImageUrl { get; set; }
     [ObservableProperty] public partial string? SourceUrl { get; set; }
     [ObservableProperty] public partial string UserNote { get; set; }
+    [ObservableProperty] public partial string? Category { get; set; }
     public int Rating { get; set => SetProperty(ref field, Math.Clamp(field, 0, MaxRating)); }
     
     //TODO: implement in sprint 2
     // should be able to look at the steps and add it all up.
     public List<RecipeIngredient> Ingredients => [];
     public List<IRecipeStep> Steps => [];
-    #endregion
-
-    #region Instance Methods
-    /// <summary>
-    /// DO NOT USE, only for use by the jsonSerializer.
-    /// It is recommended to use the <see cref="Add"/> method instead.
-    /// </summary>
+    
+    public const string HtmlHeader = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
+    public const string HtmlFooter = "</body></html>";
+    
+    public const int MaxRating = 5;
+    
     public SavedRecipe() {}
 
     /// <summary>
-    /// TODO
+    /// 
     /// </summary>
     /// <param name="selfContained">Should be true unless the html will be used in generating a list of recipes
     /// (i.e. should a html header and footer be included).</param>
@@ -62,47 +58,10 @@ public partial class SavedRecipe : ObservableObject
     
         return sb.ToString();
     }
-
-    #endregion
     
-    #region Static Properties
-    private static List<SavedRecipe>? Recipes { get; set; }
-    private static string? RecipesPath { get; set; }
-    
-    private static bool _inSave;
-    private static bool _requireResave;
-    
-    public const string HtmlHeader = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
-    public const string HtmlFooter = "</body></html>";
-    
-    public const int MaxRating = 5;
-    #endregion
-    
-    #region Static Methods
-    /// <summary>
-    /// Loading data if needed.
-    /// </summary>
-    /// <returns>a task containing a readonly collection of recipes</returns>
-    public static async Task<IReadOnlyCollection<SavedRecipe>> GetAll()
-    {
-        if (Recipes is null) await LoadRecipes();
-        return Recipes!;
-    }
-    
-    /// <summary>
-    /// Loads Data if needed.
-    /// Adds a recipe to the list of recipes.
-    /// Saves the list of recipes.
-    /// </summary>
-    /// <param name="title"></param>
-    /// <param name="description"></param>
-    /// <param name="imageUrl"></param>
-    /// <param name="sourceUrl"></param>
-    /// <returns></returns>
+    /// <inheritdoc cref="IAutosavingClass{T}.Add(T)"/>
     public static async Task<SavedRecipe> Add(string title, string description, string imageUrl, string? sourceUrl = null)
     {
-        if (Recipes is null) await LoadRecipes();
-
         var recipe = new SavedRecipe()
         {
             Title = title,
@@ -111,84 +70,8 @@ public partial class SavedRecipe : ObservableObject
             SourceUrl = sourceUrl,
         };
         
-        Recipes!.Add(recipe);
-        
-        await SaveRecipes();
+        await Add(recipe);
         
         return recipe;
     }
-
-    /// <summary>
-    /// Loads Data if needed.
-    /// Removes a recipe from the list of recipes.
-    /// Saves the list of recipes.
-    /// </summary>
-    /// <param name="recipesToRemove"></param>
-    public static async Task Remove(params SavedRecipe[] recipesToRemove)
-    {
-        if (Recipes is null) await LoadRecipes();
-
-        foreach (var recipe in recipesToRemove)
-        {
-            Recipes!.Remove(recipe);
-        }
-        
-        await SaveRecipes();
-    }
-
-    private static async Task LoadRecipes()
-    {
-        RecipesPath ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RecipeApp", "Recipes.json");
-
-        if (File.Exists(RecipesPath) && await File.ReadAllTextAsync(RecipesPath) is { Length: > 0 } fileData)
-        {
-            for (var i = 0; i < 3 && Recipes is null; i++) 
-            {
-                try
-                {
-                    Recipes = JsonSerializer.Deserialize<List<SavedRecipe>>(fileData);
-                }
-                catch (Exception)
-                {
-                    // ignored. will try again or assign recipes to an empty list.
-                }
-            }
-
-            Recipes ??= [];
-        }
-        else
-            Recipes = [];
-    }
-    
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="force">Should only be true when calling from within the function
-    /// to say that it should try to save no matter what</param>
-    private static async Task SaveRecipes(bool force = false)
-    {
-        RecipesPath ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RecipeApp", "Recipes.json");
-        
-        if (_inSave && !force)
-        {
-            _requireResave = true;
-            return;
-        }
-
-        _inSave = true;
-
-        Directory.CreateDirectory(Path.GetDirectoryName(RecipesPath)); 
-        
-        var json = JsonSerializer.Serialize(Recipes);
-        await File.WriteAllTextAsync(RecipesPath, json);
-        
-        _inSave = false;
-
-        if (_requireResave)
-        {
-            await SaveRecipes(true);
-            _requireResave = false;
-        }    
-    }
-    #endregion
 }
