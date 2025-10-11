@@ -19,6 +19,12 @@ public class Route
     /// Tells the <see cref="Navigator"/> that there is no parent route to go back to.
     /// </summary>
     public bool IsRoot { get; set; }
+
+    /// <summary>
+    /// Determines whether this route should be shown in the navigation view.
+    /// Default is true.
+    /// </summary>
+    public bool ShowInNavigationView { get; init; } = true;
     /// <summary>
     /// A function that takes a <see cref="Navigator"/> and returns a <see cref="NavigatorPage"/> for the
     /// <see cref="Navigator"/> to use during page navigations.

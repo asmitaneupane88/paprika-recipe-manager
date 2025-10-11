@@ -30,6 +30,13 @@ public partial class Navigator : ObservableObject
             Icon = Symbol.Globe,
             Name = "MealDB Recipes",
             PageFactory = nav => new SearchPage(nav),
+        },
+        new()
+        {
+            Icon = Symbol.Page,
+            Name = "Recipe Details",
+            PageFactory = nav => new RecipeDetails(nav, null!), // This is just for the route, actual navigation will use Navigate(page, title)
+            ShowInNavigationView = false
         }
     ];
     
@@ -52,7 +59,7 @@ public partial class Navigator : ObservableObject
     /// <summary>
     /// Current title of the current page.
     /// </summary>
-    [ObservableProperty] public partial string CurrentTitle { get; private set; }
+    [ObservableProperty] public partial string CurrentTitle { get; private set; } = string.Empty;
 
     /// <summary>
     /// The count of the History stack. Should be one if it is on a root route.

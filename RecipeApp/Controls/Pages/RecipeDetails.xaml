@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<local:NavigatorPage
+    x:Class="RecipeApp.Controls.Pages.RecipeDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RecipeApp.Controls.Pages"
+    xmlns:models="using:RecipeApp.Models"
+    xmlns:converters="using:RecipeApp.Converters">
+
+    <Page.Resources>
+        <converters:MinutesToTimeConverter x:Key="MinutesToTimeConverter" />
+    </Page.Resources>
+
+    <Grid>
+        <ScrollViewer>
+            <StackPanel Padding="20" Spacing="20">
+                <!-- Header Section -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="{x:Bind Recipe.Title, Mode=OneWay}"
+                                 Style="{ThemeResource TitleLargeTextBlockStyle}"
+                                 TextWrapping="Wrap"/>
+                        
+                        <TextBlock Text="{x:Bind Recipe.Category, Mode=OneWay}"
+                                 Style="{ThemeResource BodyTextBlockStyle}"
+                                 Opacity="0.6"
+                                 Margin="0,4,0,0"/>
+                        
+                        <TextBlock Text="{x:Bind Recipe.Author, Mode=OneWay}"
+                                 Style="{ThemeResource BodyTextBlockStyle}"
+                                 Opacity="0.6"
+                                 Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                        <RatingControl Value="{x:Bind Recipe.Rating, Mode=TwoWay}"
+                                     IsReadOnly="False"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Recipe Info Grid -->
+                <Grid ColumnSpacing="16" RowSpacing="8" 
+                      Padding="16" 
+                      Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                      BorderThickness="1"
+                      CornerRadius="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Prep" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" 
+                             Text="{x:Bind Recipe.PrepTimeMinutes, Mode=OneWay, Converter={StaticResource MinutesToTimeConverter}}"/>
+
+                    <TextBlock Grid.Column="1" Text="Cook" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                             Text="{x:Bind Recipe.CookTimeMinutes, Mode=OneWay, Converter={StaticResource MinutesToTimeConverter}}"/>
+
+                    <TextBlock Grid.Column="2" Text="Total" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="1" Grid.Column="2" 
+                             Text="{x:Bind Recipe.TotalTimeMinutes, Mode=OneWay, Converter={StaticResource MinutesToTimeConverter}}"/>
+
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
+                        <TextBlock Text="Servings" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                        <TextBlock Text="{x:Bind Recipe.Servings, Mode=OneWay}" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" Grid.Column="3" Text="{x:Bind Recipe.Difficulty, Mode=OneWay}"/>
+                </Grid>
+
+                <!-- Ingredients -->
+                <StackPanel Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                          BorderThickness="1"
+                          CornerRadius="8"
+                          Padding="16">
+                    <TextBlock Text="Ingredients"
+                             Style="{ThemeResource SubtitleTextBlockStyle}"
+                             Margin="0,0,0,12"/>
+                    
+                    <ItemsRepeater ItemsSource="{x:Bind Recipe.Ingredients}">
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="models:Ingredient">
+                                <StackPanel Orientation="Horizontal" 
+                                          Spacing="8" 
+                                          Margin="0,4">
+                                    <TextBlock Text="{x:Bind Amount, Mode=OneWay}"/>
+                                    <TextBlock Text="{x:Bind Unit, Mode=OneWay}"/>
+                                    <TextBlock Text="{x:Bind Name, Mode=OneWay}"/>
+                                    <TextBlock Text="{x:Bind Notes, Mode=OneWay}" 
+                                             Opacity="0.6"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+
+                <!-- Directions -->
+                <StackPanel Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                          BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                          BorderThickness="1"
+                          CornerRadius="8"
+                          Padding="16">
+                    <TextBlock Text="Directions"
+                             Style="{ThemeResource SubtitleTextBlockStyle}"
+                             Margin="0,0,0,12"/>
+                    
+                    <ItemsRepeater ItemsSource="{x:Bind Recipe.Directions}">
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <StackPanel Margin="0,8">
+                                    <TextBlock Text="{Binding}"
+                                             TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                    </ItemsRepeater>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Save Button -->
+        <CommandBar VerticalAlignment="Bottom"
+                   Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+            <AppBarButton x:Name="SaveButton" 
+                         Label="Save Recipe" 
+                         Icon="Save"
+                         Click="SaveButton_Click"/>
+        </CommandBar>
+    </Grid>
+</local:NavigatorPage>
