@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RecipeApp.Controls.Pages"
     xmlns:models="using:RecipeApp.Models"
-    xmlns:converters="using:RecipeApp.Converters">
+    xmlns:converters="using:RecipeApp.Converters"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime">
 
     <Page.Resources>
         <converters:MinutesToTimeConverter x:Key="MinutesToTimeConverter" />
@@ -25,7 +26,7 @@
                         <TextBlock Text="{x:Bind CurrentRecipe.Title, Mode=OneWay}"
                                  Style="{ThemeResource TitleLargeTextBlockStyle}"
                                  TextWrapping="Wrap"/>
-                        
+
                         <TextBlock Text="{x:Bind CurrentRecipe.Category, Mode=OneWay}"
                                  Style="{ThemeResource BodyTextBlockStyle}"
                                  Opacity="0.6"
@@ -39,8 +40,8 @@
                 </Grid>
 
                 <!-- Recipe Info Grid -->
-                <Grid ColumnSpacing="16" RowSpacing="8" 
-                      Padding="16" 
+                <Grid ColumnSpacing="16" RowSpacing="8"
+                      Padding="16"
                       Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                       BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                       BorderThickness="1"
@@ -57,15 +58,15 @@
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="Prep" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
-                    <TextBlock Grid.Row="1" 
+                    <TextBlock Grid.Row="1"
                              Text="{x:Bind Recipe.PrepTimeMinutes, Mode=OneWay, Converter={StaticResource MinutesToTimeConverter}}"/>
 
                     <TextBlock Grid.Column="1" Text="Cook" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" 
+                    <TextBlock Grid.Row="1" Grid.Column="1"
                              Text="{x:Bind Recipe.CookTimeMinutes, Mode=OneWay, Converter={StaticResource MinutesToTimeConverter}}"/>
 
                     <TextBlock Grid.Column="2" Text="Total" Style="{ThemeResource CaptionTextBlockStyle}" Opacity="0.6"/>
-                    <TextBlock Grid.Row="1" Grid.Column="2" 
+                    <TextBlock Grid.Row="1" Grid.Column="2"
                              Text="{x:Bind Recipe.TotalTimeMinutes, Mode=OneWay, Converter={StaticResource MinutesToTimeConverter}}"/>
 
                     <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
@@ -84,17 +85,17 @@
                     <TextBlock Text="Ingredients"
                              Style="{ThemeResource SubtitleTextBlockStyle}"
                              Margin="0,0,0,12"/>
-                    
+
                     <ItemsRepeater ItemsSource="{x:Bind Recipe.Ingredients}">
                         <ItemsRepeater.ItemTemplate>
                             <DataTemplate x:DataType="models:Ingredient">
-                                <StackPanel Orientation="Horizontal" 
-                                          Spacing="8" 
+                                <StackPanel Orientation="Horizontal"
+                                          Spacing="8"
                                           Margin="0,4">
                                     <TextBlock Text="{x:Bind Amount, Mode=OneWay}"/>
                                     <TextBlock Text="{x:Bind Unit, Mode=OneWay}"/>
                                     <TextBlock Text="{x:Bind Name, Mode=OneWay}"/>
-                                    <TextBlock Text="{x:Bind Notes, Mode=OneWay}" 
+                                    <TextBlock Text="{x:Bind Notes, Mode=OneWay}"
                                              Opacity="0.6"/>
                                 </StackPanel>
                             </DataTemplate>
@@ -111,10 +112,10 @@
                     <TextBlock Text="Directions"
                              Style="{ThemeResource SubtitleTextBlockStyle}"
                              Margin="0,0,0,12"/>
-                    
+
                     <ItemsRepeater ItemsSource="{x:Bind Recipe.Directions}">
                         <ItemsRepeater.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
+                            <DataTemplate x:DataType="system:String">
                                 <StackPanel Margin="0,8">
                                     <TextBlock Text="{Binding}"
                                              TextWrapping="Wrap"/>
@@ -129,8 +130,8 @@
         <!-- Command Bar -->
         <CommandBar VerticalAlignment="Bottom"
                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <AppBarButton x:Name="SaveButton" 
-                         Label="Save Recipe" 
+            <AppBarButton x:Name="SaveButton"
+                         Label="Save Recipe"
                          Icon="Save"
                          Click="SaveButton_Click"
                          Visibility="{x:Bind IsNewRecipe, Mode=OneWay}"/>
