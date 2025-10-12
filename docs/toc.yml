@@ -2,3 +2,14 @@
   href: introduction.md
 - name: Getting Started
   href: getting-started.md
+- name: Application UI
+  href: application-ui.md
+- name: Application Logic
+  href: application-logic.md
+  items:
+    - name: Interfaces / abstract classes
+      href: interfaces-and-abstract-classes.md
+    - name: Enums
+      href: enums.md
+    - name: Classes
+      href: classes.md

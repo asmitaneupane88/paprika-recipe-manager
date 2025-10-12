@@ -4,7 +4,8 @@
 /// Handles the saving and loading of a list of items automatically.
 /// This includes adding/removing items and when any observable property on an observable object the list items change.
 /// </summary>
-/// <typeparam name="T">The type to create the list for (probably the same class that inherits from this class).</typeparam>
+/// <typeparam name="T">The type to create the list for (probably the same class that inherits from this class).
+/// Note that this must be an ObservableObject.</typeparam>
 public abstract class IAutosavingClass<T> : ObservableObject where T : ObservableObject
 {
     private static List<T>? Items { get; set; }
@@ -15,7 +16,7 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
     /// <summary>
     /// Loading data if needed.
     /// </summary>
-    /// <returns>a task containing a readonly collection of recipes</returns>
+    /// <returns></returns>
     public static async Task<IReadOnlyCollection<T>> GetAll()
     {
         if (Items is null) await LoadItems();

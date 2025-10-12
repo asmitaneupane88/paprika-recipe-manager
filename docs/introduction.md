@@ -1,19 +1,6 @@
-# Introduction
+﻿# Introduction
+This application is a recipe app based off of the app Paprika.
 
-## Application Architecture
-TODO
+Furthermore, the app is using Uno Platform and .NET 9.
 
-### Supported Platforms
-- Linux (needs testing)
-- Windows 10 (needs testing)
-- Windows 11
-- MacOS
-
-## Application Ui/Ux
-TODO
-
-### Shell
-The app uses the @RecipeApp.Controls.Shell class as the main container.
-This container is responsible for the navigation menu and the header.
-The content of the shell is determined by the current page of the @RecipeApp.Models.Navigator
-which handles all navigation and keeping track of the current page along with history.
+It is highly recommended to view [Getting Started](getting-started.md) next to get more details.
