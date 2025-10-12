@@ -22,16 +22,11 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="{x:Bind Recipe.Title, Mode=OneWay}"
+                        <TextBlock Text="{x:Bind CurrentRecipe.Title, Mode=OneWay}"
                                  Style="{ThemeResource TitleLargeTextBlockStyle}"
                                  TextWrapping="Wrap"/>
                         
-                        <TextBlock Text="{x:Bind Recipe.Category, Mode=OneWay}"
-                                 Style="{ThemeResource BodyTextBlockStyle}"
-                                 Opacity="0.6"
-                                 Margin="0,4,0,0"/>
-                        
-                        <TextBlock Text="{x:Bind Recipe.Author, Mode=OneWay}"
+                        <TextBlock Text="{x:Bind CurrentRecipe.Category, Mode=OneWay}"
                                  Style="{ThemeResource BodyTextBlockStyle}"
                                  Opacity="0.6"
                                  Margin="0,4,0,0"/>
@@ -131,13 +126,19 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Save Button -->
+        <!-- Command Bar -->
         <CommandBar VerticalAlignment="Bottom"
                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <AppBarButton x:Name="SaveButton" 
                          Label="Save Recipe" 
                          Icon="Save"
-                         Click="SaveButton_Click"/>
+                         Click="SaveButton_Click"
+                         Visibility="{x:Bind IsNewRecipe, Mode=OneWay}"/>
+            <AppBarButton x:Name="EditButton"
+                         Label="Edit Recipe"
+                         Icon="Edit"
+                         Click="EditButton_Click"
+                         Visibility="{x:Bind IsSavedRecipe, Mode=OneWay}"/>
         </CommandBar>
     </Grid>
 </local:NavigatorPage>

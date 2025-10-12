@@ -30,6 +30,7 @@ public class RecipeDetailsTests
         var recipe = new Recipe
         {
             Title = "Test Recipe",
+            Description = "Test Description",
             PrepTimeMinutes = 30,
             CookTimeMinutes = 60,
             Servings = 4,
@@ -50,6 +51,7 @@ public class RecipeDetailsTests
         var recipe = new Recipe
         {
             Title = "Test Recipe",
+            Description = "Test Description",
             PrepTimeMinutes = 30,
             CookTimeMinutes = 60,
             Servings = 4,

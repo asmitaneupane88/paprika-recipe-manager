@@ -95,7 +95,9 @@ public sealed partial class RecipePage : NavigatorPage
     {
         if (sender is Button { CommandParameter: RecipeCard rc })
         {
-            // TODO use rc (recipe card) here for the details page.
+            // Navigation doesn't need to be awaited since it's synchronous
+            var details = new RecipeDetails(Navigator, savedRecipe: rc.SavedRecipe);
+            Navigator.Navigate(details, $"Recipe: {rc.SavedRecipe.Title}");
         }
     }
 

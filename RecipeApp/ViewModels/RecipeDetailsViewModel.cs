@@ -13,14 +13,19 @@ public class RecipeDetailsViewModel : INotifyPropertyChanged
         _recipe = recipe;
     }
 
-    public Task SaveRecipeAsync()
+    public async Task<SavedRecipe> SaveRecipeAsync()
     {
-        // TODO: Implement saving to local storage
-        // This would involve:
-        // 1. Converting MealDB recipe to local format if needed
-        // 2. Saving to local storage (SQLite, JSON file, etc.)
-        // 3. Updating the saved recipes collection
-        return Task.CompletedTask;
+        var savedRecipe = new SavedRecipe
+        {
+            Title = _recipe.Title,
+            Description = _recipe.Description ?? "",
+            ImageUrl = _recipe.ImageUrl ?? "",
+            Category = _recipe.Category,
+            Rating = 0
+        };
+
+        await SavedRecipe.Add(savedRecipe);
+        return savedRecipe;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

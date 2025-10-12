@@ -3,17 +3,24 @@
 /// <summary>
 /// Handles the representation of a saved recipe along with loading and saving of the saved recipes.
 /// </summary>
-public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
+public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
 { 
     [JsonIgnore] public int BindableMaxRating => MaxRating;
 
     [ObservableProperty] public required partial string Title { get; set; }
-    [ObservableProperty] public partial string Description { get; set; }
-    [ObservableProperty] public partial string ImageUrl { get; set; }
+    [ObservableProperty] public partial string Description { get; set; } = string.Empty;
+    [ObservableProperty] public partial string ImageUrl { get; set; } = string.Empty;
     [ObservableProperty] public partial string? SourceUrl { get; set; }
-    [ObservableProperty] public partial string UserNote { get; set; }
+    [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
     [ObservableProperty] public partial string? Category { get; set; }
-    public int Rating { get; set => SetProperty(ref field, Math.Clamp(field, 0, MaxRating)); }
+    [ObservableProperty] 
+    [property: JsonIgnore]
+    private double _rating;
+
+    partial void OnRatingChanging(double value)
+    {
+        _rating = Math.Clamp(value, 0, MaxRating);
+    }
     
     //TODO: implement in sprint 2
     // should be able to look at the steps and add it all up.

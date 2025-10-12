@@ -35,7 +35,7 @@ public partial class Navigator : ObservableObject
         {
             Icon = Symbol.Page,
             Name = "Recipe Details",
-            PageFactory = nav => new RecipeDetails(nav, null!), // This is just for the route, actual navigation will use Navigate(page, title)
+            PageFactory = nav => new RecipeDetails(nav, (Recipe)null!), // Cast to Recipe to resolve ambiguity
             ShowInNavigationView = false
         }
     ];

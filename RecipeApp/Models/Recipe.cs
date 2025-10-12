@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace RecipeApp.Models;
 
-public class Recipe : INotifyPropertyChanged
+public class Recipe : INotifyPropertyChanged, IRecipe
 {
     public string Id { get; init; } = Guid.NewGuid().ToString();
     public required string Title { get; init; }
@@ -21,6 +21,7 @@ public class Recipe : INotifyPropertyChanged
     public string? ImageUrl { get; init; }
     public string? Source { get; init; } // "MealDB" or "Local"
     public string? MealDbId { get; init; } // Only for MealDB recipes
+    public string? Description { get; init; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

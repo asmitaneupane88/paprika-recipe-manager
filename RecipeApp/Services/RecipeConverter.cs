@@ -40,6 +40,7 @@ public static class RecipeConverter
         return new Recipe
         {
             Title = mealDbRecipe.Name,
+            Description = mealDbRecipe.Instructions,
             Category = mealDbRecipe.Category,
             PrepTimeMinutes = 15, // Default values since MealDB doesn't provide these
             CookTimeMinutes = 30,

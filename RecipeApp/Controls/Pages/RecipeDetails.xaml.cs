@@ -2,17 +2,68 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using RecipeApp.Models;
 using RecipeApp.ViewModels;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace RecipeApp.Controls.Pages;
 
-public sealed partial class RecipeDetails : NavigatorPage
+public sealed partial class RecipeDetails : NavigatorPage, INotifyPropertyChanged
 {
-    public Recipe Recipe { get; private set; }
+    private Recipe _recipe;
+    public Recipe Recipe 
+    { 
+        get => _recipe;
+        private set
+        {
+            _recipe = value;
+            OnPropertyChanged(nameof(Recipe));
+            OnPropertyChanged(nameof(IsSavedRecipe));
+            OnPropertyChanged(nameof(IsNewRecipe));
+            OnPropertyChanged(nameof(CurrentRecipe));
+        }
+    }
+
+    // This property is used for binding in XAML
+    public IRecipe CurrentRecipe => _savedRecipe != null ? _savedRecipe : Recipe;
+    
+    private SavedRecipe? _savedRecipe;
     private RecipeDetailsViewModel ViewModel { get; }
+    
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    // Binding properties for visibility
+    public bool IsSavedRecipe => _savedRecipe != null;
+    public bool IsNewRecipe => !IsSavedRecipe;
 
     public RecipeDetails(Navigator navigator, Recipe recipe) : base(navigator)
     {
-        Recipe = recipe;
+        _recipe = recipe;
+        ViewModel = new RecipeDetailsViewModel(Recipe);
+        this.InitializeComponent();
+    }
+
+    public RecipeDetails(Navigator navigator, SavedRecipe savedRecipe) : base(navigator) 
+    {
+        _savedRecipe = savedRecipe;
+        _recipe = new Recipe
+        {
+            Title = savedRecipe.Title,
+            Description = savedRecipe.Description ?? string.Empty,
+            Category = savedRecipe.Category,
+            ImageUrl = savedRecipe.ImageUrl,
+            PrepTimeMinutes = 0, // TODO: These will be added in sprint 2
+            CookTimeMinutes = 0,
+            Servings = 1,
+            Difficulty = "Unknown",
+            Rating = savedRecipe.Rating,
+            Ingredients = new(),  // Empty collections for now - will be populated in sprint 2
+            Directions = new()
+        };
         ViewModel = new RecipeDetailsViewModel(Recipe);
         this.InitializeComponent();
     }
@@ -32,7 +83,8 @@ public sealed partial class RecipeDetails : NavigatorPage
         var result = await dialog.ShowAsync();
         if (result == ContentDialogResult.Primary)
         {
-            await ViewModel.SaveRecipeAsync();
+            // Save and update our reference to the saved version
+            _savedRecipe = await ViewModel.SaveRecipeAsync();
             
             // Show confirmation
             var infoBar = new InfoBar
@@ -40,8 +92,17 @@ public sealed partial class RecipeDetails : NavigatorPage
                 Title = "Recipe Saved",
                 Message = "The recipe has been saved to your collection.",
                 Severity = InfoBarSeverity.Success,
-                IsOpen = true
+                IsOpen = true,
+                XamlRoot = this.XamlRoot
             };
+        }
+    }
+
+    private void EditButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_savedRecipe != null)
+        {
+            Navigator.Navigate(new EditRecipe(Navigator, _savedRecipe), $"Edit {_savedRecipe.Title}");
         }
     }
 }
