@@ -31,13 +31,6 @@ public partial class Navigator : ObservableObject
             Name = "MealDB Recipes",
             PageFactory = nav => new SearchPage(nav),
         },
-        new()
-        {
-            Icon = Symbol.Page,
-            Name = "Recipe Details",
-            PageFactory = nav => new RecipeDetails(nav, (Recipe)null!), // Cast to Recipe to resolve ambiguity
-            ShowInNavigationView = false
-        }
     ];
     
     /// <summary>
@@ -65,7 +58,7 @@ public partial class Navigator : ObservableObject
     /// The count of the History stack. Should be one if it is on a root route.
     /// </summary>
     public int HistoryItems => History.Count;
-    private Stack<(NavigatorPage? SavedPage, Route? PageRoute, string Name)> History = [];
+    private Stack<(NavigatorPage SavedPage, Route? PageRoute, string Name)> History = [];
     
     /// <summary>
     /// Navigates to the first route automatically.
@@ -79,12 +72,14 @@ public partial class Navigator : ObservableObject
     /// Attempts to go back to the previous page.
     /// </summary>
     /// <returns>a <see cref="Boolean"/> indicating if the <see cref="Navigator"/> was able to go back</returns>
-    public bool TryGoBack()
+    public async Task<bool> TryGoBack()
     {
         if (!History.TryPop(out var page)) return false;
 
         CurrentPage = page.SavedPage;
         CurrentRoute = page.PageRoute;
+
+        await CurrentPage!.Restore();
             
         RouteChanged?.Invoke(CurrentPage!, CurrentRoute, CurrentTitle);
             
