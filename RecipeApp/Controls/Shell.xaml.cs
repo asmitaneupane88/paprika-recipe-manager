@@ -46,9 +46,9 @@ public sealed partial class Shell : NavigatorPage
         }
     }
 
-    private void ButtonBack_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
     {
-        Navigator.TryGoBack();
+        await Navigator.TryGoBack();
     }
 }
 

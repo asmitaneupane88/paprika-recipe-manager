@@ -31,13 +31,7 @@ namespace RecipeApp.Services
 
                 foreach (var meal in apiResponse?.Meals ?? [])
                 {
-                    recipes.Add(new MealDbRecipe
-                    {
-                        Name        = meal.strMeal ?? "Unknown",
-                        ImageUrl    = meal.strMealThumb ?? string.Empty,
-                        Instructions= meal.strInstructions ?? string.Empty,
-                        Ingredients = GetIngredientsFromMeal(meal)
-                    });
+                    recipes.Add(meal);
                 }
                 return recipes;
             }
@@ -66,18 +60,28 @@ namespace RecipeApp.Services
         [
             new()
             {
-                Name = "Dummy Pasta",
-                Ingredients = "Pasta, Sauce, Cheese",
-                Instructions = "Boil pasta, add sauce.",
-                ImageUrl = "https://www.themealdb.com/images/media/meals/wxywrq1468235067.jpg"
+                strMeal = "Dummy Pasta",
+                strIngredient1 = "Pasta",
+                strIngredient2 = "Sauce",
+                strIngredient3 = "Cheese",
+                strMeasure1 = "500g",
+                strMeasure2 = "200ml",
+                strMeasure3 = "100g",
+                strInstructions = "Boil pasta, add sauce.",
+                strMealThumb = "https://www.themealdb.com/images/media/meals/wxywrq1468235067.jpg"
             },
 
             new()
             {
-                Name = "Dummy Salad",
-                Ingredients = "Lettuce, Tomato, Dressing",
-                Instructions = "Chop and toss.",
-                ImageUrl = "https://www.themealdb.com/images/media/meals/abc123.jpg"
+                strMeal = "Dummy Salad",
+                strIngredient1 = "Lettuce",
+                strIngredient2 = "Tomato",
+                strIngredient3 = "Dressing",
+                strMeasure1 = "1 head",
+                strMeasure2 = "2 medium",
+                strMeasure3 = "2 tbsp",
+                strInstructions = "Chop and toss.",
+                strMealThumb = "https://www.themealdb.com/images/media/meals/abc123.jpg"
             }
         ];
     }

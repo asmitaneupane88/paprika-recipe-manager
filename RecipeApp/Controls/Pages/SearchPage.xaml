@@ -27,15 +27,27 @@
                   Margin="0,16,0,0">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:MealDbRecipe">
-                    <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
-                        <Image Source="{x:Bind ImageUrl}" Width="100" Height="100"/>
-                        <StackPanel>
-                            <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="18"/>
-                            <TextBlock Text="{x:Bind Ingredients}"
-                                       TextWrapping="WrapWholeWords"
-                                       MaxWidth="400"/>
+                    <Button Click="Recipe_Click" 
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Style="{ThemeResource ButtonRevealStyle}"
+                            Padding="0"
+                            Background="Transparent">
+                        <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
+                            <Image Source="{x:Bind ImageUrl}" Width="100" Height="100"/>
+                            <StackPanel>
+                                <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="18"/>
+                                <TextBlock Text="{x:Bind Category}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" 
+                                         Style="{ThemeResource CaptionTextBlockStyle}"/>
+                                <TextBlock Text="{x:Bind IngredientsPreview}"
+                                         Style="{ThemeResource CaptionTextBlockStyle}"
+                                         TextWrapping="WrapWholeWords"
+                                         MaxWidth="400"
+                                         Opacity="0.8"
+                                         Margin="0,4,0,0"/>
+                            </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </Button>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>

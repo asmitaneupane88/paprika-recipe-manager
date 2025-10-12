@@ -16,10 +16,10 @@ public sealed partial class RecipePage : NavigatorPage
     private string SearchText
     {
         get;
-        set { SetField(ref field, value); UpdateShownRecipes(); }
+        set { SetField(ref field, value); _ = UpdateShownRecipes(); }
     } = "";
     
-    private SavedCategory SelectedCategory { get; set { SetField(ref field, value); UpdateShownRecipes(); } }
+    private SavedCategory SelectedCategory { get; set { SetField(ref field, value); _ = UpdateShownRecipes(); } }
     private ObservableCollection<SavedCategory> Categories { get; set => SetField(ref field, value); } = [];
     
     private bool CardsSelected { get; set => SetField(ref field, value); } = false;
@@ -93,9 +93,11 @@ public sealed partial class RecipePage : NavigatorPage
 
     private void OnRecipeCardClicked(object sender, RoutedEventArgs e)
     {
-        if (sender is Button { CommandParameter: RecipeCard rc })
+        if (sender is ListView { SelectedItem: RecipeCard rc } lv)
         {
-            // TODO use rc (recipe card) here for the details page.
+            lv.SelectedItem = null;
+            var details = new RecipeDetails(Navigator, savedRecipe: rc.SavedRecipe);
+            Navigator.Navigate(details, $"Recipe: {rc.SavedRecipe.Title}");
         }
     }
 
@@ -110,7 +112,7 @@ public sealed partial class RecipePage : NavigatorPage
         
         await SavedRecipe.Remove(recipesToRemove);
         
-        UpdateShownRecipes();
+        await UpdateShownRecipes();
     }
 
     private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)
@@ -141,7 +143,12 @@ public sealed partial class RecipePage : NavigatorPage
 
         await FileHelper.SaveHtmlAsPdf(html);
     }
-    
-    
+
+    /// <inheritdoc />
+    public override async Task Restore()
+    {
+        await UpdateShownRecipes();
+        await base.Restore();
+    }
 }
 

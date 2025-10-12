@@ -80,10 +80,10 @@
             Grid.ColumnSpan="3"
             ItemsSource="{x:Bind FilteredRecipes, Mode=OneWay}"
             IsItemClickEnabled="True"
-            ItemClick="OnRecipeCardClicked">
+            SelectionChanged="OnRecipeCardClicked">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:RecipeCard">
-                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" Margin="10" Padding="10" CornerRadius="8">
+                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" Margin="10" Padding="10" CornerRadius="8" Tag="{x:Bind}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>

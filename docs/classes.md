@@ -8,7 +8,7 @@ This class uses the [IAutoSavingClass](interfaces-and-abstract-classes.md#iautos
 
 See @RecipeApp.Models.SavedRecipe for details.
 
-## SavedRecipe
+## SavedCategory
 Represents a saved category stored in a json file.
 This class uses the [IAutoSavingClass](interfaces-and-abstract-classes.md#iautosavingclass) to handle saving and loading.
 
