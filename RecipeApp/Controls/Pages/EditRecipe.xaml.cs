@@ -14,7 +14,7 @@ namespace RecipeApp.Controls.Pages
             this.InitializeComponent();
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             // Since SavedRecipe inherits from IAutosavingClass, changes are automatically saved
             // We just need to show a confirmation and navigate back
@@ -28,13 +28,13 @@ namespace RecipeApp.Controls.Pages
             };
 
             // Return to the recipe details page
-            Navigator.TryGoBack();
+            await Navigator.TryGoBack();
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private async void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             // Return to the recipe details page without saving changes
-            Navigator.TryGoBack();
+            await Navigator.TryGoBack();
         }
     }
 }
