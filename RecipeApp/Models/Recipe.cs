@@ -17,7 +17,7 @@ public class Recipe : INotifyPropertyChanged, IRecipe
     public required string Difficulty { get; init; }
     public required ObservableCollection<Ingredient> Ingredients { get; init; } = [];
     public required ObservableCollection<string> Directions { get; init; } = [];
-    public double Rating { get; set; }
+    public int Rating { get; set; }
     public string? ImageUrl { get; init; }
     public string? Source { get; init; } // "MealDB" or "Local"
     public string? MealDbId { get; init; } // Only for MealDB recipes

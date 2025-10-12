@@ -13,14 +13,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string? SourceUrl { get; set; }
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
     [ObservableProperty] public partial string? Category { get; set; }
-    [ObservableProperty] 
-    [property: JsonIgnore]
-    private double _rating;
+    public int Rating { get; set => SetProperty(ref field, Math.Clamp(value, 0, MaxRating)); }
 
-    partial void OnRatingChanging(double value)
-    {
-        _rating = Math.Clamp(value, 0, MaxRating);
-    }
     
     //TODO: implement in sprint 2
     // should be able to look at the steps and add it all up.
