@@ -3,7 +3,7 @@
 - name: Developer Document
   items:
     - name: MealDB API Search Feature
-      href: docs/mealdb-api.md
+      href: mealdb-api.md
 - name: Introduction
   href: introduction.md
 - name: Getting Started
