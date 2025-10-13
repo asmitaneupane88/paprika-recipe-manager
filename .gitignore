@@ -3,9 +3,11 @@
 
 # Remove everything beginning with a dot
 .*/
-!.config/
 !.github/
 !.devcontainer/
+
+# Config files
+.config/
 
 # operating system junk files
 thumbs.db
@@ -264,3 +266,11 @@ mergedstyles.xaml
 
 !build/ci/publish
 /doc/articles/llms/llms-full.txt
+
+# docfx stuff:
+_site/
+api/
+
+# other stuff
+/RecipeApp/obj/
+/RecipeApp/bin/

@@ -1,4 +1,4 @@
-﻿namespace RecipeApp.Models;
+namespace RecipeApp.Models;
 
 /// <summary>
 /// Handles navigation and where you are in the application. View each field and method for more info. 
@@ -11,17 +11,25 @@ public partial class Navigator : ObservableObject
     /// View the <see cref="Route"/> class for more info.
     /// </summary>
     public static readonly IReadOnlyList<Route> Routes = [
-        new()
+        //TODO: maybe add this during sprint 2 or 3?
+        // widgets and whatnot
+        /*new()
         {
             Icon = Symbol.Home,
             Name = "Home",
             PageFactory = nav => new MainPage(nav),
+        },*/
+        new()
+        {
+            Icon = Symbol.Folder,
+            Name = "Saved Recipes",
+            PageFactory = nav => new RecipePage(nav),
         },
         new()
         {
-            Icon = Symbol.Help,
-            Name = "Second",
-            PageFactory = nav => new SecondPage(nav),
+            Icon = Symbol.Globe,
+            Name = "MealDB Recipes",
+            PageFactory = nav => new SearchPage(nav),
         },
         new()
         {
@@ -51,16 +59,15 @@ public partial class Navigator : ObservableObject
     /// <summary>
     /// Current title of the current page.
     /// </summary>
-    [ObservableProperty] public partial string CurrentTitle { get; private set; }
+    [ObservableProperty] public partial string CurrentTitle { get; private set; } = string.Empty;
 
     /// <summary>
     /// The count of the History stack. Should be one if it is on a root route.
     /// </summary>
     public int HistoryItems => History.Count;
-    private Stack<(NavigatorPage? SavedPage, Route? PageRoute, string Name)> History = [];
+    private Stack<(NavigatorPage SavedPage, Route? PageRoute, string Name)> History = [];
     
     /// <summary>
-    /// Constructor.
     /// Navigates to the first route automatically.
     /// </summary>
     public Navigator()
@@ -72,12 +79,14 @@ public partial class Navigator : ObservableObject
     /// Attempts to go back to the previous page.
     /// </summary>
     /// <returns>a <see cref="Boolean"/> indicating if the <see cref="Navigator"/> was able to go back</returns>
-    public bool TryGoBack()
+    public async Task<bool> TryGoBack()
     {
         if (!History.TryPop(out var page)) return false;
 
         CurrentPage = page.SavedPage;
         CurrentRoute = page.PageRoute;
+
+        await CurrentPage!.Restore();
             
         RouteChanged?.Invoke(CurrentPage!, CurrentRoute, CurrentTitle);
             

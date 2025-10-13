@@ -1,4 +1,8 @@
-﻿namespace RecipeApp.Controls;
+namespace RecipeApp.Controls;
+using System.Collections.ObjectModel;
+using RecipeApp.Controls.Pages;
+using RecipeApp.Models;
+
 
 /// <summary>
 /// The main window of the application.
@@ -42,9 +46,9 @@ public sealed partial class Shell : NavigatorPage
         }
     }
 
-    private void ButtonBack_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonBack_OnClick(object sender, RoutedEventArgs e)
     {
-        Navigator.TryGoBack();
+        await Navigator.TryGoBack();
     }
 }
 

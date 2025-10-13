@@ -22,6 +22,14 @@ public abstract class NavigatorPage : Page, INotifyPropertyChanged
     {
         this.Navigator = navigator ?? new Navigator();
     }
+
+    /// <summary>
+    /// For use by the <see cref="Navigator"/> when returning to this page, which could require refreshing data.
+    /// </summary>
+    public virtual async Task Restore()
+    {
+        
+    }
     
     #region Rider Generated INotifyPropertyChanged Implementation
     /// <summary>
@@ -55,5 +63,4 @@ public abstract class NavigatorPage : Page, INotifyPropertyChanged
         return true;
     }
     #endregion
-    
 }

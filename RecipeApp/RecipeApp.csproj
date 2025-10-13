@@ -2,6 +2,8 @@
     <PropertyGroup>
         <TargetFrameworks>net9.0-desktop;net9.0</TargetFrameworks>
 
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
         <OutputType>Exe</OutputType>
         <UnoSingleProject>true</UnoSingleProject>
 
@@ -36,6 +38,12 @@
         <DependentUpon>MainPage.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="PuppeteerSharp" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />
     </ItemGroup>
 
 </Project>
