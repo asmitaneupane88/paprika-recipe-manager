@@ -54,11 +54,10 @@ public sealed partial class RecipePage : NavigatorPage
         var recipes = await SavedRecipe.GetAll();
 
         FilteredRecipes = recipes
-            .Where(r => r.Title.Contains(SearchText, StringComparison.CurrentCultureIgnoreCase))
+            .Where(r => r.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
             .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
                         || (r.Category is not null 
-                        && r.Category
-                            .Trim()
+                        && r.Category.Trim()
                             .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
             .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
             .ToObservableCollection();

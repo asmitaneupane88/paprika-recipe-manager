@@ -15,12 +15,24 @@ public class RecipeDetailsViewModel : INotifyPropertyChanged
 
     public async Task<SavedRecipe> SaveRecipeAsync()
     {
+        // If we have a category, make sure it exists in SavedCategory
+        if (!string.IsNullOrWhiteSpace(_recipe.Category))
+        {
+            var categories = await SavedCategory.GetAll();
+            var categoryExists = categories.Any(c => c.Name.Equals(_recipe.Category.Trim(), StringComparison.CurrentCultureIgnoreCase));
+            
+            if (!categoryExists)
+            {
+                await SavedCategory.Add(_recipe.Category.Trim(), null);
+            }
+        }
+
         var savedRecipe = new SavedRecipe
         {
             Title = _recipe.Title,
             Description = _recipe.Description ?? "",
             ImageUrl = _recipe.ImageUrl ?? "",
-            Category = _recipe.Category,
+            Category = _recipe.Category?.Trim(),
             Rating = 0
         };
 
