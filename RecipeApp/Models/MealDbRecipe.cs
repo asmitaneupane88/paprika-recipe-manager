@@ -82,7 +82,7 @@ namespace RecipeApp.Models
             set => strMealThumb = value;
         }
         
-        public string IngredientsPreview
+        public string Ingredients
         {
             get
             {

@@ -39,7 +39,7 @@
                                 <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="18"/>
                                 <TextBlock Text="{x:Bind Category}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" 
                                          Style="{ThemeResource CaptionTextBlockStyle}"/>
-                                <TextBlock Text="{x:Bind IngredientsPreview}"
+                                <TextBlock Text="{x:Bind Ingredients}"
                                          Style="{ThemeResource CaptionTextBlockStyle}"
                                          TextWrapping="WrapWholeWords"
                                          MaxWidth="400"
