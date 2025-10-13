@@ -11,7 +11,6 @@ namespace RecipeApp.Controls.Pages
         {
             this.InitializeComponent();
         }
-
         private void Recipe_Click(object sender, RoutedEventArgs e)
         {
             if (sender is FrameworkElement element && element.DataContext is MealDbRecipe mealDbRecipe)

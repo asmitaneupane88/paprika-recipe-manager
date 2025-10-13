@@ -1,14 +1,44 @@
-﻿<local:NavigatorPage
+﻿<pages:NavigatorPage
     x:Class="RecipeApp.Controls.Pages.InputARecipe"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:RecipeApp.Controls.Pages"
+    xmlns:vm="using:RecipeApp.ViewModels"
+    xmlns:models="using:RecipeApp.Models"
+    xmlns:pages="clr-namespace:RecipeApp.Controls.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+        <Page.DataContext>
+            <vm:SearchViewModel x:Name="ViewModel" />
+        </Page.DataContext>
 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBox x:Name="MyTextBox"
+                 Grid.Row="0"
+                 Grid.Column="0"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Margin="10"
+                 Width="300"
+                 Text="Enter Recipe Title" />
     </Grid>
-</local:NavigatorPage>
+
+</pages:NavigatorPage>
+
+
+
+
