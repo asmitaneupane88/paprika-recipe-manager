@@ -6,25 +6,25 @@ namespace RecipeApp.Tests;
 
 public class RecipeDetailsTests
 {
-    [Fact]
+    [Test]
     public void MinutesToTimeConverter_ConvertsCorrectly()
     {
         var converter = new MinutesToTimeConverter();
 
         // Test minutes less than 1 hour
         var result1 = converter.Convert(45, typeof(string), null!, string.Empty);
-        Assert.Equal("45 min", result1);
+        Assert.Equals("45 min", result1);
 
         // Test exact hours
         var result2 = converter.Convert(120, typeof(string), null!, string.Empty);
-        Assert.Equal("2 hr", result2);
+        Assert.Equals("2 hr", result2);
 
         // Test hours and minutes
         var result3 = converter.Convert(150, typeof(string), null!, string.Empty);
-        Assert.Equal("2 hr 30 min", result3);
+        Assert.Equals("2 hr 30 min", result3);
     }
 
-    [Fact]
+    [Test]
     public void Recipe_PropertiesInitializeCorrectly()
     {
         var recipe = new Recipe
@@ -39,13 +39,13 @@ public class RecipeDetailsTests
             Directions = new()
         };
 
-        Assert.Equal("Test Recipe", recipe.Title);
-        Assert.Equal(90, recipe.TotalTimeMinutes); // 30 + 60
-        Assert.Equal(4, recipe.Servings);
-        Assert.Equal("Medium", recipe.Difficulty);
+        Assert.Equals("Test Recipe", recipe.Title);
+        Assert.Equals(90, recipe.TotalTimeMinutes); // 30 + 60
+        Assert.Equals(4, recipe.Servings);
+        Assert.Equals("Medium", recipe.Difficulty);
     }
 
-    [Fact]
+    [Test]
     public void RecipeViewModel_SaveRecipe_CallsSaveMethod()
     {
         var recipe = new Recipe
@@ -65,6 +65,6 @@ public class RecipeDetailsTests
         // Note: This is a basic test. Once actual save functionality is implemented,
         // we should mock the storage service and verify it's called correctly
         var saveTask = viewModel.SaveRecipeAsync();
-        Assert.True(saveTask.IsCompleted);
+        Assert.Equals(saveTask.IsCompleted, true);
     }
 }
