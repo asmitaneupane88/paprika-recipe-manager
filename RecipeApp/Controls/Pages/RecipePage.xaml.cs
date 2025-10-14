@@ -111,18 +111,24 @@ public sealed partial class RecipePage : NavigatorPage
             PrimaryButtonText = "Save",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
+            IsPrimaryButtonEnabled = false,
             XamlRoot = this.XamlRoot
         };
-        var textbox = new TextBox()
+        
+        var textbox = new TextBox
         {
             PlaceholderText="Recipe Title",
         };
+        
         textbox.TextChanged += (s, _) =>
         {
             dialog.IsPrimaryButtonEnabled = !string.IsNullOrWhiteSpace(textbox.Text);
         };
+        
         dialog.Content = textbox;
+        
         var result = await dialog.ShowAsync();
+        
         if (result == ContentDialogResult.Primary)
         {
             var newRecipe = new SavedRecipe()
