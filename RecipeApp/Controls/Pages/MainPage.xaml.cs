@@ -12,9 +12,4 @@ public sealed partial class MainPage : NavigatorPage
     {
         Navigator.Navigate(new ThirdPage(Navigator), "Third Page");
     }
-    
-    private void ButtonTwo_OnClick(object sender2, RoutedEventArgs f)
-    {
-        Navigator.Navigate(new InputARecipe(Navigator), "Enter a Recipe Manually");
-    }
 }

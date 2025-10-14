@@ -102,9 +102,6 @@ public sealed partial class RecipePage : NavigatorPage
 
     private async void OnButtonAddClick(object sender, RoutedEventArgs e)
     {
-        // Since SavedRecipe inherits from IAutosavingClass, changes are automatically saved
-        // We just need to show a confirmation and navigate back
-        
         var dialog = new ContentDialog
         {
             Title = "Create New Recipe",
