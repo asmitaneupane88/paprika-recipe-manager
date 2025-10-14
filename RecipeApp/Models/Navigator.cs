@@ -31,6 +31,13 @@ public partial class Navigator : ObservableObject
             Name = "MealDB Recipes",
             PageFactory = nav => new SearchPage(nav),
         },
+        new()
+        {
+            Icon = Symbol.Help,
+            Name = "Enter a Recipe Manually",
+            PageFactory = nav => new InputARecipe(nav),
+        },
+        
     ];
     
     /// <summary>
