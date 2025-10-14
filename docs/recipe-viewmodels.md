@@ -1,5 +1,3 @@
-# Recipe ViewModels Documentation
-
 ## RecipeDetailsViewModel
 
 ### Overview

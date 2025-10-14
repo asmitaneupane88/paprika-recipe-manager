@@ -1,4 +1,4 @@
-### Recipe Model
+##Overview
 
 The `Recipe` class serves as the primary data model for recipes in the application. It implements both `INotifyPropertyChanged` for UI updates and `IRecipe` for standard recipe functionality.
 
@@ -73,3 +73,4 @@ var newRecipe = new Recipe
     Category = "Dessert"
 };
 ```
+

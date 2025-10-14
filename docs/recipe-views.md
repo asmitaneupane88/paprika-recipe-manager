@@ -1,10 +1,6 @@
-# Recipe Views Documentation
+# Recipe Views
 
 ## EditRecipe View
-
-### Overview
-
-The EditRecipe view provides a user interface for creating and modifying recipes in the Paprika Recipe Manager application. It implements a form-based interface with two-way data binding for real-time updates.
 
 ### XAML Structure
 

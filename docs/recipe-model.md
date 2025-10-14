@@ -1,10 +1,5 @@
-# Recipe Model Documentation
+## Recipe Model
 
-## Overview
-
-The Recipe model is the core data structure in the Paprika Recipe Manager application, representing all aspects of a recipe including ingredients, instructions, timing, and metadata.
-
-## Class Definition
 
 ### Recipe Class
 
