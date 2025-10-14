@@ -100,9 +100,40 @@ public sealed partial class RecipePage : NavigatorPage
         }
     }
 
-    private void OnButtonAddClick(object sender, RoutedEventArgs e)
+    private async void OnButtonAddClick(object sender, RoutedEventArgs e)
     {
-        //TODO: go to add recipe page
+        // Since SavedRecipe inherits from IAutosavingClass, changes are automatically saved
+        // We just need to show a confirmation and navigate back
+        
+        var dialog = new ContentDialog
+        {
+            Title = "Create New Recipe",
+            PrimaryButtonText = "Save",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = this.XamlRoot
+        };
+        var textbox = new TextBox()
+        {
+            PlaceholderText="Recipe Title",
+        };
+        textbox.TextChanged += (s, _) =>
+        {
+            dialog.IsPrimaryButtonEnabled = !string.IsNullOrWhiteSpace(textbox.Text);
+        };
+        dialog.Content = textbox;
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            var newRecipe = new SavedRecipe()
+            {
+                Title = textbox.Text,
+            };
+
+            await SavedRecipe.Add(newRecipe);
+
+            Navigator.Navigate(new EditRecipe(Navigator, newRecipe), title:$"Edit {newRecipe.Title}");
+        }
     }
 
     private async void OnButtonRemoveClick(object sender, RoutedEventArgs e)
