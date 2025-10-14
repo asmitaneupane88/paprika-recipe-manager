@@ -1,58 +1,42 @@
-# Welcome to Paprika Recipe Manager
+# Welcome to PseudoChef
 
-This is the documentation for the Paprika Recipe Manager project.
+This is the documentation for the PseudoChef. This application is based off of the app Paprika. Furthermore, the app is using Uno Platform and .NET 9.
 
-## Getting Started
+## Features
 
-1. Clone the repository
-2. Open the solution in Visual Studio or VS Code
-3. Build and run the project
+- Search recipes from MealDB (API)
+- Save favorite recipes
+- View detailed recipe information
+- Edit recipe details
+- Manage your recipe collection
 
 ## Project Structure
 
 - `RecipeApp/` - Main application project
-  - `Intefaces/` - Interfaces and abstract classes
+  - `Interfaces/` - Interfaces and abstract classes
+    - `IRecipe.cs` - Base recipe interface
+    - `IRecipeService.cs` - Recipe service interface
+    - `IAutosavingClass.cs` - Autosaving functionality interface
   - `Models/` - Data models
+    - `Recipe.cs` - Core recipe model with all recipe properties
+    - `SavedRecipe.cs` - Local storage recipe model
+    - `RecipeIngredient.cs` - Ingredient data structure
+    - `MealDbRecipe.cs` - API recipe model
+    - `Navigator.cs` - Navigation state management
+    - `Route.cs` - Route definitions
+    - `RecipeSteps/` - Recipe step implementations
+      - `TextStep.cs` - Text-based recipe step
+      - `TimerStep.cs` - Timer-based recipe step
   - `ViewModels/` - MVVM view models
+    - `RecipeDetailsViewModel.cs` - Recipe details logic
+    - `SearchViewModel.cs` - Recipe search functionality
   - `Controls/` - UI controls and pages
+    - `Pages/` - Application pages
+      - `RecipeDetails.xaml` - Recipe details view
+      - `EditRecipe.xaml` - Recipe editing interface
+      - `SearchPage.xaml` - Recipe search interface
+    - `Shell.xaml` - Main application shell
   - `Services/` - Business logic and services
-
-### Recommended IDE
-- JetBrains Rider (easiest to work with in my opinion)
-
-### Supported IDEs
-- Any IDE that supports .NET 9 and the Uno Platform Extension
-    - JetBrains Rider
-    - Visual Studio
-    - Visual Studio Code
-    - Any others mentioned on the Uno Platform website
-
-### Installation
-1. It is recommended to first install from Uno Platform the UnoCheck command line tool to make sure you can build without issues.
-2. It is recommended to email about getting a free student license for Uno Platform (needed for hot reloading and the UI designer).
-3. Install a supported IDE and the Uno Platform Extension.
-4. Clone the repository from GitHub and open the solution.
-5. Build and verify that it runs without errors.
-
-
-## Features
-
-- Search recipes from MealDB
-- Save favorite recipes
-- View detailed recipe information
-- Manage your recipe collection
-
-### Supported Platforms
-- Linux (needs testing)
-- Windows 10 (needs testing)
-- Windows 11
-- MacOS
-
-## Application Ui/Ux
-TODO
-
-### Shell
-The app uses the @RecipeApp.Controls.Shell class as the main container.
-This container is responsible for the navigation menu and the header.
-The content of the shell is determined by the current page of the @RecipeApp.Models.Navigator
-which handles all navigation and keeping track of the current page along with history.
+    - `ApiControl.cs` - MealDB API integration
+    - `RecipeConverter.cs` - Recipe format conversion
+    - `FileHelper.cs` - File operations

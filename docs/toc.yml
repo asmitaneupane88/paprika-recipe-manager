@@ -1,21 +1,32 @@
 - name: Home
   href: index.md
-- name: Developer Document
+- name: Getting Started
+  items:
+    - name: Installation Guide
+      href: installation.md
+- name: Recipe Management
+  items:
+    - name: Overview
+      href: recipe-management.md
+    - name: Recipe Model
+      href: recipe-model.md
+    - name: Recipe Views
+      href: recipe-views.md
+    - name: Recipe ViewModels
+      href: recipe-viewmodels.md
+- name: Developer Documentation
   items:
     - name: MealDB API Search Feature
       href: mealdb-api.md
-- name: Introduction
-  href: introduction.md
-- name: Getting Started
-  href: getting-started.md
 - name: Application UI
   href: application-ui.md
 - name: Application Logic
   href: application-logic.md
   items:
-    - name: Interfaces / abstract classes
+    - name: Interfaces / Abstract Classes
       href: interfaces-and-abstract-classes.md
     - name: Enums
       href: enums.md
     - name: Classes
       href: classes.md
+
