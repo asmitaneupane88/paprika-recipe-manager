@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace RecipeApp.Controls.Pages;
 
-public sealed partial class RecipeDetails : NavigatorPage, INotifyPropertyChanged
+public sealed partial class RecipeDetailsPage : NavigatorPage, INotifyPropertyChanged
 {
     private Recipe _recipe;
     public Recipe Recipe 
@@ -40,14 +40,14 @@ public sealed partial class RecipeDetails : NavigatorPage, INotifyPropertyChange
     public bool IsSavedRecipe => _savedRecipe != null;
     public bool IsNewRecipe => !IsSavedRecipe;
 
-    public RecipeDetails(Navigator navigator, Recipe recipe) : base(navigator)
+    public RecipeDetailsPage(Navigator navigator, Recipe recipe) : base(navigator)
     {
         _recipe = recipe;
         ViewModel = new RecipeDetailsViewModel(Recipe);
         this.InitializeComponent();
     }
 
-    public RecipeDetails(Navigator navigator, SavedRecipe savedRecipe) : base(navigator) 
+    public RecipeDetailsPage(Navigator navigator, SavedRecipe savedRecipe) : base(navigator) 
     {
         _savedRecipe = savedRecipe;
         _recipe = new Recipe

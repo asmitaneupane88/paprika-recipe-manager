@@ -5,9 +5,9 @@ using RecipeApp.Services;
 
 namespace RecipeApp.Controls.Pages
 {
-    public sealed partial class SearchPage : NavigatorPage
+    public sealed partial class MealDbSearchPage : NavigatorPage
     {
-        public SearchPage(Navigator? nav = null) : base(nav)
+        public MealDbSearchPage(Navigator? nav = null) : base(nav)
         {
             this.InitializeComponent();
         }
@@ -17,7 +17,7 @@ namespace RecipeApp.Controls.Pages
             if (sender is FrameworkElement element && element.DataContext is MealDbRecipe mealDbRecipe)
             {
                 var recipe = mealDbRecipe.ToRecipe();
-                Navigator.Navigate(new RecipeDetails(Navigator, recipe), recipe.Title);
+                Navigator.Navigate(new RecipeDetailsPage(Navigator, recipe), recipe.Title);
             }
         }
     }

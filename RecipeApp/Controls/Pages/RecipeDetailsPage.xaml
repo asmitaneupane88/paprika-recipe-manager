@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <local:NavigatorPage
-    x:Class="RecipeApp.Controls.Pages.RecipeDetails"
+    x:Class="RecipeApp.Controls.Pages.RecipeDetailsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RecipeApp.Controls.Pages"

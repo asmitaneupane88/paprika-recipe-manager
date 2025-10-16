@@ -1,5 +1,5 @@
 ﻿<pages:NavigatorPage
-    x:Class="RecipeApp.Controls.Pages.SearchPage"
+    x:Class="RecipeApp.Controls.Pages.MealDbSearchPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:RecipeApp.ViewModels"

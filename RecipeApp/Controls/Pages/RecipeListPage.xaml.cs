@@ -7,7 +7,7 @@ using Uno.Extensions;
 
 namespace RecipeApp.Controls.Pages;
 
-public sealed partial class RecipePage : NavigatorPage
+public sealed partial class RecipeListPage : NavigatorPage
 {
     private const int AllCategorySortOrder = -20252025;
     
@@ -26,7 +26,7 @@ public sealed partial class RecipePage : NavigatorPage
     private Visibility ListVisibility { get; set => SetField(ref field, value); } = Visibility.Visible;
     private Visibility GridVisibility { get; set => SetField(ref field, value); } = Visibility.Collapsed;
     
-    public RecipePage(Navigator? nav = null) : base(nav)
+    public RecipeListPage(Navigator? nav = null) : base(nav)
     {
         this.InitializeComponent();
         
@@ -95,7 +95,7 @@ public sealed partial class RecipePage : NavigatorPage
         if (sender is ListView { SelectedItem: RecipeCard rc } lv)
         {
             lv.SelectedItem = null;
-            var details = new RecipeDetails(Navigator, savedRecipe: rc.SavedRecipe);
+            var details = new RecipeDetailsPage(Navigator, savedRecipe: rc.SavedRecipe);
             Navigator.Navigate(details, $"Recipe: {rc.SavedRecipe.Title}");
         }
     }

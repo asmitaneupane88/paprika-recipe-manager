@@ -1,7 +1,7 @@
 ﻿namespace RecipeApp.Models;
 
 // TODO: for use in recipe steps
-public record RecipeIngredient
+public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
 {
     public string Name { get; init; }
     

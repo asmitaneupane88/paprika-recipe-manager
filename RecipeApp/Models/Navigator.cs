@@ -23,13 +23,13 @@ public partial class Navigator : ObservableObject
         {
             Icon = Symbol.Folder,
             Name = "Saved Recipes",
-            PageFactory = nav => new RecipePage(nav),
+            PageFactory = nav => new RecipeListPage(nav),
         },
         new()
         {
             Icon = Symbol.Globe,
             Name = "MealDB Recipes",
-            PageFactory = nav => new SearchPage(nav),
+            PageFactory = nav => new MealDbSearchPage(nav),
         },
     ];
     

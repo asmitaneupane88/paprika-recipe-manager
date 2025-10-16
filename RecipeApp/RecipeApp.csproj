@@ -34,12 +34,6 @@
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-      <Compile Update="Controls\Pages\MainPage.xaml.cs">
-        <DependentUpon>MainPage.xaml</DependentUpon>
-        <IsDefaultItem>true</IsDefaultItem>
-      </Compile>
-    </ItemGroup>
-    <ItemGroup>
       <PackageReference Include="PuppeteerSharp" />
     </ItemGroup>
     <ItemGroup>
