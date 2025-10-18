@@ -17,7 +17,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string? Category { get; set; }
     public int Rating { get; set => SetProperty(ref field, Math.Clamp(value, 0, MaxRating)); }
     
-    public List<RecipeIngredient> Ingredients => StepsStartNode.GetNestedIngredients();
     [ObservableProperty] public partial StartStep StepsStartNode { get; set; }
     
     public const string HtmlHeader = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";

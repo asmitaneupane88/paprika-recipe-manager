@@ -12,11 +12,7 @@ public partial class TextStep : IStep
            A step that can be an instruction, note, or question.
            This step supports multiple outputs to other steps.
            """;
-
-    public override bool HasAnyInNode() => true;
-    public override bool HasMultipleInNode()
-        => false;
-
+    
     public override List<Node> GetOutNodes() => OutNodes;
 
     [ObservableProperty] public partial string? Title { get; set; }

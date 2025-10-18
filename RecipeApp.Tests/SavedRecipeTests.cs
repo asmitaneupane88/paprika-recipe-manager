@@ -60,50 +60,87 @@ public class SavedRecipeTests
     [Test]
     public void TestSteps()
     {
+        // build
         var root = new StartStep();
-        
-        Console.WriteLine(@"Testing with only root");
-        root.MinutesToComplete = 5;
-        root.ArePathsValid().Should().BeFalse();
-        root.GetTotalTime().Should().Be(5);
+        var s1 = new TextStep {MinutesToComplete = 5};
+        var s2 = new TextStep {MinutesToComplete = 3};
+        var s3 = new TextStep {MinutesToComplete = 0};
+        var s4 = new TextStep {MinutesToComplete = 10};
+        var s5 = new TextStep {MinutesToComplete = 8};
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var merge0 = new MergeStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var end = new FinishStep {MinutesToComplete = 4};
 
-        Console.WriteLine(@"Testing with root and final step");
-        var final = new FinishStep { MinutesToComplete = 10 };
-        root.NextStep = final;
-        root.ArePathsValid().Should().BeTrue();
-        root.GetTotalTime().Should().Be(15);
-        root.GetPrepTime().Should().Be(5);
-        root.GetCookTime().Should().Be(0);
-        root.GetCleanupTime().Should().Be(10);
-        
-        Console.WriteLine(@"Testing with wrong intermediate step A");
-        var next = new TextStep
-        {
-            MinutesToComplete = 3,
-            OutNodes = [
-                new("Next", final),
-                new("Back", [])
-            ]
-        };
-        root.NextStep = next;
-        
-        root.ArePathsValid().Should().BeFalse();
-        
-        Console.WriteLine(@"Testing with wrong intermediate step B");
-        next.OutNodes = [];
-        
-        root.ArePathsValid().Should().BeFalse();
+        root.Paths =
+        [
+            (new Node("Oven", merge0), 2),
+            (new Node("Microwave", split2), 3),
+        ];
 
-        Console.WriteLine(@"Testing with correct intermediate step");
-        next.OutNodes = [
-            new("Next", final),
-            new("Back", [ next ])
+        split1.OutNodes =
+        [
+            new Node("", s1),
+            new Node("", s2)
         ];
         
-        root.ArePathsValid().Should().BeTrue();
-        root.GetTotalTime().Should().Be(18);
-        root.GetPrepTime().Should().Be(5);
-        root.GetCookTime().Should().Be(3);
-        root.GetCleanupTime().Should().Be(10);
+        // skip s1 to invalidate the path
+        
+        s2.OutNodes =
+        [
+            new Node("Next", merge1)
+        ];
+        
+        merge1.NextStep = s3;
+
+        s3.OutNodes =
+        [
+            new Node("Skip", end),
+            new Node("Next", s4)
+        ];
+
+        s4.OutNodes =
+        [
+            new Node("Next", merge2)
+        ];
+
+        s5.OutNodes =
+        [
+            new Node("", merge2)
+        ];
+
+        split2.OutNodes =
+        [
+            new Node("", merge0),
+            new Node("", s5),
+        ];
+        
+        merge0.NextStep = split1;
+        merge2.NextStep = end;
+
+
+        // test for fails
+        root.GetNestedPathInfo().All(pi => pi.IsValid).Should().BeFalse();
+
+        // rebuild a bit
+        s1.OutNodes =
+        [
+            new Node("Next", merge1)
+        ];
+
+        // test for passes
+        var info = root.GetNestedPathInfo();
+        
+        info.All(pi => pi.IsValid).Should().BeTrue();
+        info[0].MaxCookTime.Should().Be(15); 
+        info[0].MinCookTime.Should().Be(5);
+        info[0].PrepTime.Should().Be(2);
+        info[0].CleanupTime.Should().Be(4);
+        
+        info[1].MaxCookTime.Should().Be(15);
+        info[1].MinCookTime.Should().Be(8);
+        info[1].PrepTime.Should().Be(3);
     }
 }

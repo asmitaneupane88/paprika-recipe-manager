@@ -8,12 +8,7 @@ public partial class MergeStep : IStep
         => """
            A merge step will wait for all active steps that merge into it to complete.
            """;
-
-    public override bool HasAnyInNode() => true;
-
-    public override bool HasMultipleInNode()
-        => true;
-
+    
     public override List<Node> GetOutNodes()
         => [ new("Next", NextStep) ];
     

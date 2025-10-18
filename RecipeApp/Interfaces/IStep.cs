@@ -6,17 +6,12 @@ public abstract partial class IStep : ObservableObject
 {
     public abstract string GetTitle();
     public abstract string? GetDescription();
-    public abstract bool HasAnyInNode();
-    public abstract bool HasMultipleInNode();
 
     public abstract List<Node> GetOutNodes();
 
     
     [JsonIgnore] public string BindableTitle => GetTitle();
     [JsonIgnore] public string? BindableDescription => GetDescription();
-    [JsonIgnore] public bool BindableHasInNode => HasAnyInNode();
-    [JsonIgnore] public bool BindableHasMultipleInNodes => HasMultipleInNode();
-
     [JsonIgnore] public List<Node> BindableGetOutNodes => GetOutNodes();
 
     [ObservableProperty] public partial int X { get; set; } = 0;
@@ -25,91 +20,77 @@ public abstract partial class IStep : ObservableObject
     [ObservableProperty] public partial double MinutesToComplete { get; set; } = 0;
     [ObservableProperty] public partial List<RecipeIngredient> IngredientsToUse { get; set; } = [];
     
-    public List<RecipeIngredient> GetNestedIngredients(List<IStep>? visited = null)
+
+    public List<PathInfo> GetNestedPathInfo(List<IStep>? visitedSteps = null)
     {
-        visited ??= [];
-
-        visited.Add(this);
+        visitedSteps ??= [];
         
-        var children = GetOutNodes()
-            .SelectMany(node => node.Next)
-            .Where(step => !visited.Contains(step));
+        visitedSteps.Add(this);
         
-        var ingredients = children
-            .SelectMany(step => step.GetNestedIngredients())
-            .ToList();
-        
-        ingredients = ingredients
-            .Concat(IngredientsToUse.Where(i => !ingredients.Contains(i)))
-            .ForEach(i => i.Quantity += IngredientsToUse.FirstOrDefault(x => x.Name == i.Name)?.Quantity ?? 0)
-            .ToList();
-        
-        return ingredients;
-    }
-
-    public double? GetCleanupTime(List<IStep>? visited = null)
-    {
-        visited ??= [];
-
-        visited.Add(this);
-        
-        var children = GetOutNodes()
-            .SelectMany(node => node.Next)
-            .Where(step => !visited.Contains(step));
-        
-        foreach (var node in children)
+        if (this is StartStep startStep)
         {
-            if (node is FinishStep)
-                return node.MinutesToComplete;
+            List<PathInfo> returnInfo = [];
+
+            foreach (var pathPair in startStep.Paths)
+                if (pathPair.outNode.Next is not null)
+                    returnInfo.Add(pathPair.outNode.Next.GetNestedPathInfo(visitedSteps).First() with { OutNode = pathPair.outNode, PrepTime = pathPair.prepTime});
+                else
+                    returnInfo.Add(new PathInfo(pathPair.outNode, false,[], []));
             
-            if (node.GetCleanupTime() is { } cleanupTime)
-                return cleanupTime;
+            return returnInfo;
         }
-        
-        return null;
-    }
-
-    public double GetCookTime(List<IStep>? visited = null)
-    {
-        //TODO: needs a merge step and logic for dealing with different paths to get a range for the time
-        throw new NotImplementedException(); 
-        
-        var minutes = this is not (StartStep or FinishStep) ? MinutesToComplete : 0;
-        
-        visited ??= [];
-
-        visited.Add(this);
-        
-        var children = GetOutNodes()
-            .SelectMany(node => node.Next)
-            .Where(step => !visited.Contains(step));
-        
-        foreach (var node in children)
+        else if (this is FinishStep)
         {
-            minutes += node.GetCookTime(visited);
+            return [ new PathInfo(null!, true, IngredientsToUse, IngredientsToUse, 0, 0, 0, MinutesToComplete) ];
         }
-        
-        return minutes;
+        else
+        {
+            var outNodes = GetOutNodes();
+            var outPaths = outNodes
+                .Select(n => (n.Next?.GetNestedPathInfo().First() ?? new PathInfo(n, false, [], [])) with { OutNode = n }) //TODO clean up this line
+                .ToList();
+            
+            if (outPaths.Count == 0) return [ new PathInfo(null, false, [], []) ];
+
+            if (this is SplitStep)
+            {
+                // got to look for the highest min cook time here
+                var minPath = outPaths.OrderByDescending(p => p.MinCookTime).First();
+                var maxPath = outPaths.OrderByDescending(p => p.MaxCookTime).First();
+                
+                var newMinIngredients = CombineIngredients(minPath.MinIngredients, IngredientsToUse);
+                var newMaxIngredients = CombineIngredients(maxPath.MaxIngredients, IngredientsToUse);
+
+                var newMinCookTime = minPath.MinCookTime + MinutesToComplete;
+                var newMaxCookTime = maxPath.MaxCookTime + MinutesToComplete;       
+                
+                return [new PathInfo(null, outPaths.All(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
+            }
+            else
+            {
+                var minPath = outPaths.OrderBy(p => p.MinCookTime).First();
+                var maxPath = outPaths.OrderByDescending(p => p.MaxCookTime).First();
+
+                var newMinIngredients = CombineIngredients(minPath.MinIngredients, IngredientsToUse);
+                var newMaxIngredients = CombineIngredients(maxPath.MaxIngredients, IngredientsToUse);
+
+                var newMinCookTime = minPath.MinCookTime + MinutesToComplete;
+                var newMaxCookTime = maxPath.MaxCookTime + MinutesToComplete;
+                
+                return [new PathInfo(null, outPaths.All(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
+            }
+        }
     }
-
-    public bool ArePathsValid(List<IStep>? visited = null)
+    
+    private List<RecipeIngredient> CombineIngredients(List<RecipeIngredient> x, List<RecipeIngredient> y)
     {
-        visited ??= [];
-        
-        if (visited.Contains(this)) return true;
+        foreach (var ingredient in y)
+            if (x.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)) is { } existingIngredient)
+                existingIngredient.Quantity += ingredient.Quantity;
+            else
+                x.Add(ingredient);
 
-        visited.Add(this);
-
-        var outNodes = GetOutNodes();
-        
-        if (this is not FinishStep && outNodes.Count == 0) return false;
-        
-        return outNodes
-            .All(node => 
-                node.Next.Count != 0 
-                && node.Next.All(step => step.ArePathsValid(visited))
-            );
+        return x;
     }
 }
-
 
