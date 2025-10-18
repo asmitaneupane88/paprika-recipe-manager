@@ -11,7 +11,10 @@ public partial class TimerStep : IStep
             ? null 
             : "A step that can be used to set a timer.";
 
-    public override bool HasInNode() => false;
+    public override bool HasAnyInNode()
+        => false;
+    public override bool HasMultipleInNode()
+        => false;
 
     public override List<Node> GetOutNodes()
         => BackNodeEnabled

@@ -6,13 +6,17 @@ public abstract partial class IStep : ObservableObject
 {
     public abstract string GetTitle();
     public abstract string? GetDescription();
-    public abstract bool HasInNode();
+    public abstract bool HasAnyInNode();
+    public abstract bool HasMultipleInNode();
+
     public abstract List<Node> GetOutNodes();
 
     
     [JsonIgnore] public string BindableTitle => GetTitle();
     [JsonIgnore] public string? BindableDescription => GetDescription();
-    [JsonIgnore] public bool BindableHasInNode => HasInNode();
+    [JsonIgnore] public bool BindableHasInNode => HasAnyInNode();
+    [JsonIgnore] public bool BindableHasMultipleInNodes => HasMultipleInNode();
+
     [JsonIgnore] public List<Node> BindableGetOutNodes => GetOutNodes();
 
     [ObservableProperty] public partial int X { get; set; } = 0;
@@ -67,6 +71,9 @@ public abstract partial class IStep : ObservableObject
 
     public double GetCookTime(List<IStep>? visited = null)
     {
+        //TODO: needs a merge step and logic for dealing with different paths to get a range for the time
+        throw new NotImplementedException(); 
+        
         var minutes = this is not (StartStep or FinishStep) ? MinutesToComplete : 0;
         
         visited ??= [];
@@ -93,7 +100,11 @@ public abstract partial class IStep : ObservableObject
 
         visited.Add(this);
 
-        return GetOutNodes()
+        var outNodes = GetOutNodes();
+        
+        if (this is not FinishStep && outNodes.Count == 0) return false;
+        
+        return outNodes
             .All(node => 
                 node.Next.Count != 0 
                 && node.Next.All(step => step.ArePathsValid(visited))

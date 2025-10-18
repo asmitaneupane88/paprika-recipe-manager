@@ -13,7 +13,9 @@ public partial class TextStep : IStep
            This step supports multiple outputs to other steps.
            """;
 
-    public override bool HasInNode() => true;
+    public override bool HasAnyInNode() => true;
+    public override bool HasMultipleInNode()
+        => false;
 
     public override List<Node> GetOutNodes() => OutNodes;
 

@@ -6,9 +6,14 @@ public partial class FinishStep : IStep
         => "Finish";
 
     public override string? GetDescription()
-        => null;
+        => """
+           Ends the recipe. after making sure all steps are complete (i.e. this also acts as a merge step).
+           """;
 
-    public override bool HasInNode() 
+    public override bool HasAnyInNode() 
+        => true;
+
+    public override bool HasMultipleInNode()
         => true;
 
     public override List<Node> GetOutNodes() => [];
