@@ -1,180 +1,101 @@
 # Installation Guide
 
-This guide provides detailed instructions for setting up the Paprika Recipe Manager development environment on both macOS and Windows.
+This guide explains how to set up the devepment enviroment for the Paprika Recipe Manager, a .NET-based application using the Uno platform for cross-platform UI, on Windows. This setup supports the core features of Sprint 1, including recipe mangement and MealDB API integration.
 
 ## Prerequisites
-
-### All Platforms
-
-- .NET 9 SDK
-- Git
-- One of the supported IDEs:
-  - JetBrains Rider (recommended)
-  - Visual Studio
-  - Visual Studio Code
-
-## Uno Platform Setup
-
-1. Install UnoCheck Command Line Tool
-
-   ```bash
-   dotnet tool install --global Uno.Check
-   ```
-
-2. Request Student License
-   - Email Uno Platform for a free student license
-   - Include your student email and institution details
-   - This license enables:
-     - Hot reloading functionality
-     - UI designer features
-     - Advanced debugging tools
-
-## Platform-Specific Installation
-
-### macOS Installation
-
+- **System Requirements**:
+    - Windows 10 or 11 (64-bit)
+    - 8GB RAM (16GB recommended)
+    - 10GB free disk space
+- **Software**:
+    - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+    - [Git](https://git-scm.com/downloads)
+    - IDE (choose one):
+        - [JetBrains Rider](https://www.jetbrains.com/rider/) (recommended)
+        - [Visual Studio 2022](https://visualstudio.microsoft.com/) with ".NET Desktop Development" and "Universal Windows Platform development" workloads
+        - [Visual Studio Code](https://code.visualstudio.com/) with C# extension
+- **Uno Platform Extension**:
+    - Required for all IDEs to support Uno Platform development.
+## Setup Instructions
 1. **Install Development Tools**
-
-   ```bash
-   # Install Homebrew if not already installed
-   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-   # Install .NET SDK
-   brew install --cask dotnet-sdk
-
-   # Verify installation
-   dotnet --version
-   ```
-
-2. **IDE Installation**
-
-   - **JetBrains Rider (Recommended)**
-
-     1. Download Rider from JetBrains website
-     2. Install using the DMG file
-     3. Launch Rider and install recommended plugins
-
-   - **Visual Studio for Mac**
-     1. Download from Microsoft's website
-     2. Run the installer package
-     3. Follow the installation wizard
-
-3. **Uno Platform Extension**
-
-   - In Rider:
-
-     1. Go to Settings → Plugins
-     2. Search for "Uno Platform"
-     3. Install and restart IDE
-
-   - In VS Code:
-     1. Open Extensions panel
-     2. Search for "Uno Platform"
-     3. Install and reload
-
-4. **Additional Tools**
-
-   ```bash
-   # Install additional development tools
-   dotnet tool install --global Uno.Check
-
-   # Run environment check
-   uno-check
-   ```
-
-### Windows Installation
-
-1. **Install Development Tools**
-
-   - Download and install .NET 9 SDK from Microsoft
-   - Install Git for Windows
-   - Install Windows Terminal (recommended)
-
-2. **IDE Installation**
-
-   - **JetBrains Rider (Recommended)**
-
-     1. Download Rider installer
-     2. Run the installer with default settings
-     3. Enable recommended plugins
-
-   - **Visual Studio**
-     1. Download Visual Studio installer
-     2. Select ".NET Desktop Development"
-     3. Include "Universal Windows Platform development"
-
-3. **Uno Platform Extension**
-
-   - In Rider:
-
-     1. Settings → Plugins
-     2. Market Place → Search "Uno Platform"
-     3. Install and restart
-
-   - In Visual Studio:
-     1. Extensions → Manage Extensions
-     2. Search for "Uno Platform"
-     3. Download and install
-
-4. **UWP Development (Windows Only)**
-   1. Enable Developer Mode in Windows Settings
-   2. Install Windows SDK
-   3. Enable Hyper-V for emulator support
-
-## Project Setup
-
-1. **Clone Repository**
+- Download and install .NET 9 SDK from the [official site](https://dotnet.microsoft.com/download/dotnet/9.0).
+- Install Git for Windows from [git-scm.com](https://git-scm.com/downloads).
+- Verify installations:
+```bash
+dotnet --version
+git --version
+  ```
+2. **Install IDE**
+- **JetBrains Rider**
+  - Download and run the installer from [JetBrains](https://www.jetbrains.com/rider/)
+  - Enable recommended plugins (e.g, .NET, Uno Platform) during setup.
+- **Visual Studio**:
+  - Download the installer from [Microsoft](https://visualstudio.microsoft.com/)
+  - Select ".NET Desktop Development" and "Universal Windows Platform development" workloads.
+- **Visual Studio Code**:
+  - Install from [code.visualstudio.com](https://code.visualstudio.com/)
+  - Add the C# extension via the Extensions panel.
+3. **Install Uno Platform**:
+- Install the Uno.Check tool
+    ```bash
+  dotnet tool install --gobal Uno.check
+    ```
+- Install the Uno Platform Extension:
+  - **Rider**: Go to Settings -> Pluggins, search for "Uno Platform", install and restart.
+  - **Visual Studio**: Go to Extension -> Manage Extensions, search for "Uno Platform", install, and restart.
+  - **VS Code**: Open Extensions panel, search for "Uno Platform", install, and reload.
+- Verify Uno Platform setup:
+    ```bash
+    uno -check
+    ```
+4. **Clone and Set Up the Project**
+- **Clone the repository**:
 
    ```bash
    git clone https://github.com/asmitaneupane88/paprika-recipe-manager.git
    cd paprika-recipe-manager
    ```
-
-2. **Restore Dependencies**
+- **Restore Dependencies**
 
    ```bash
    dotnet restore
    ```
-
-3. **Build Project**
+- **Build Project**
 
    ```bash
    dotnet build
    ```
-
-4. **Environment Verification**
-
-   ```bash
-   # Verify Uno Platform setup
-   uno-check
-
-   # Run the application
-   dotnet run --project RecipeApp/RecipeApp.csproj
-   ```
+5. **Configure API Connectivity**
+- **Purpose**: Ensure the application can connect to the **MealDB** API for recipe search functionality (handled by `Services/ApiControl.cs` and `ViewModels/SearchViewModel.cs`)
+- **Steps**:
+  1. **Verify Internet Access**:
+     - Ensure a stable internet connection, as the MealDB API requires online access.
+     - Test connectivity by pinging the API endpoint:
+  ```bash
+     ping www.themealdb.com
+  ```
+  2. **Check API Configuration**:
+     - The MealDB API's free tier does not required an API key, and the current implementation hardcodes the API URL in `Services/ApiControl.cs`.
+  3. **Test API Connectivity**:
+     - Run the application (`dotnet run --project ReceipeApp/RecipeApp.csproj`)
+     - Navigate to the search page (`Controls/Pages/MealDbSearchPage`) and perform a test search (e.g., "chicken")
+     - Verify that `SearchViewModel.cs` polulates `SearchResults` with data from `MealDBRecipe.cs`.
 
 ## Troubleshooting
-
-### Common Issues
-
-1. **Build Errors**
-
-   - Verify .NET SDK version matches project requirements
-   - Clear NuGet cache: `dotnet nuget locals all --clear`
-   - Rebuild solution: `dotnet clean && dotnet build`
-
-2. **IDE Issues**
-
-   - Update IDE to latest version
-   - Reinstall Uno Platform extension
-   - Clear IDE cache and restart
-
-3. **Runtime Errors**
-   - Check UnoCheck output for missing dependencies
-   - Verify environment variables
-   - Update platform tools
-
-## Documentation Resources
-
-   - [Uno Platform Documentation](https://platform.uno/docs/articles/intro.html)
-   - [Project Wiki](docs/introduction.md)
-   - [Troubleshooting Guide](docs/getting-started.md)
+### Build Errors:
+- Ensure .NET 9 SDK is install `(dotnet --version)`.
+- Clear NuGet cache `dotnet nuget locals all --clear`.
+- Rebuild: `dotnet clean && dotnet build`.
+### Uno Platform Issues:
+- Run `uno-check` to diagnose missing depedencies.
+- Reinstall the Uno Platform extension if UI components fail to load.
+### API Connectivity:
+1. **No Response from MealDB API**:
+   - Verify internet connectivity (`ping www.themealDB.com`)
+   - Check API status by accessing `https://www.themealdb.com/api/json/v1/1/search.php?s=test` in the browser.
+2. **Search Results Not Displaying**:
+   - Confirm that `MealDbSearchPage.xaml` bindings match `SearchViewModel` properties.
+   - Check `ApiControl.cs` for deserialization issues.
+### IDE issues:
+- Update IDE to the latest version.
+- Clear IDE cache and restart.
