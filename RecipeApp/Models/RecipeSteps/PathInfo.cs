@@ -1,7 +1,7 @@
 ﻿namespace RecipeApp.Models.RecipeSteps;
 
 public record PathInfo(
-    Node OutNode,
+    OutNode OutNode,
     bool IsValid,
     List<RecipeIngredient> MinIngredients,
     List<RecipeIngredient> MaxIngredients,

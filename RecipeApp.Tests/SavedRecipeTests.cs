@@ -76,45 +76,45 @@ public class SavedRecipeTests
 
         root.Paths =
         [
-            (new Node("Oven", merge0), 2),
-            (new Node("Microwave", split2), 3),
+            (new OutNode("Oven", merge0), 2),
+            (new OutNode("Microwave", split2), 3),
         ];
 
         split1.OutNodes =
         [
-            new Node("", s1),
-            new Node("", s2)
+            new OutNode("", s1),
+            new OutNode("", s2)
         ];
         
         // skip s1 to invalidate the path
         
         s2.OutNodes =
         [
-            new Node("Next", merge1)
+            new OutNode("Next", merge1)
         ];
         
         merge1.NextStep = s3;
 
         s3.OutNodes =
         [
-            new Node("Skip", end),
-            new Node("Next", s4)
+            new OutNode("Skip", end),
+            new OutNode("Next", s4)
         ];
 
         s4.OutNodes =
         [
-            new Node("Next", merge2)
+            new OutNode("Next", merge2)
         ];
 
         s5.OutNodes =
         [
-            new Node("", merge2)
+            new OutNode("", merge2)
         ];
 
         split2.OutNodes =
         [
-            new Node("", merge0),
-            new Node("", s5),
+            new OutNode("", merge0),
+            new OutNode("", s5),
         ];
         
         merge0.NextStep = split1;
@@ -127,7 +127,7 @@ public class SavedRecipeTests
         // rebuild a bit
         s1.OutNodes =
         [
-            new Node("Next", merge1)
+            new OutNode("Next", merge1)
         ];
 
         // test for passes

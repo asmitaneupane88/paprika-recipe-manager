@@ -9,9 +9,9 @@ public partial class StartStep : IStep
            This is the entry point for the recipe.
            """;
     
-    public override List<Node> GetOutNodes() 
+    public override List<OutNode> GetOutNodes() 
         => Paths.Select(p => p.outNode).ToList();
 
-    public List<(Node outNode, double prepTime)> Paths { get; set; } = [];
+    public List<(OutNode outNode, double prepTime)> Paths { get; set; } = [];
 }
 

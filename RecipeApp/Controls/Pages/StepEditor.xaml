@@ -24,12 +24,17 @@
             Grid.RowSpan="2"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto"
-            ZoomMode="Enabled">
+            ZoomMode="Enabled"
+            ViewChanged="ScrollViewer_OnViewChanged">
             <Canvas
                 x:Name="StepCanvas"
                 Width="20000"
                 Height="20000"
-                Background="Transparent">
+                Background="Transparent"
+                PointerPressed="StepCanvas_OnPointerPressed"
+                PointerReleased="StepCanvas_OnPointerReleased"
+                PointerMoved="StepCanvas_OnPointerMoved"
+                PointerExited="StepCanvas_OnPointerExited">
             </Canvas>
         </ScrollViewer>
 

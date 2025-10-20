@@ -1,0 +1,27 @@
+﻿<interfaces:IStepControl
+    x:Class="RecipeApp.Controls.StepControls.StartWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:steps="clr-namespace:RecipeApp.Models.RecipeSteps"
+    xmlns:interfaces="clr-namespace:RecipeApp.Interfaces"
+    x:Name="Root">
+    <Border x:Name="Card" Width="150" Margin="10" Background="{ThemeResource SurfaceColor}" BorderBrush="{ThemeResource OutlineColor}" BorderThickness="2" CornerRadius="8" PointerPressed="Card_OnPointerPressed" PointerReleased="Card_OnPointerReleased">
+        <StackPanel>
+            <TextBlock Margin="5" FontSize="20" Text="Start"/>
+            <ItemsControl ItemsSource="{x:Bind Nodes}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="steps:OutNode">
+                        <Grid Margin="5,5,15,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{x:Bind Title}" FontSize="16" VerticalAlignment="Center"/>
+                            <Ellipse Grid.Column="1" Fill="{ThemeResource PrimaryColor}" Width="{Binding OutNodeSize, ElementName=Root}" Height="{Binding OutNodeSize, ElementName=Root}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" PointerPressed="Node_OnPointerPressed" PointerReleased="Node_OnPointerReleased" Tag="{x:Bind}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Border>
+</interfaces:IStepControl>

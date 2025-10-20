@@ -9,7 +9,7 @@ public partial class MergeStep : IStep
            A merge step will wait for all active steps that merge into it to complete.
            """;
     
-    public override List<Node> GetOutNodes()
+    public override List<OutNode> GetOutNodes()
         => [ new("Next", NextStep) ];
     
     public IStep? NextStep;

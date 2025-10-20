@@ -13,10 +13,10 @@ public partial class TextStep : IStep
            This step supports multiple outputs to other steps.
            """;
     
-    public override List<Node> GetOutNodes() => OutNodes;
+    public override List<OutNode> GetOutNodes() => OutNodes;
 
     [ObservableProperty] public partial string? Title { get; set; }
     [ObservableProperty] public partial string? Instructions { get; set; }
     
-    public List<Node> OutNodes { get; set; } = [];
+    public List<OutNode> OutNodes { get; set; } = [];
 }

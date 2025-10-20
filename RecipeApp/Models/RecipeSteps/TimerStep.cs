@@ -11,7 +11,7 @@ public partial class TimerStep : IStep
             ? null 
             : "A step that can be used to set a timer.";
     
-    public override List<Node> GetOutNodes()
+    public override List<OutNode> GetOutNodes()
         => BackNodeEnabled
             ? [ new("Next", NextStep), new("Last", LastStep) ]
             : [ new("Next", NextStep) ];
