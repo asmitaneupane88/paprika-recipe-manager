@@ -147,6 +147,18 @@ public sealed partial class RecipeListPage : NavigatorPage
         
         await UpdateShownRecipes();
     }
+    
+    private async void OnButtonUploadPdfClick(object sender, RoutedEventArgs e)
+    {
+        await UploadRecipePdfAsync();
+    }
+
+    private async Task UploadRecipePdfAsync()
+    {
+        var picker = new FileOpenPicker();
+        picker.FileTypeFilter.Add(".pdf");
+        picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+    }
 
     private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)
     {
@@ -183,5 +195,7 @@ public sealed partial class RecipeListPage : NavigatorPage
         await UpdateShownRecipes();
         await base.Restore();
     }
+
+    
 }
 
