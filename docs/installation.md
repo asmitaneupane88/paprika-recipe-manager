@@ -21,9 +21,9 @@ This guide explains how to set up the devepment enviroment for the Paprika Recip
 - Download and install .NET 9 SDK from the [official site](https://dotnet.microsoft.com/download/dotnet/9.0).
 - Install Git for Windows from [git-scm.com](https://git-scm.com/downloads).
 - Verify installations:
-```bash
-dotnet --version
-git --version
+    ```bash
+    dotnet --version
+    git --version
   ```
 2. **Install IDE**
 - **JetBrains Rider**
