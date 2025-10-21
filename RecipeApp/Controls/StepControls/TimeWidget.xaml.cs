@@ -26,6 +26,8 @@ public sealed partial class TimeWidget : IStepControl
     
     [ObservableProperty] public partial ObservableCollection<OutNode> Nodes { get; set; }
     
+    [ObservableProperty] public partial InNode NodeIn { get; set; } = new(null, 10);
+    
     public TimeWidget(TimerStep step)
     {
         this.InitializeComponent();
@@ -44,6 +46,9 @@ public sealed partial class TimeWidget : IStepControl
     public override void UpdateActiveNodes(bool outNodeActive, bool inNodeActive)
     {
         OutNodeSize = outNodeActive ? 20 : 10;
+        
+        inNode.Width = (inNodeActive && NodeIn.Source is null) || (!inNodeActive && NodeIn.Source is not null) ? 20 : 10;
+        inNode.Height = (inNodeActive && NodeIn.Source is null) || (!inNodeActive && NodeIn.Source is not null) ? 20 : 10;
     }
 }
 

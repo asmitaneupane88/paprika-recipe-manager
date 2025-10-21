@@ -7,7 +7,15 @@
     x:Name="Root">
     <Border x:Name="Card" Width="150" Margin="10" Background="{ThemeResource SurfaceColor}" BorderBrush="{ThemeResource OutlineColor}" BorderThickness="2" CornerRadius="8" PointerPressed="Card_OnPointerPressed" PointerReleased="Card_OnPointerReleased">
         <StackPanel>
-            <TextBlock Margin="5" FontSize="20" Text="Start"/>
+            <Grid Margin="5,5,15,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Ellipse x:Name="inNode" Fill="{ThemeResource PrimaryColor}" Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" PointerPressed="Node_OnPointerPressed" PointerReleased="Node_OnPointerReleased" Tag="{x:Bind NodeIn}"/>
+                <TextBlock Grid.Column="1" Text="{x:Bind Step.BindableTitle}" FontSize="16" VerticalAlignment="Center"/>
+            </Grid>
             <ItemsControl ItemsSource="{x:Bind Nodes}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="steps:OutNode">

@@ -23,8 +23,10 @@ namespace RecipeApp.Controls.StepControls;
 public sealed partial class SplitWidget : IStepControl
 {
     [ObservableProperty] public partial double OutNodeSize { get; set; } = 20;
+
+    [ObservableProperty] public partial ObservableCollection<OutNode> Nodes { get; set; } = [];
     
-    [ObservableProperty] public partial ObservableCollection<OutNode> Nodes { get; set; }
+    [ObservableProperty] public partial InNode NodeIn { get; set; } = new(null, 10);
     
     public SplitWidget(SplitStep step)
     {
@@ -32,6 +34,32 @@ public sealed partial class SplitWidget : IStepControl
         
         Step = step;
         Nodes = step.GetOutNodes().ToObservableCollection();
+
+        AddSplitOption();
+    }
+    
+    private void AddSplitOption()
+    {
+        var newOut = new OutNode("", null);
+        Nodes.Add(newOut);
+        newOut.PropertyChanged += NewInOnPropertyChanged;
+    }
+
+    private void NewInOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is OutNode node && e.PropertyName == nameof(OutNode.Next))
+        {
+            if (node.Next is null)
+            {
+                node.PropertyChanged -= NewInOnPropertyChanged;
+                Nodes.Remove(node);
+            }
+            else
+            {
+                if (Nodes.All(n => n.Next is not null))
+                    AddSplitOption();
+            }
+        }
     }
 
     public override void ToggleSelection(bool isSelected)
@@ -44,6 +72,9 @@ public sealed partial class SplitWidget : IStepControl
     public override void UpdateActiveNodes(bool outNodeActive, bool inNodeActive)
     {
         OutNodeSize = outNodeActive ? 20 : 10;
+        
+        inNode.Width = (inNodeActive && NodeIn.Source is null) || (!inNodeActive && NodeIn.Source is not null) ? 20 : 10;
+        inNode.Height = (inNodeActive && NodeIn.Source is null) || (!inNodeActive && NodeIn.Source is not null) ? 20 : 10;
     }
 }
 

@@ -11,10 +11,10 @@ public abstract partial class IStepControl : UserControl
 {
     public event Action<IStepControl, Point>? CardMouseDown;
     public event Action<IStepControl>? CardMouseUp;
-    public event Action<Ellipse, OutNode> OutNodeMouseDown;
-    public event Action<Ellipse, OutNode> OutNodeMouseUp;
-    public event Action<Ellipse, InNode> InNodeMouseDown;
-    public event Action<Ellipse, InNode> InNodeMouseUp;
+    public event Action<Ellipse, OutNode, IStepControl> OutNodeMouseDown;
+    public event Action<Ellipse, OutNode, IStepControl> OutNodeMouseUp;
+    public event Action<Ellipse, InNode, IStepControl> InNodeMouseDown;
+    public event Action<Ellipse, InNode, IStepControl> InNodeMouseUp;
 
     [ObservableProperty] public partial IStep Step { get; set; }
     
@@ -57,8 +57,8 @@ public abstract partial class IStepControl : UserControl
     
     protected void InvokeCardMouseDown(IStepControl control, Point point) => CardMouseDown?.Invoke(control, point);
     protected void InvokeCardMouseUp(IStepControl control) => CardMouseUp?.Invoke(control);
-    protected void InvokeOutNodeMouseDown(Ellipse ellipse, OutNode outNode) => OutNodeMouseDown?.Invoke(ellipse, outNode);
-    protected void InvokeOutNodeMouseUp(Ellipse ellipse, OutNode outNode) => OutNodeMouseUp?.Invoke(ellipse, outNode);
-    protected void InvokeInNodeMouseDown(Ellipse ellipse, InNode node) => InNodeMouseDown?.Invoke(ellipse, node);
-    protected void InvokeInNodeMouseUp(Ellipse ellipse, InNode node) => InNodeMouseUp?.Invoke(ellipse, node);
+    protected void InvokeOutNodeMouseDown(Ellipse ellipse, OutNode outNode) => OutNodeMouseDown?.Invoke(ellipse, outNode, this);
+    protected void InvokeOutNodeMouseUp(Ellipse ellipse, OutNode outNode) => OutNodeMouseUp?.Invoke(ellipse, outNode, this);
+    protected void InvokeInNodeMouseDown(Ellipse ellipse, InNode node) => InNodeMouseDown?.Invoke(ellipse, node, this);
+    protected void InvokeInNodeMouseUp(Ellipse ellipse, InNode node) => InNodeMouseUp?.Invoke(ellipse, node, this);
 }
