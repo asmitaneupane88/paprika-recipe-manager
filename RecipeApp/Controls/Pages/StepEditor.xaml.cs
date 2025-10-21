@@ -1,4 +1,5 @@
 ﻿using Windows.Foundation;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Shapes;
 using RecipeApp.Controls.StepControls;
@@ -48,9 +49,11 @@ public sealed partial class StepEditor : NavigatorPage
         
         _savedRecipe = sr;
         
-        // got to add everything at once and then update the connections between nodes
+        //TODO got to add everything at once and then update the connections between nodes
         
-        AddStep(new StartStep { Paths=[ new OutNode("Microwave", null), new OutNode("Oven", null), ] });
+        LoadSteps();
+        
+        /*AddStep(new StartStep { Paths=[ new OutNode("Microwave", null), new OutNode("Oven", null), ] });
         // AddStep(new TextStep { MinutesToComplete = 1, Title = "Preheat oven to 425", OutNodes= [ new OutNode("Next", null) ] });
         // AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in oven", OutNodes= [ new OutNode("Next", null) ] });
         // AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in microwave", OutNodes= [ new OutNode("Next", null) ] });
@@ -65,8 +68,82 @@ public sealed partial class StepEditor : NavigatorPage
         // AddStep(new TextStep { MinutesToComplete = 1, Title = "Cut the mini pizza into 4 slices", OutNodes= [ new OutNode("Next", null) ] });
         // AddStep(new MergeStep { });
         // AddStep(new MergeStep { });
-        AddStep(new FinishStep { });
+        AddStep(new FinishStep { });*/
     }
+
+    // Used Claude Sonnet 4.5 to make the LoadSteps and the methods that it calls. Also modified it a bit to work with the current codebase
+
+    private async void LoadSteps()
+    {
+        _savedRecipe.RootStepNode ??= new StartStep { Paths = [ new OutNode("Start", null) ] };
+
+        var allSteps = new HashSet<IStep>();
+        var queue = new Queue<IStep>();
+        queue.Enqueue(_savedRecipe.RootStepNode);
+    
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            if (!allSteps.Add(current)) continue;
+        
+            foreach (var outNode in current.BindableGetOutNodes ?? [])
+            {
+                if (outNode.Next is not null)
+                    queue.Enqueue(outNode.Next);
+            }
+        }
+    
+        if (!allSteps.Any(s => s is FinishStep))
+        {
+            var finishStep = new FinishStep();
+            allSteps.Add(finishStep);
+        }
+    
+        var stepToControlMap = new Dictionary<IStep, IStepControl>();
+        foreach (var step in allSteps)
+        {
+            var widget = AddStep(step);
+            stepToControlMap[step] = widget;
+        }
+        
+        DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+            {
+                RebuildConnections(stepToControlMap);
+            });
+    }
+    
+    private void RebuildConnections(Dictionary<IStep, IStepControl> stepToControlMap)
+    {
+        foreach (var (step, control) in stepToControlMap)
+        {
+            var outNodes = step.BindableGetOutNodes ?? [];
+
+            foreach (var outNode in outNodes)
+            {
+                if (outNode.Next is null) continue;
+                if (!stepToControlMap.TryGetValue(outNode.Next, out var targetControl)) continue;
+
+                var targetInNodes = targetControl.GetInNodes() ?? [];
+                var targetInNode = targetInNodes.FirstOrDefault(n => n.Source is null);
+            
+                if (targetInNode is null) continue;
+
+                var outEllipse = control.GetEllipseForOutNode(outNode);
+                var inEllipse = targetControl.GetEllipseForInNode(targetInNode);
+
+                if (outEllipse is null || inEllipse is null) continue;
+
+                var line = new StepConnectorLine(outEllipse, StepCanvas);
+                line.SetEndLocation(null, inEllipse);
+
+                targetInNode.Source = outEllipse;
+                NodeLines.Add(outEllipse, (line, outNode, targetInNode, control));
+            }
+        }
+    }
+
+    
+
 
     private void StepCanvas_OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
@@ -117,16 +194,16 @@ public sealed partial class StepEditor : NavigatorPage
         }
     }
 
-    private void AddStep(IStep step)
+    private IStepControl AddStep(IStep step)
     {
         IStepControl widget = step switch
         {
             StartStep startStep => new StartWidget(startStep),
             FinishStep finishStep => new FinishWidget(finishStep),
             MergeStep mergeStep => new MergeWidget(mergeStep),
-            SplitStep splitStep => new SplitWidget(splitStep), //TODO
-            TimerStep timerStep => new TimeWidget(timerStep), //TODO
-            TextStep textStep => new TextWidget(textStep), //TODO
+            SplitStep splitStep => new SplitWidget(splitStep),
+            TimerStep timerStep => new TimeWidget(timerStep),
+            TextStep textStep => new TextWidget(textStep),
             _ => throw new ArgumentOutOfRangeException(nameof(step), step, null)
         };
 
@@ -136,11 +213,15 @@ public sealed partial class StepEditor : NavigatorPage
         widget.OutNodeMouseUp += WidgetOnOutNodeMouseUp;
         widget.InNodeMouseDown += WidgetOnInNodeMouseDown;
         widget.InNodeMouseUp += WidgetOnInNodeMouseUp;
-            
+        
+        widget.SetValue(Canvas.LeftProperty, step.X);
+        widget.SetValue(Canvas.TopProperty, step.Y);
+        
         StepCanvas.Children.Add(widget);
         _selectedStep = widget;
         UpdateSelect();
         
+        return widget;
     }
 
     private void WidgetOnInNodeMouseUp(Ellipse arg1, InNode arg2, IStepControl arg3)
@@ -150,7 +231,7 @@ public sealed partial class StepEditor : NavigatorPage
             _draggingNode?.Item3.SetEndLocation(null, arg1);
             
             arg2.Source = _draggingNode?.Item1;
-            _draggingNode?.Item2.Next = _draggingNode?.Item4?.Step;
+            _draggingNode?.Item2.Next = arg3.Step;
             NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2, _draggingNode?.Item4!));
         }
 

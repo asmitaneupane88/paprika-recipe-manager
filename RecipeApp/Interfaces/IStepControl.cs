@@ -63,4 +63,38 @@ public abstract partial class IStepControl : UserControl
     protected void InvokeInNodeMouseUp(Ellipse ellipse, InNode node) => InNodeMouseUp?.Invoke(ellipse, node, this);
 
     public virtual List<InNode> GetInNodes() => [];
+    
+    // Used Claude Sonnet 4.5 to make the code under this (FindEllipseWithTag and the two GetEllipseForOutNode methods)
+    
+    public Ellipse? GetEllipseForOutNode(OutNode outNode)
+    {
+        return FindEllipseWithTag(this, outNode);
+    }
+
+    public Ellipse? GetEllipseForInNode(InNode inNode)
+    {
+        return FindEllipseWithTag(this, inNode);
+    }
+
+    private static Ellipse? FindEllipseWithTag(DependencyObject parent, object tag)
+    {
+        if (parent is null) return null;
+
+        var childCount = VisualTreeHelper.GetChildrenCount(parent);
+        for (var i = 0; i < childCount; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+
+            // Check if current child is an Ellipse with matching tag
+            if (child is Ellipse ellipse && Equals(ellipse.Tag, tag))
+                return ellipse;
+
+            // Recursively search children
+            var result = FindEllipseWithTag(child, tag);
+            if (result is not null)
+                return result;
+        }
+
+        return null;
+    }
 }

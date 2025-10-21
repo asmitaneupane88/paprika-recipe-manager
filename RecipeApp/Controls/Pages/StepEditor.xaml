@@ -70,7 +70,7 @@
                                         <Grid Margin="5">
                                             <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
                                             <Button Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}" Margin="5">
-                                                <SymbolIcon Symbol="Remove"/>
+                                                <SymbolIcon Symbol="Delete"/>
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
@@ -82,7 +82,7 @@
                 </StackPanel>
 
                 <StackPanel Visibility="{x:Bind IsNotNull(SelectedTimerStep), Mode=OneWay}">
-                    <TextBox PlaceholderText="Title" Text="{x:Bind SelectedTimerStep.Title, Mode=TwoWay}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <TextBox PlaceholderText="Title" Text="{x:Bind SelectedTimerStep.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="5"/>
                     <NumberBox PlaceholderText="Minutes To Complete" Value="{x:Bind SelectedTimerStep.MinutesToComplete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" HorizontalAlignment="Stretch" Margin="5"/>
                 </StackPanel>
 
@@ -103,7 +103,7 @@
                                         <Grid Margin="5">
                                             <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
                                             <Button Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}" Margin="5">
-                                                <SymbolIcon Symbol="Remove"/>
+                                                <SymbolIcon Symbol="Delete"/>
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
