@@ -27,10 +27,17 @@ public sealed partial class StepEditor : NavigatorPage
     public SplitStep? SelectedSplitStep => _selectedStep?.Step as SplitStep;
     public MergeStep? SelectedMergeStep => _selectedStep?.Step as MergeStep;
     public StartStep? SelectedStartStep => _selectedStep?.Step as StartStep;
+    public FinishStep? SelectedFinishStep => _selectedStep?.Step as FinishStep;
+
     
     public Visibility IsNotNull(object? obj)
     {
         return obj is not null ? Visibility.Visible : Visibility.Collapsed;
+    }
+    
+    public Visibility BothNull(object? obj1, object? obj2)
+    {
+        return obj1 is null && obj2 is null && _selectedStep is not null ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private Dictionary<Ellipse, (StepConnectorLine, OutNode, InNode, IStepControl)> NodeLines = [];
@@ -272,6 +279,8 @@ public sealed partial class StepEditor : NavigatorPage
         }
         
         StepCanvas.Children.Remove(_selectedStep);
+        _selectedStep = null;
+        UpdateSelect();
     }
 
     private void ButtonAddOutNode_OnClick(object sender, RoutedEventArgs e)
@@ -299,6 +308,17 @@ public sealed partial class StepEditor : NavigatorPage
                 NodeLines.Remove(lineToRemove.Key);
             }
         }
+    }
+
+    private void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: RecipeIngredient ingredient })
+            _selectedStep?.Step.IngredientsToUse.Remove(ingredient);
+    }
+
+    private void ButtonAddIngredient_OnClick(object sender, RoutedEventArgs e)
+    {
+        _selectedStep?.Step.IngredientsToUse.Add(new RecipeIngredient());
     }
 }
 

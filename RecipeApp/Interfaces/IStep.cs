@@ -18,7 +18,7 @@ public abstract partial class IStep : ObservableObject
     [ObservableProperty] public partial double Y { get; set; } = 0;
 
     [ObservableProperty] public partial double MinutesToComplete { get; set; } = 0;
-    [ObservableProperty] public partial List<RecipeIngredient> IngredientsToUse { get; set; } = [];
+    [ObservableProperty] public partial ObservableCollection<RecipeIngredient> IngredientsToUse { get; set; } = [];
     
 
     public List<PathInfo> GetNestedPathInfo(List<IStep>? visitedSteps = null)
@@ -82,10 +82,10 @@ public abstract partial class IStep : ObservableObject
         }
     }
     
-    private List<RecipeIngredient> CombineIngredients(List<RecipeIngredient> x, List<RecipeIngredient> y)
+    private ObservableCollection<RecipeIngredient> CombineIngredients(ObservableCollection<RecipeIngredient> x, ObservableCollection<RecipeIngredient> y)
     {
         foreach (var ingredient in y)
-            if (x.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)) is { } existingIngredient)
+            if (x.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase) && i.Unit == ingredient.Unit) is { } existingIngredient)
                 existingIngredient.Quantity += ingredient.Quantity;
             else
                 x.Add(ingredient);

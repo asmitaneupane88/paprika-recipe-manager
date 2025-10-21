@@ -24,14 +24,11 @@ public sealed partial class StartWidget : IStepControl
 {
     [ObservableProperty] public partial double OutNodeSize { get; set; } = 20;
     
-    [ObservableProperty] public partial ObservableCollection<OutNode> Nodes { get; set; }
-    
     public StartWidget(StartStep step)
     {
         this.InitializeComponent();
         
         Step = step;
-        Nodes = step.GetOutNodes().ToObservableCollection();
     }
 
     public override void ToggleSelection(bool isSelected)

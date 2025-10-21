@@ -3,8 +3,8 @@
 public record PathInfo(
     OutNode OutNode,
     bool IsValid,
-    List<RecipeIngredient> MinIngredients,
-    List<RecipeIngredient> MaxIngredients,
+    ObservableCollection<RecipeIngredient> MinIngredients,
+    ObservableCollection<RecipeIngredient> MaxIngredients,
     double PrepTime = 0,
     double MinCookTime = 0,
     double MaxCookTime = 0,
