@@ -10,5 +10,5 @@ public partial class FinishStep : IStep
            Ends the recipe. after making sure all steps are complete (i.e. this also acts as a merge step).
            """;
 
-    public override List<OutNode> GetOutNodes() => [];
+    public override ObservableCollection<OutNode> GetOutNodes() => [];
 }

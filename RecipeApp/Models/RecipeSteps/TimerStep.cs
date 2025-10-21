@@ -11,7 +11,7 @@ public partial class TimerStep : IStep
             ? null 
             : "A step that can be used to set a timer.";
     
-    public override List<OutNode> GetOutNodes()
+    public override ObservableCollection<OutNode> GetOutNodes()
         => [ new("Next", NextStep) ];
     
     public string? Title { get;

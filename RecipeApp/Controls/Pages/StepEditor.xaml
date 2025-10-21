@@ -61,21 +61,23 @@
                     <NumberBox PlaceholderText="Minutes To Complete" Value="{x:Bind SelectedTextStep.MinutesToComplete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" HorizontalAlignment="Stretch" Margin="5"/>
 
                     <!--TODO: 100+ errors from something in this block-->
-                    <!-- <StackPanel> -->
-                    <!--     <ScrollViewer MaxHeight="200"> -->
-                    <!--         <ItemsRepeater ItemsSource="{x:Bind SelectedTextStep.OutNodes, Mode=OneWay}"> -->
-                    <!--             <ItemsRepeater.ItemTemplate> -->
-                    <!--                 <DataTemplate x:DataType="recipeSteps:OutNode"> -->
-                    <!--                     <Grid Margin="5"> -->
-                    <!--                         <TextBox Text="{x:Bind Title, Mode=TwoWay}" HorizontalAlignment="Stretch"/> -->
-                    <!--                         <Button Content="Remove" Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}"/> -->
-                    <!--                     </Grid> -->
-                    <!--                 </DataTemplate> -->
-                    <!--             </ItemsRepeater.ItemTemplate> -->
-                    <!--         </ItemsRepeater> -->
-                    <!--     </ScrollViewer> -->
-                    <!--     <Button Content="Add Node" Click="ButtonAddOutNode_OnClick"/> -->
-                    <!-- </StackPanel> -->
+                    <StackPanel Margin="5,5,5,20">
+                        <ScrollViewer MaxHeight="200">
+                            <ItemsRepeater ItemsSource="{x:Bind SelectedTextStep.OutNodes, Mode=OneWay}">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="recipeSteps:OutNode">
+                                        <Grid Margin="5">
+                                            <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                                            <Button Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}" Margin="5">
+                                                <SymbolIcon Symbol="Remove"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                        <Button Content="Add Node" Click="ButtonAddOutNode_OnClick"/>
+                    </StackPanel>
 
                     <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
                 </StackPanel>

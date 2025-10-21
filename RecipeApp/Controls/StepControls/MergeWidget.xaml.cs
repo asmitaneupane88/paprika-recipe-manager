@@ -79,5 +79,8 @@ public sealed partial class MergeWidget : IStepControl
             node.Size = (inNodeActive && node.Source is null) || (!inNodeActive && node.Source is not null) ? 20 : 10;
         }
     }
+    
+    public override List<InNode> GetInNodes() => Nodes.ToList();
+
 }
 

@@ -27,7 +27,6 @@ public sealed partial class StepEditor : NavigatorPage
     public SplitStep? SelectedSplitStep => _selectedStep?.Step as SplitStep;
     public MergeStep? SelectedMergeStep => _selectedStep?.Step as MergeStep;
     public StartStep? SelectedStartStep => _selectedStep?.Step as StartStep;
-
     
     public Visibility IsNotNull(object? obj)
     {
@@ -253,18 +252,34 @@ public sealed partial class StepEditor : NavigatorPage
 
     private void ButtonRemoveStep_OnClick(object sender, RoutedEventArgs e)
     {
-        //TODO
+        foreach (var outNode in _selectedStep?.Step?.BindableGetOutNodes??[])
+        {
+            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is { } lineToRemove)
+            {
+                lineToRemove.Value.Item3.Source = null;
+                lineToRemove.Value.Item1.Dispose();
+                NodeLines.Remove(lineToRemove.Key);
+            }
+        }
+        
+        foreach (var inNode in _selectedStep?.GetInNodes()??[])
+        {
+            if (inNode.Source is not null && NodeLines.Remove(inNode.Source, out var lineToRemove))
+            {
+                lineToRemove.Item3.Source = null;
+                lineToRemove.Item1.Dispose();
+            }
+        }
+        
+        StepCanvas.Children.Remove(_selectedStep);
     }
 
     private void ButtonAddOutNode_OnClick(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement { Tag: OutNode node })
-        {
-            if (_selectedStep?.Step is StartStep startStep)
-                startStep.Paths.Add(new OutNode("", null));
-            else if (_selectedStep?.Step is TextStep textStep)
-                textStep.OutNodes.Add(new OutNode("", null));
-        }
+        if (_selectedStep?.Step is StartStep startStep)
+            startStep.Paths.Add(new OutNode("", null));
+        else if (_selectedStep?.Step is TextStep textStep)
+            textStep.OutNodes.Add(new OutNode("", null));
     }
 
     private void ButtonRemoveOutNode_OnClick(object sender, RoutedEventArgs e)
@@ -275,6 +290,14 @@ public sealed partial class StepEditor : NavigatorPage
                 startStep.Paths.Remove(node);
             else if (_selectedStep?.Step is TextStep textStep)
                 textStep.OutNodes.Remove(node);
+            else return;
+
+            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { } lineToRemove)
+            {
+                lineToRemove.Value.Item3.Source = null;
+                lineToRemove.Value.Item1.Dispose();
+                NodeLines.Remove(lineToRemove.Key);
+            }
         }
     }
 }

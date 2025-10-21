@@ -61,4 +61,6 @@ public abstract partial class IStepControl : UserControl
     protected void InvokeOutNodeMouseUp(Ellipse ellipse, OutNode outNode) => OutNodeMouseUp?.Invoke(ellipse, outNode, this);
     protected void InvokeInNodeMouseDown(Ellipse ellipse, InNode node) => InNodeMouseDown?.Invoke(ellipse, node, this);
     protected void InvokeInNodeMouseUp(Ellipse ellipse, InNode node) => InNodeMouseUp?.Invoke(ellipse, node, this);
+
+    public virtual List<InNode> GetInNodes() => [];
 }

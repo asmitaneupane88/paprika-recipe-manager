@@ -13,7 +13,7 @@ public partial class TextStep : IStep
            This step supports multiple outputs to other steps.
            """;
     
-    public override List<OutNode> GetOutNodes() => OutNodes;
+    public override ObservableCollection<OutNode> GetOutNodes() => OutNodes;
 
     public string? Title { get;
         set
@@ -24,5 +24,5 @@ public partial class TextStep : IStep
     }
     [ObservableProperty] public partial string? Instructions { get; set; }
     
-    public List<OutNode> OutNodes { get; set; } = [];
+    public ObservableCollection<OutNode> OutNodes { get; set; } = [];
 }

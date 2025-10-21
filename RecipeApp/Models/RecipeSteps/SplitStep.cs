@@ -12,9 +12,9 @@ public class SplitStep : IStep
         throw new NotImplementedException();
     }
 
-    public override List<OutNode> GetOutNodes()
+    public override ObservableCollection<OutNode> GetOutNodes()
         => OutNodes;
     
-    public List<OutNode> OutNodes { get; set; } = [];
+    public ObservableCollection<OutNode> OutNodes { get; set; } = [];
 
 }

@@ -7,12 +7,12 @@ public abstract partial class IStep : ObservableObject
     public abstract string GetTitle();
     public abstract string? GetDescription();
 
-    public abstract List<OutNode> GetOutNodes();
+    public abstract ObservableCollection<OutNode> GetOutNodes();
 
     
     [JsonIgnore] public string BindableTitle => GetTitle();
     [JsonIgnore] public string? BindableDescription => GetDescription();
-    [JsonIgnore] public List<OutNode> BindableGetOutNodes => GetOutNodes();
+    [JsonIgnore] public ObservableCollection<OutNode> BindableGetOutNodes => GetOutNodes();
 
     [ObservableProperty] public partial double X { get; set; } = 0;
     [ObservableProperty] public partial double Y { get; set; } = 0;

@@ -47,5 +47,7 @@ public sealed partial class TextWidget : IStepControl
         inNode.Width = (inNodeActive && NodeIn.Source is null) || (!inNodeActive && NodeIn.Source is not null) ? 20 : 10;
         inNode.Height = (inNodeActive && NodeIn.Source is null) || (!inNodeActive && NodeIn.Source is not null) ? 20 : 10;
     }
+    
+    public override List<InNode> GetInNodes() => [NodeIn];
 }
 

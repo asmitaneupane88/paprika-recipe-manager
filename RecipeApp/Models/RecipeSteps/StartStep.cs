@@ -9,9 +9,9 @@ public partial class StartStep : IStep
            This is the entry point for the recipe.
            """;
     
-    public override List<OutNode> GetOutNodes() 
+    public override ObservableCollection<OutNode> GetOutNodes() 
         => Paths;
 
-    public List<OutNode> Paths { get; set; } = [];
+    public ObservableCollection<OutNode> Paths { get; set; } = [];
 }
 
