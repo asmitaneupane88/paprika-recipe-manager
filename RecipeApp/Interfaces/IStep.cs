@@ -32,10 +32,10 @@ public abstract partial class IStep : ObservableObject
             List<PathInfo> returnInfo = [];
 
             foreach (var pathPair in startStep.Paths)
-                if (pathPair.outNode.Next is not null)
-                    returnInfo.Add(pathPair.outNode.Next.GetNestedPathInfo(visitedSteps).First() with { OutNode = pathPair.outNode, PrepTime = pathPair.prepTime});
+                if (pathPair.Next is not null)
+                    returnInfo.Add(pathPair.Next.GetNestedPathInfo(visitedSteps).First() with { OutNode = pathPair, PrepTime = startStep.MinutesToComplete});
                 else
-                    returnInfo.Add(new PathInfo(pathPair.outNode, false,[], []));
+                    returnInfo.Add(new PathInfo(pathPair, false,[], []));
             
             return returnInfo;
         }

@@ -5,6 +5,9 @@
     xmlns:local="using:RecipeApp.Controls.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:stepControls="clr-namespace:RecipeApp.Controls.StepControls"
+    xmlns:recipeSteps="clr-namespace:RecipeApp.Models.RecipeSteps"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -40,10 +43,77 @@
 
         <StackPanel Grid.Row="0" Grid.Column="1" Background="{ThemeResource SurfaceColor}" BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" CornerRadius="8" Margin="10">
             <TextBlock Margin="5" FontSize="20" Text="Toolbox"/>
+
+            <Button Content="Add Text Step" Click="ButtonAddText_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+            <Button Content="Add Timer Step" Click="ButtonAddTimer_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+            <Button Content="Add Split Step" Click="ButtonAddSplit_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+            <Button Content="Add Merge Step" Click="ButtonAddMerge_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+
         </StackPanel>
 
         <StackPanel Grid.Row="1" Grid.Column="1" Background="{ThemeResource SurfaceColor}" BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" CornerRadius="8" Margin="10">
             <TextBlock Margin="5" FontSize="20" Text="Properties"/>
+
+            <StackPanel>
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedTextStep), Mode=OneWay}">
+                    <TextBox PlaceholderText="Title" Text="{x:Bind SelectedTextStep.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <TextBox PlaceholderText="Instructions" Text="{x:Bind SelectedTextStep.Instructions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <NumberBox PlaceholderText="Minutes To Complete" Value="{x:Bind SelectedTextStep.MinutesToComplete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" HorizontalAlignment="Stretch" Margin="5"/>
+
+                    <!--TODO: 100+ errors from something in this block-->
+                    <!-- <StackPanel> -->
+                    <!--     <ScrollViewer MaxHeight="200"> -->
+                    <!--         <ItemsRepeater ItemsSource="{x:Bind SelectedTextStep.OutNodes, Mode=OneWay}"> -->
+                    <!--             <ItemsRepeater.ItemTemplate> -->
+                    <!--                 <DataTemplate x:DataType="recipeSteps:OutNode"> -->
+                    <!--                     <Grid Margin="5"> -->
+                    <!--                         <TextBox Text="{x:Bind Title, Mode=TwoWay}" HorizontalAlignment="Stretch"/> -->
+                    <!--                         <Button Content="Remove" Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}"/> -->
+                    <!--                     </Grid> -->
+                    <!--                 </DataTemplate> -->
+                    <!--             </ItemsRepeater.ItemTemplate> -->
+                    <!--         </ItemsRepeater> -->
+                    <!--     </ScrollViewer> -->
+                    <!--     <Button Content="Add Node" Click="ButtonAddOutNode_OnClick"/> -->
+                    <!-- </StackPanel> -->
+
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedTimerStep), Mode=OneWay}">
+                    <TextBox PlaceholderText="Title" Text="{x:Bind SelectedTimerStep.Title, Mode=TwoWay}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <NumberBox PlaceholderText="Minutes To Complete" Value="{x:Bind SelectedTimerStep.MinutesToComplete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" HorizontalAlignment="Stretch" Margin="5"/>
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedSplitStep), Mode=OneWay}">
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedMergeStep), Mode=OneWay}">
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedStartStep), Mode=OneWay}">
+                    <!--TODO: 100+ errors from something in this block-->
+                    <!-- <StackPanel> -->
+                    <!--     <ScrollViewer MaxHeight="200"> -->
+                    <!--         <ItemsRepeater ItemsSource="{x:Bind SelectedStartStep.Paths, Mode=OneWay}"> -->
+                    <!--             <ItemsRepeater.ItemTemplate> -->
+                    <!--                 <DataTemplate x:DataType="recipeSteps:OutNode"> -->
+                    <!--                     <Grid Margin="5"> -->
+                    <!--                         <TextBox Text="{x:Bind Title, Mode=TwoWay}" HorizontalAlignment="Stretch"/> -->
+                    <!--                         <Button Content="Remove" Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}"/> -->
+                    <!--                     </Grid> -->
+                    <!--                 </DataTemplate> -->
+                    <!--             </ItemsRepeater.ItemTemplate> -->
+                    <!--         </ItemsRepeater> -->
+                    <!--     </ScrollViewer> -->
+                    <!--     <Button Content="Add Node" Click="ButtonAddOutNode_OnClick"/> -->
+                    <!-- </StackPanel> -->
+
+                </StackPanel>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </local:NavigatorPage>

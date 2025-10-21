@@ -15,9 +15,26 @@ public sealed partial class StepEditor : NavigatorPage
 
     private (Ellipse, OutNode, StepConnectorLine, IStepControl)? _draggingNode;
     private (IStepControl, IStep, Point)? _draggingStep;
-    private IStepControl? _selectedStep;
+    private IStepControl? _selectedStep { get;
+        set
+        {
+            SetField(ref field, value);
+            Bindings.Update();
+        }
+    }
+    public TextStep? SelectedTextStep => _selectedStep?.Step as TextStep;
+    public TimerStep? SelectedTimerStep => _selectedStep?.Step as TimerStep;
+    public SplitStep? SelectedSplitStep => _selectedStep?.Step as SplitStep;
+    public MergeStep? SelectedMergeStep => _selectedStep?.Step as MergeStep;
+    public StartStep? SelectedStartStep => _selectedStep?.Step as StartStep;
 
-    private Dictionary<Ellipse, (StepConnectorLine, OutNode, InNode)> NodeLines = [];
+    
+    public Visibility IsNotNull(object? obj)
+    {
+        return obj is not null ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private Dictionary<Ellipse, (StepConnectorLine, OutNode, InNode, IStepControl)> NodeLines = [];
     
     public StepEditor(SavedRecipe sr, Navigator? nav = null) : base(nav)
     {
@@ -27,21 +44,21 @@ public sealed partial class StepEditor : NavigatorPage
         
         // got to add everything at once and then update the connections between nodes
         
-        AddStep(new StartStep { Paths=[ (new OutNode("Microwave", null), 5), (new OutNode("Oven", null), 10) ] });
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Preheat oven to 425", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in oven", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in microwave", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new TimerStep { Title = "Set microwave to 1.5 minutes", MinutesToComplete = 1.5});
-        AddStep(new TimerStep { Title = "Cook for 8 minutes", MinutesToComplete = 8});
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Is the mini pizza cooked?", OutNodes= [ new OutNode("Yes", null), new OutNode("No", null) ] });
-        AddStep(new TimerStep { Title = "Cook for another 2 minutes", MinutesToComplete = 2});
-        AddStep(new SplitStep());
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Turn off the oven", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Take the mini pizza out of the oven", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Take the mini pizza out of the microwave", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new TextStep { MinutesToComplete = 1, Title = "Cut the mini pizza into 4 slices", OutNodes= [ new OutNode("Next", null) ] });
-        AddStep(new MergeStep { });
-        AddStep(new MergeStep { });
+        AddStep(new StartStep { Paths=[ new OutNode("Microwave", null), new OutNode("Oven", null), ] });
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Preheat oven to 425", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in oven", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in microwave", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new TimerStep { Title = "Set microwave to 1.5 minutes", MinutesToComplete = 1.5});
+        // AddStep(new TimerStep { Title = "Cook for 8 minutes", MinutesToComplete = 8});
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Is the mini pizza cooked?", OutNodes= [ new OutNode("Yes", null), new OutNode("No", null) ] });
+        // AddStep(new TimerStep { Title = "Cook for another 2 minutes", MinutesToComplete = 2});
+        // AddStep(new SplitStep());
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Turn off the oven", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Take the mini pizza out of the oven", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Take the mini pizza out of the microwave", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Cut the mini pizza into 4 slices", OutNodes= [ new OutNode("Next", null) ] });
+        // AddStep(new MergeStep { });
+        // AddStep(new MergeStep { });
         AddStep(new FinishStep { });
     }
 
@@ -128,7 +145,7 @@ public sealed partial class StepEditor : NavigatorPage
             
             arg2.Source = _draggingNode?.Item1;
             _draggingNode?.Item2.Next = _draggingNode?.Item4?.Step;
-            NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2));
+            NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2, _draggingNode?.Item4!));
         }
 
         PointerUp();
@@ -138,9 +155,9 @@ public sealed partial class StepEditor : NavigatorPage
     {
         if (arg2.Source is { } source&& NodeLines.Remove(source, out var line))
         {
-            _draggingNode = (source, line.Item2, line.Item1, arg3);
+            _draggingNode = (source, line.Item2, line.Item1, line.Item4);
             arg2.Source = null;
-            UpdateControlNodes(false, true, arg3);
+            UpdateControlNodes(false, true, line.Item4);
         }
         
         _pointerPressed = true;
@@ -212,6 +229,53 @@ public sealed partial class StepEditor : NavigatorPage
     private void ScrollViewer_OnViewChanged(object? sender, ScrollViewerViewChangedEventArgs e)
     {
         StepCanvas_OnPointerMoved(null, null);
+    }
+
+    private void ButtonAddText_OnClick(object sender, RoutedEventArgs e)
+    {
+        AddStep(new TextStep { OutNodes = [ new OutNode("Next", null) ]});
+    }
+
+    private void ButtonAddTimer_OnClick(object sender, RoutedEventArgs e)
+    {
+        AddStep(new TimerStep());
+    }
+
+    private void ButtonAddSplit_OnClick(object sender, RoutedEventArgs e)
+    {
+        AddStep(new SplitStep());
+    }
+
+    private void ButtonAddMerge_OnClick(object sender, RoutedEventArgs e)
+    {
+        AddStep(new MergeStep());
+    }
+
+    private void ButtonRemoveStep_OnClick(object sender, RoutedEventArgs e)
+    {
+        //TODO
+    }
+
+    private void ButtonAddOutNode_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: OutNode node })
+        {
+            if (_selectedStep?.Step is StartStep startStep)
+                startStep.Paths.Add(new OutNode("", null));
+            else if (_selectedStep?.Step is TextStep textStep)
+                textStep.OutNodes.Add(new OutNode("", null));
+        }
+    }
+
+    private void ButtonRemoveOutNode_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: OutNode node })
+        {
+            if (_selectedStep?.Step is StartStep startStep)
+                startStep.Paths.Remove(node);
+            else if (_selectedStep?.Step is TextStep textStep)
+                textStep.OutNodes.Remove(node);
+        }
     }
 }
 

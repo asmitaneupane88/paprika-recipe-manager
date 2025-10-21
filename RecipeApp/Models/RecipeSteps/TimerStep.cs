@@ -12,13 +12,15 @@ public partial class TimerStep : IStep
             : "A step that can be used to set a timer.";
     
     public override List<OutNode> GetOutNodes()
-        => BackNodeEnabled
-            ? [ new("Next", NextStep), new("Last", LastStep) ]
-            : [ new("Next", NextStep) ];
+        => [ new("Next", NextStep) ];
     
-    [ObservableProperty] public partial string? Title { get; set; }
-    [ObservableProperty] public partial bool BackNodeEnabled { get; set; }
+    public string? Title { get;
+        set
+        {
+            SetProperty(ref field, value);
+            OnPropertyChanged(nameof(BindableTitle));
+        }
+    }
     
     public IStep? NextStep;
-    public IStep? LastStep;
 }

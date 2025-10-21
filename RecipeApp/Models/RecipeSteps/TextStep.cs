@@ -15,7 +15,13 @@ public partial class TextStep : IStep
     
     public override List<OutNode> GetOutNodes() => OutNodes;
 
-    [ObservableProperty] public partial string? Title { get; set; }
+    public string? Title { get;
+        set
+        {
+            SetProperty(ref field, value);
+            OnPropertyChanged(nameof(BindableTitle));
+        }
+    }
     [ObservableProperty] public partial string? Instructions { get; set; }
     
     public List<OutNode> OutNodes { get; set; } = [];

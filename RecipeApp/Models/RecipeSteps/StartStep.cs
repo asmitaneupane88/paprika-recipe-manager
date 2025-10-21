@@ -10,8 +10,8 @@ public partial class StartStep : IStep
            """;
     
     public override List<OutNode> GetOutNodes() 
-        => Paths.Select(p => p.outNode).ToList();
+        => Paths;
 
-    public List<(OutNode outNode, double prepTime)> Paths { get; set; } = [];
+    public List<OutNode> Paths { get; set; } = [];
 }
 

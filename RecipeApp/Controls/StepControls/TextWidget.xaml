@@ -14,9 +14,9 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <Ellipse x:Name="inNode" Fill="{ThemeResource PrimaryColor}" Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" PointerPressed="Node_OnPointerPressed" PointerReleased="Node_OnPointerReleased" Tag="{x:Bind NodeIn}"/>
-                <TextBlock Grid.Column="1" Text="{x:Bind Step.BindableTitle}" FontSize="16" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="{x:Bind Step.BindableTitle, Mode=OneWay}" FontSize="16" VerticalAlignment="Center"/>
             </Grid>
-            <ItemsControl ItemsSource="{x:Bind Nodes}">
+            <ItemsControl ItemsSource="{x:Bind Step.BindableGetOutNodes}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="steps:OutNode">
                         <Grid Margin="5,5,15,5">
@@ -24,7 +24,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="20"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{x:Bind Title}" FontSize="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontSize="16" VerticalAlignment="Center"/>
                             <Ellipse Grid.Column="1" Fill="{ThemeResource PrimaryColor}" Width="{Binding OutNodeSize, ElementName=Root}" Height="{Binding OutNodeSize, ElementName=Root}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" PointerPressed="Node_OnPointerPressed" PointerReleased="Node_OnPointerReleased" Tag="{x:Bind}"/>
                         </Grid>
                     </DataTemplate>
