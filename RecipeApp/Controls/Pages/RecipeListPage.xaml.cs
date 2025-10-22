@@ -4,12 +4,24 @@ using Windows.Graphics.Printing;
 using Microsoft.UI.Xaml.Input;
 using RecipeApp.Services;
 using Uno.Extensions;
+using Windows.Storage.Pickers;
+using Windows.Storage;
+using System;
+using System.Threading.Tasks;
+using Windows.Devices.Midi;
 
 namespace RecipeApp.Controls.Pages;
 
 public sealed partial class RecipeListPage : NavigatorPage
 {
-    private const int AllCategorySortOrder = -20252025;
+    public RecipeListPage()
+    {
+        this.InitializeComponent();
+    }
+
+private const int AllCategorySortOrder = -20252025;
+
+    private readonly string PdfSavePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "SavedPdfs");
     
     private ObservableCollection<RecipeCard> FilteredRecipes { get; set => SetField(ref field, value); } = [];
     
@@ -158,6 +170,63 @@ public sealed partial class RecipeListPage : NavigatorPage
         var picker = new FileOpenPicker();
         picker.FileTypeFilter.Add(".pdf");
         picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+
+#if WINDOWS
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.Instance));
+        
+#endif
+        var file = await picker.PickSingleFileAsync();
+
+        if (file == null)
+        {
+            var cancelDialog = new ContentDialog
+            {
+                Title = "Upload Canceled",
+                Content = "No file was selected.",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            };
+            await cancelDialog.ShowAsync();
+            return;
+        }
+
+        try
+        {
+            Directory.CreateDirectory(PdfSavePath);
+            
+            var destinationPath = Path.Combine(PdfSavePath, file.Name);
+            await file.CopyAsync(await StorageFolder.GetFolderFromPathAsync(PdfSavePath), file.Name, NameCollisionOption.GenerateUniqueName);
+            
+            //Attached to first selected recipe
+            var selectedRecipe = GetSelectedRecipes().FirstOrDefault();
+            if (selectedRecipe != null)
+            {
+                selectedRecipe.PdfPath =  destinationPath;
+                await SavedRecipe.Update(selectedRecipe);  // assumes async persistence API
+            }
+
+            var dialog = new ContentDialog
+            {
+                Title = "PDF Uploaded Successfully",
+                Content = $"Saved to: {destinationPath}",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+
+            await UpdateShownRecipes();
+        }
+        catch (Exception ex)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = "Upload Failed",
+                Content = ex.Message,
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            };
+            await dialog.ShowAsync();
+        }    
     }
 
     private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)

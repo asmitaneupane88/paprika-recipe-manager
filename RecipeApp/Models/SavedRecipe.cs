@@ -14,6 +14,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
     [ObservableProperty] public partial string? Category { get; set; }
     public int Rating { get; set => SetProperty(ref field, Math.Clamp(value, 0, MaxRating)); }
+    [ObservableProperty] public partial string? PdfPath { get; set; }
+    [JsonIgnore] public bool HasPdf => !String.IsNullOrEmpty(PdfPath);
 
     
     //TODO: implement in sprint 2
@@ -74,5 +76,17 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
         await Add(recipe);
         
         return recipe;
+    }
+
+    public static async Task Update(SavedRecipe recipe)
+    {
+        var all = await GetAll();
+        var existing = all.FirstOrDefault(r => r.Title == recipe.Title);
+        if (existing != null)
+        {
+            existing.PdfPath = recipe.PdfPath;
+        }
+
+        // TODO: persist to disk when SaveAll() is implemented
     }
 }
