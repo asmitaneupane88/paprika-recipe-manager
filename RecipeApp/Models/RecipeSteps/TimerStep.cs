@@ -12,7 +12,7 @@ public partial class TimerStep : IStep
             : "A step that can be used to set a timer.";
     
     public override ObservableCollection<OutNode> GetOutNodes()
-        => [ new("Next", NextStep) ];
+        => [ NextStep ];
     
     public string? Title { get;
         set
@@ -22,5 +22,5 @@ public partial class TimerStep : IStep
         }
     }
     
-    public IStep? NextStep;
+    public OutNode NextStep = new OutNode("",null);
 }

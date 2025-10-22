@@ -24,7 +24,6 @@ public sealed partial class TimeWidget : IStepControl
 {
     [ObservableProperty] public partial double OutNodeSize { get; set; } = 20;
     
-    [ObservableProperty] public partial ObservableCollection<OutNode> Nodes { get; set; }
     
     [ObservableProperty] public partial InNode NodeIn { get; set; } = new(null, 10);
     
@@ -33,7 +32,6 @@ public sealed partial class TimeWidget : IStepControl
         this.InitializeComponent();
         
         Step = step;
-        Nodes = step.GetOutNodes().ToObservableCollection();
     }
 
     public override void ToggleSelection(bool isSelected)

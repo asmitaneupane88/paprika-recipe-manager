@@ -49,26 +49,7 @@ public sealed partial class StepEditor : NavigatorPage
         
         _savedRecipe = sr;
         
-        //TODO got to add everything at once and then update the connections between nodes
-        
         LoadSteps();
-        
-        /*AddStep(new StartStep { Paths=[ new OutNode("Microwave", null), new OutNode("Oven", null), ] });
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Preheat oven to 425", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in oven", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Put mini pizza in microwave", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new TimerStep { Title = "Set microwave to 1.5 minutes", MinutesToComplete = 1.5});
-        // AddStep(new TimerStep { Title = "Cook for 8 minutes", MinutesToComplete = 8});
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Is the mini pizza cooked?", OutNodes= [ new OutNode("Yes", null), new OutNode("No", null) ] });
-        // AddStep(new TimerStep { Title = "Cook for another 2 minutes", MinutesToComplete = 2});
-        // AddStep(new SplitStep());
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Turn off the oven", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Take the mini pizza out of the oven", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Take the mini pizza out of the microwave", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new TextStep { MinutesToComplete = 1, Title = "Cut the mini pizza into 4 slices", OutNodes= [ new OutNode("Next", null) ] });
-        // AddStep(new MergeStep { });
-        // AddStep(new MergeStep { });
-        AddStep(new FinishStep { });*/
     }
 
     // Used Claude Sonnet 4.5 to make the LoadSteps and the methods that it calls. Also modified it a bit to work with the current codebase
@@ -102,13 +83,21 @@ public sealed partial class StepEditor : NavigatorPage
         var stepToControlMap = new Dictionary<IStep, IStepControl>();
         foreach (var step in allSteps)
         {
-            var widget = AddStep(step);
+            var incomingConnectionCount = step is MergeStep mergeStep ? 
+                allSteps
+                    .SelectMany(step1 => step1.BindableGetOutNodes ?? [])
+                    .Count(outNode => outNode.Next == mergeStep) 
+                : 0 ;
+            
+            
+            var widget = AddStep(step, incomingConnectionCount);
             stepToControlMap[step] = widget;
         }
         
         DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
             {
                 RebuildConnections(stepToControlMap);
+                UpdateControlNodes(true, false);
             });
     }
     
@@ -143,8 +132,6 @@ public sealed partial class StepEditor : NavigatorPage
     }
 
     
-
-
     private void StepCanvas_OnPointerPressed(object sender, PointerRoutedEventArgs e)
     {
         
@@ -194,13 +181,13 @@ public sealed partial class StepEditor : NavigatorPage
         }
     }
 
-    private IStepControl AddStep(IStep step)
+    private IStepControl AddStep(IStep step, int connectionCount = 0)
     {
         IStepControl widget = step switch
         {
             StartStep startStep => new StartWidget(startStep),
             FinishStep finishStep => new FinishWidget(finishStep),
-            MergeStep mergeStep => new MergeWidget(mergeStep),
+            MergeStep mergeStep => new MergeWidget(mergeStep, connectionCount),
             SplitStep splitStep => new SplitWidget(splitStep),
             TimerStep timerStep => new TimeWidget(timerStep),
             TextStep textStep => new TextWidget(textStep),
@@ -342,11 +329,12 @@ public sealed partial class StepEditor : NavigatorPage
     {
         foreach (var outNode in _selectedStep?.Step?.BindableGetOutNodes??[])
         {
-            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is { } lineToRemove)
+            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is var lineToRemove)
             {
-                lineToRemove.Value.Item3.Source = null;
-                lineToRemove.Value.Item1.Dispose();
-                NodeLines.Remove(lineToRemove.Key);
+                lineToRemove.Value.Item3?.Source = null;
+                lineToRemove.Value.Item1?.Dispose();
+                if (lineToRemove.Key is not null)
+                    NodeLines.Remove(lineToRemove.Key);
             }
         }
         

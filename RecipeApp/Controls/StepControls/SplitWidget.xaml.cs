@@ -24,7 +24,6 @@ public sealed partial class SplitWidget : IStepControl
 {
     [ObservableProperty] public partial double OutNodeSize { get; set; } = 20;
 
-    [ObservableProperty] public partial ObservableCollection<OutNode> Nodes { get; set; } = [];
     
     [ObservableProperty] public partial InNode NodeIn { get; set; } = new(null, 10);
     
@@ -33,15 +32,15 @@ public sealed partial class SplitWidget : IStepControl
         this.InitializeComponent();
         
         Step = step;
-        Nodes = step.GetOutNodes().ToObservableCollection();
-
-        AddSplitOption();
+        
+        if (Step.BindableGetOutNodes.Count == 0)
+            AddSplitOption();
     }
     
     private void AddSplitOption()
     {
         var newOut = new OutNode("", null);
-        Nodes.Add(newOut);
+        Step.BindableGetOutNodes.Add(newOut);
         newOut.PropertyChanged += NewInOnPropertyChanged;
     }
 
@@ -52,11 +51,11 @@ public sealed partial class SplitWidget : IStepControl
             if (node.Next is null)
             {
                 node.PropertyChanged -= NewInOnPropertyChanged;
-                Nodes.Remove(node);
+                Step.BindableGetOutNodes.Remove(node);
             }
             else
             {
-                if (Nodes.All(n => n.Next is not null))
+                if (Step.BindableGetOutNodes.All(n => n.Next is not null))
                     AddSplitOption();
             }
         }

@@ -1,4 +1,6 @@
-﻿namespace RecipeApp.Interfaces;
+﻿using System.Text.Json.Serialization.Metadata;
+
+namespace RecipeApp.Interfaces;
 
 /// <summary>
 /// Handles the saving and loading of a list of items automatically.
@@ -15,8 +17,10 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
     
     private static JsonSerializerOptions _jsonOptions = new()
     {
-        ReferenceHandler = ReferenceHandler.Preserve
+        ReferenceHandler = ReferenceHandler.Preserve,
+
     };
+
     
     /// <summary>
     /// Loading data if needed.
@@ -133,6 +137,11 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
     }
     
     private static async void ListObjectChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        await SaveItems();
+    }
+    
+    public static async Task SaveAll()
     {
         await SaveItems();
     }

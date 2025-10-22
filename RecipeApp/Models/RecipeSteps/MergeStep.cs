@@ -10,8 +10,8 @@ public partial class MergeStep : IStep
            """;
     
     public override ObservableCollection<OutNode> GetOutNodes()
-        => [ new("Next", NextStep) ];
+        => [ NextStep ];
     
-    public IStep? NextStep;
+    public OutNode NextStep = new OutNode("",null);
 
 }

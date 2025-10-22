@@ -25,17 +25,18 @@ public sealed partial class MergeWidget : IStepControl
 {
     [ObservableProperty] public partial double InNodeSize { get; set; } = 20;
     
-    [ObservableProperty] public partial ObservableCollection<InNode> Nodes { get; set; }
+    [ObservableProperty] public partial ObservableCollection<InNode> Nodes { get; set; } = [];
     [ObservableProperty] public partial OutNode NodeOut { get; set; }
     
-    public MergeWidget(MergeStep step)
+    public MergeWidget(MergeStep step, int connectionCount)
     {
         this.InitializeComponent();
         
         Step = step;
-        NodeOut = step.GetOutNodes().First();
-        Nodes = [ ];
-        AddMergeOption();
+        NodeOut = step.NextStep;
+        
+        for (var i = 0; i <= connectionCount; i++)
+            AddMergeOption();
     }
 
     private void AddMergeOption()

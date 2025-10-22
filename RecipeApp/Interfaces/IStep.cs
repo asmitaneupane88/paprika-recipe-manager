@@ -2,6 +2,13 @@
 
 namespace RecipeApp.Interfaces;
 
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(StartStep), "StartStep")]
+[JsonDerivedType(typeof(FinishStep), "FinishStep")]
+[JsonDerivedType(typeof(TextStep), "TextStep")]
+[JsonDerivedType(typeof(TimerStep), "TimerStep")]
+[JsonDerivedType(typeof(MergeStep), "MergeStep")]
+[JsonDerivedType(typeof(SplitStep), "SplitStep")]
 public abstract partial class IStep : ObservableObject
 {
     public abstract string GetTitle();
