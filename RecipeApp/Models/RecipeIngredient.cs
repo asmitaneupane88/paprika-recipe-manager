@@ -1,12 +1,13 @@
-﻿namespace RecipeApp.Models;
+﻿using RecipeApp.Enums;
 
-// TODO: for use in recipe steps
+namespace RecipeApp.Models;
+
 public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
 {
-    public string Name { get; init; }
+    public string Name { get; set; }
     
-    public string ModifierNote { get; init; }
+    public string ModifierNote { get; set; }
     
-    public double Quantity { get; init; }
-    public UnitType Unit { get; init; }
+    public double Quantity { get; set; }
+    public UnitType Unit { get; set; }
 }

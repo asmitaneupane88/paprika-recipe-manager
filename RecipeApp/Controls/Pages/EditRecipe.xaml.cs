@@ -36,5 +36,10 @@ namespace RecipeApp.Controls.Pages
             // Return to the recipe details page without saving changes
             await Navigator.TryGoBack();
         }
+
+        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            Navigator.Navigate(new StepEditor(Recipe, Navigator), $"Step Editor: {Recipe.Title}");
+        }
     }
 }

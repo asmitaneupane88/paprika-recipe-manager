@@ -1,9 +1,4 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using RecipeApp.Models;
-
-namespace RecipeApp.Services
+namespace RecipeApp.Interfaces
 {
     public interface IRecipeService
     {

@@ -10,7 +10,7 @@
         <ScrollViewer>
             <StackPanel Padding="20" Spacing="20">
                 <!-- Header Section -->
-                <TextBlock Text="Edit Recipe" 
+                <TextBlock Text="Edit Recipe"
                          Style="{ThemeResource TitleLargeTextBlockStyle}"/>
 
                 <!-- Recipe Form -->
@@ -76,10 +76,13 @@
         <!-- Save Button -->
         <CommandBar VerticalAlignment="Bottom"
                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <AppBarButton Label="Save Changes" 
-                         Icon="Save"
-                         Click="SaveButton_Click"/>
-            <AppBarButton Label="Cancel" 
+            <AppBarButton
+                Icon="Edit"
+                Click="ButtonBase_OnClick"/>
+            <AppBarButton Label="Save Changes"
+                          Icon="Save"
+                          Click="SaveButton_Click"/>
+            <AppBarButton Label="Cancel"
                          Icon="Cancel"
                          Click="CancelButton_Click"/>
         </CommandBar>
