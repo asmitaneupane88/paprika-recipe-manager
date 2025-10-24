@@ -76,8 +76,8 @@ public class SavedRecipeTests
 
         root.Paths =
         [
-            (new OutNode("Oven", merge0), 2),
-            (new OutNode("Microwave", split2), 3),
+            new OutNode("Oven", merge0),
+            new OutNode("Microwave", split2),
         ];
 
         split1.OutNodes =
@@ -93,7 +93,7 @@ public class SavedRecipeTests
             new OutNode("Next", merge1)
         ];
         
-        merge1.NextStep = s3;
+        merge1.NextStep = new OutNode("", s3);
 
         s3.OutNodes =
         [
@@ -117,8 +117,8 @@ public class SavedRecipeTests
             new OutNode("", s5),
         ];
         
-        merge0.NextStep = split1;
-        merge2.NextStep = end;
+        merge0.NextStep = new OutNode("", split1);
+        merge2.NextStep = new OutNode("", end);
 
 
         // test for fails
@@ -136,11 +136,9 @@ public class SavedRecipeTests
         info.All(pi => pi.IsValid).Should().BeTrue();
         info[0].MaxCookTime.Should().Be(15); 
         info[0].MinCookTime.Should().Be(5);
-        info[0].PrepTime.Should().Be(2);
         info[0].CleanupTime.Should().Be(4);
         
         info[1].MaxCookTime.Should().Be(15);
         info[1].MinCookTime.Should().Be(8);
-        info[1].PrepTime.Should().Be(3);
     }
 }

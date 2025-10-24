@@ -76,7 +76,7 @@ public abstract partial class IStepControl : UserControl
         return FindEllipseWithTag(this, inNode);
     }
 
-    private static Ellipse? FindEllipseWithTag(DependencyObject parent, object tag)
+    private static Ellipse? FindEllipseWithTag(DependencyObject? parent, object tag)
     {
         if (parent is null) return null;
 
@@ -85,11 +85,9 @@ public abstract partial class IStepControl : UserControl
         {
             var child = VisualTreeHelper.GetChild(parent, i);
 
-            // Check if current child is an Ellipse with matching tag
             if (child is Ellipse ellipse && Equals(ellipse.Tag, tag))
                 return ellipse;
 
-            // Recursively search children
             var result = FindEllipseWithTag(child, tag);
             if (result is not null)
                 return result;
