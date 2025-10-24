@@ -22,5 +22,5 @@ public partial class TimerStep : IStep
         }
     }
     
-    public OutNode NextStep = new OutNode("",null);
+    public OutNode NextStep { get; set; } = new OutNode("",null);
 }

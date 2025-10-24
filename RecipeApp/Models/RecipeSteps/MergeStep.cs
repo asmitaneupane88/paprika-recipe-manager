@@ -12,6 +12,6 @@ public partial class MergeStep : IStep
     public override ObservableCollection<OutNode> GetOutNodes()
         => [ NextStep ];
     
-    public OutNode NextStep = new OutNode("",null);
+    public OutNode NextStep { get; set; } = new OutNode("",null);
 
 }
