@@ -81,8 +81,8 @@ public class AiHelper
                                 "$defs": 
                                 {
                                     "SavedRecipe": {
-                                      "type": "object",
-                                      "properties": {
+                                    "type": "object",
+                                    "properties": {
                                         "__id__": { "type": "string" },
                                         "Title": { "type": "string" },
                                         "Description": { "type": "string" },
@@ -91,54 +91,38 @@ public class AiHelper
                                         "UserNote": { "type": ["string", "null"] },
                                         "Category": { "type": ["string", "null"] },
                                         "Rating": { "type": "integer", "minimum": 0, "maximum": 5 },
-                                        "RootStepNode": {
-                                          "$ref": "#/$defs/StartStep"
+                                        "Steps": {
+                                          "type": "array",
+                                          "items": { "$ref": "#/$defs/RecipeStep" }
                                         }
                                       },
-                                      "required": ["__id__", "Title", "Description"],
+                                      "required": ["__id__", "Title", "Description", "Steps"],
                                       "additionalProperties": false
                                     },
-                                    "StartStep": {
+                                    "RecipeStep": {
                                       "type": "object",
                                       "properties": {
-                                        "X": { "type": "number" },
-                                        "Y": { "type": "number" },
+                                        "Type": { "type": "string", "enum": ["Instruction", "Timer"] },
+                                        "Title": { "type": "string" },
+                                        "Instruction": { "type": ["string", "null"] },
                                         "MinutesToComplete": { "type": "number" },
-                                        "IngredientsToUse": {
+                                        "Ingredients": {
                                           "type": ["array", "null"],
                                           "items": { "$ref": "#/$defs/RecipeIngredient" }
-                                        },
-                                        "Paths": {
-                                          "type": ["array", "null"],
-                                          "items": { "$ref": "#/$defs/OutNode" }
                                         }
                                       },
-                                      "required": ["X", "Y", "MinutesToComplete"],
+                                      "required": ["Type", "Text"],
                                       "additionalProperties": false
                                     },
                                     "RecipeIngredient": {
-                                      "type": "object",
-                                      "properties": {
-                                        "Name": { "type": "string" },
-                                        "ModifierNote": { "type": "string" },
-                                        "Quantity": { "type": "number" },
-                                        "Unit": { "type": "string", "description": "UnitType enum value" }
-                                      },
-                                      "required": ["Name", "ModifierNote", "Quantity", "Unit"],
-                                      "additionalProperties": false
-                                    },
-                                    "OutNode": {
-                                      "type": "object",
-                                      "properties": {
-                                        "Title": { "type": "string" },
-                                        "Next": {
-                                          "type": ["object", "null"],
-                                          "description": "IStep reference - incomplete"
+                                        "type": "object",
+                                        "properties": {
+                                            "Name": { "type": "string" },
+                                            "ModifierNote": { "type": ["string"] },
+                                            "Quantity": { "type": "number" },
+                                            "Unit": { "type": "string", "enum": ["TSP", "TBSP", "CUP", "PINT", "QUART", "GALLON", "OZ", "LB", "KG" ] }
                                         }
-                                      },
-                                      "required": ["Title"],
-                                      "additionalProperties": false
-                                    }
+                                    }   
                                 }
                             }
                             """),
