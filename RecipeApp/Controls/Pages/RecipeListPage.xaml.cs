@@ -11,20 +11,19 @@ public sealed partial class RecipeListPage : NavigatorPage
 {
     private const int AllCategorySortOrder = -20252025;
     
-    private ObservableCollection<RecipeCard> FilteredRecipes { get; set => SetField(ref field, value); } = [];
+    [ObservableProperty] private partial ObservableCollection<RecipeCard> FilteredRecipes { get; set; } = [];
     
     private string SearchText
     {
         get;
-        set { SetField(ref field, value); _ = UpdateShownRecipes(); }
+        set { SetProperty(ref field, value); _ = UpdateShownRecipes(); }
     } = "";
     
-    private SavedCategory SelectedCategory { get; set { SetField(ref field, value); _ = UpdateShownRecipes(); } }
-    private ObservableCollection<SavedCategory> Categories { get; set => SetField(ref field, value); } = [];
-    
-    private bool CardsSelected { get; set => SetField(ref field, value); } = false;
-    private Visibility ListVisibility { get; set => SetField(ref field, value); } = Visibility.Visible;
-    private Visibility GridVisibility { get; set => SetField(ref field, value); } = Visibility.Collapsed;
+    private SavedCategory SelectedCategory { get; set { SetProperty(ref field, value); _ = UpdateShownRecipes(); } }
+    [ObservableProperty] private partial ObservableCollection<SavedCategory> Categories { get; set; } = [];
+    [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
+    [ObservableProperty] private partial Visibility ListVisibility { get; set; } = Visibility.Visible;
+    [ObservableProperty] private partial Visibility GridVisibility { get; set; } = Visibility.Collapsed;
     
     public RecipeListPage(Navigator? nav = null) : base(nav)
     {

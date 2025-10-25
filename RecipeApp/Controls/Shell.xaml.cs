@@ -28,9 +28,9 @@ public sealed partial class Shell : NavigatorPage
     }
 
     public ObservableCollection<Route> RoutesAvailable { get; set; } = [];
-    public Symbol ButtonSymbol { get; set => SetField(ref field, value); }
-    public Visibility BackVisibility { get; set => SetField(ref field, value); } = Visibility.Collapsed;
-    public Visibility NavbarVisibility { get; set => SetField(ref field, value); } = Visibility.Visible;
+    [ObservableProperty] public partial Symbol ButtonSymbol { get; set; }
+    [ObservableProperty] public partial Visibility BackVisibility { get; set; } = Visibility.Collapsed;
+    [ObservableProperty] public partial Visibility NavbarVisibility { get; set; } = Visibility.Visible;
     
     private void NavigatorOnRouteChanged(Page page, Route? route, string title)
     {

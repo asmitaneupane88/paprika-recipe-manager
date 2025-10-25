@@ -30,6 +30,7 @@
             MVUX;
             ThemeService;
             SkiaRenderer;
+            WebView;
         </UnoFeatures>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>

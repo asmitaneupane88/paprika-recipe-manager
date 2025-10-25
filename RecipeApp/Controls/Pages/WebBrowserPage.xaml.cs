@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
+
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+
+namespace RecipeApp.Controls.Pages;
+
+/// <summary>
+/// An empty page that can be used on its own or navigated to within a Frame.
+/// </summary>
+public sealed partial class WebBrowserPage : NavigatorPage
+{
+    [ObservableProperty] private partial string SearchBarText { get; set; } = "";
+
+    [ObservableProperty] private partial Visibility ProgressBarVis { get; set; } = Visibility.Collapsed;
+    [ObservableProperty] private partial bool CanDownload { get; set; } = false;
+    
+    public WebBrowserPage(Navigator? nav = null) : base(nav)
+    {
+        this.InitializeComponent();
+
+        InitializeWebView();
+    }
+
+    private async void InitializeWebView()
+    {
+        try
+        {
+            await WebViewControl.EnsureCoreWebView2Async();
+            WebViewControl.CoreWebView2.Navigate("https://google.com");
+            WebViewControl.CoreWebView2.SourceChanged += (_, _) 
+                => { SearchBarText=WebViewControl.CoreWebView2.Source; };
+            WebViewControl.CoreWebView2.NewWindowRequested += (_, args) =>
+            {
+                args.Handled = true;
+                WebViewControl.CoreWebView2.Navigate(args.Uri);
+            };
+        }
+        catch (Exception ex)
+        {
+            // Handle initialization errors
+        }
+    }
+
+    private void ButtonBack_OnClick(object sender, RoutedEventArgs e)
+    {
+        WebViewControl.GoBack();
+    }
+
+    private void ButtonForward_OnClick(object sender, RoutedEventArgs e)
+    {
+        WebViewControl.GoForward();
+
+    }
+
+    private void ButtonGo_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (Uri.TryCreate(SearchBarText, UriKind.Absolute, out var uri))
+            WebViewControl.CoreWebView2.Navigate(SearchBarText);
+        else
+            WebViewControl.CoreWebView2.Navigate($"https://google.com/search?q={SearchBarText}");
+    }
+
+    private void ButtonDownload_OnClick(object sender, RoutedEventArgs e)
+    {
+        
+    }
+}
+

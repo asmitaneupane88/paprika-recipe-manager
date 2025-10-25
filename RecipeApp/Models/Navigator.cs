@@ -27,9 +27,15 @@ public partial class Navigator : ObservableObject
         },
         new()
         {
-            Icon = Symbol.Globe,
+            Icon = Symbol.Find,
             Name = "MealDB Recipes",
             PageFactory = nav => new MealDbSearchPage(nav),
+        },
+        new()
+        {
+            Icon = Symbol.Globe,
+            Name = "Web Browser",
+            PageFactory = nav => new WebBrowserPage(nav),
         },
     ];
     

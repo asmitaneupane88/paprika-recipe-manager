@@ -19,7 +19,7 @@ public sealed partial class StepEditor : NavigatorPage
     private IStepControl? _selectedStep { get;
         set
         {
-            SetField(ref field, value);
+            SetProperty(ref field, value);
             Bindings.Update();
         }
     }
