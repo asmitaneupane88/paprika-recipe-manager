@@ -173,60 +173,53 @@ private const int AllCategorySortOrder = -20252025;
 
 #if WINDOWS
         WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.Instance));
-        
 #endif
         var file = await picker.PickSingleFileAsync();
 
         if (file == null)
-        {
-            var cancelDialog = new ContentDialog
-            {
-                Title = "Upload Canceled",
-                Content = "No file was selected.",
-                CloseButtonText = "OK",
-                XamlRoot = this.XamlRoot
-            };
-            await cancelDialog.ShowAsync();
             return;
-        }
 
         try
         {
-            Directory.CreateDirectory(PdfSavePath);
+            var localFolderPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RecipeAppFiles");
+            Directory.CreateDirectory(localFolderPath);
+            var savedFilePath = Path.Combine(localFolderPath, file.Name);
+            await file.CopyAsync(await StorageFolder.GetFolderFromPathAsync(localFolderPath), file.Name, NameCollisionOption.GenerateUniqueName);
+
+            var htmlContent = await FileHelper.ConvertPdfToTextAsync(savedFilePath);
+            var htmlPath =  Path.Combine(localFolderPath, $"{Path.GetFileNameWithoutExtension(savedFilePath)}.html");
+            await File.WriteAllTextAsync(htmlPath, htmlContent);
             
-            var destinationPath = Path.Combine(PdfSavePath, file.Name);
-            await file.CopyAsync(await StorageFolder.GetFolderFromPathAsync(PdfSavePath), file.Name, NameCollisionOption.GenerateUniqueName);
-            
-            //Attached to first selected recipe
+            //Attach to selected recipe if available
             var selectedRecipe = GetSelectedRecipes().FirstOrDefault();
             if (selectedRecipe != null)
             {
-                selectedRecipe.PdfPath =  destinationPath;
-                await SavedRecipe.Update(selectedRecipe);  // assumes async persistence API
+                selectedRecipe.PdfPath = savedFilePath;
+                selectedRecipe.HtmlPath = htmlPath;
+                await SavedRecipe.Update(selectedRecipe);
             }
-
+            
             var dialog = new ContentDialog
             {
-                Title = "PDF Uploaded Successfully",
-                Content = $"Saved to: {destinationPath}",
+                Title = "PDF Upload & Converted",
+                Content = $"File saved: \n{savedFilePath}\n\nHTML created:\n{htmlPath}",
                 CloseButtonText = "OK",
                 XamlRoot = this.XamlRoot
             };
             await dialog.ShowAsync();
-
-            await UpdateShownRecipes();
         }
         catch (Exception ex)
         {
             var dialog = new ContentDialog
             {
-                Title = "Upload Failed",
+                Title = "PDF Upload failed",
                 Content = ex.Message,
                 CloseButtonText = "OK",
                 XamlRoot = this.XamlRoot
             };
             await dialog.ShowAsync();
-        }    
+        }
     }
 
     private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)

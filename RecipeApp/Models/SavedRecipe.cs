@@ -15,7 +15,11 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string? Category { get; set; }
     public int Rating { get; set => SetProperty(ref field, Math.Clamp(value, 0, MaxRating)); }
     [ObservableProperty] public partial string? PdfPath { get; set; }
+    [ObservableProperty] public partial string ?HtmlPath { get; set; }
     [JsonIgnore] public bool HasPdf => !String.IsNullOrEmpty(PdfPath);
+    [JsonIgnore] public bool HasHtml => !String.IsNullOrEmpty(HtmlPath);
+    
+    
 
     
     //TODO: implement in sprint 2
@@ -85,6 +89,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
         if (existing != null)
         {
             existing.PdfPath = recipe.PdfPath;
+            existing.HtmlPath = recipe.HtmlPath;
         }
 
         // TODO: persist to disk when SaveAll() is implemented

@@ -35,6 +35,7 @@
     </PropertyGroup>
     <ItemGroup>
       <PackageReference Include="PuppeteerSharp" />
+      <PackageReference Include="UglyToad.PdfPig" />
     </ItemGroup>
     <ItemGroup>
       <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />
