@@ -34,6 +34,8 @@
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="AutoGen" />
+      <PackageReference Include="AutoGen.LMStudio" />
       <PackageReference Include="PuppeteerSharp" />
     </ItemGroup>
     <ItemGroup>
