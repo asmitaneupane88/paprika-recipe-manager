@@ -1,4 +1,5 @@
-﻿using RecipeApp.Interfaces;
+﻿using System.Text.Json;
+using RecipeApp.Interfaces;
 using RecipeApp.Models;
 using RecipeApp.Services;
 
@@ -46,5 +47,19 @@ public class AiTests
         var recipes = await _recipeService.SearchAsync("Chicken");
 
         var result = await AiHelper.MealDbToSavedRecipe(recipes.First());
+        
+        Console.WriteLine(JsonSerializer.Serialize(result));
+    }
+    
+    [Test, Explicit]
+    public async Task ConvertStringToSavedRecipe()
+    {
+        // just paste html in the text block below
+        var result = await AiHelper.StringToSavedRecipe(
+            """
+            TODO
+            """);
+        
+        Console.WriteLine(JsonSerializer.Serialize(result));
     }
 }
