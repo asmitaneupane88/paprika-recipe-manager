@@ -75,15 +75,18 @@ public sealed partial class WebBrowserPage : NavigatorPage
         string html = await (WebViewControl.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML")?.AsTask() ?? new Task<string>(() => ""));
         
         // used Claude Sonnet 4.5 to generate a lot of the boilerplate for interacting with python using pythonnet (and python.included)
+        // had to go trough and fix it a bit after.
         var recipeInfo = await Task.Run(async () =>
         {
             DownloadStatus = "Updating Python...";
             
-            await Installer.SetupPython();
-            await Installer.InstallPip();
+            await Installer.SetupPython(true);
+            await Installer.TryInstallPip(true);
             await Installer.PipInstallModule("recipe-scrapers");
+            var result3 = Installer.IsPipInstalled();
+            Debug.WriteLine(result3);
             
-            var result2 = Installer.IsModuleInstalled("recipe-scrapers");
+            var result2 = Installer.IsModuleInstalled("recipe_scrapers");
             Debug.WriteLine(result2);
             
             PythonEngine.Initialize();
