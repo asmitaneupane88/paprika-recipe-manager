@@ -20,9 +20,10 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
     public MealPlannerPage(Navigator? nav = null) : base(nav)
     {
-        
-        // Initialize date constraints (1 year past to 1 year future)
+        // Use current system date
         var today = DateTime.Today;
+        
+        // Initialize date constraints (1 year past to 1 year future from today)
         _minDate = today.AddYears(-1);
         _maxDate = today.AddYears(1);
         
@@ -30,9 +31,9 @@ public sealed partial class MealPlannerPage : NavigatorPage
         _currentWeekStart = GetStartOfWeek(today);
         
         this.InitializeComponent();
+        InitializeMealSlots(); // Initialize slots first
         UpdateDateDisplay();
-        UpdateDayHeaders();
-        InitializeMealSlots();
+        UpdateDayHeaders(); // This will ensure day headers are properly highlighted
     }
 
     private DateTime GetStartOfWeek(DateTime date)
@@ -92,9 +93,33 @@ public sealed partial class MealPlannerPage : NavigatorPage
         UpdateDayHeaders();
     }
 
+    private void ClearAllHighlights()
+    {
+        if (_mealSlotsGrid != null)
+        {
+            foreach (var child in _mealSlotsGrid.Children)
+            {
+                if (child is Border border)
+                {
+                    border.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                }
+            }
+        }
+
+        for (int i = 0; i < 7; i++)
+        {
+            if (this.FindName($"Day{i}Header") is TextBlock header)
+            {
+                header.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
+            }
+        }
+    }
+
     private void UpdateDayHeaders()
     {
         var today = DateTime.Today;
+        ClearAllHighlights();
+
         for (int i = 0; i < 7; i++)
         {
             var date = _currentWeekStart.AddDays(i);
@@ -103,25 +128,27 @@ public sealed partial class MealPlannerPage : NavigatorPage
             {
                 dayHeader.Text = $"{date:ddd}\n{date:MMM d}";
                 
-                // Clear any previous highlight
-                var column = Grid.GetColumn(dayHeader);
-                var columnDefinition = CalendarGrid.ColumnDefinitions[column];
-                columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-                
-                // Highlight today's column
+                // Highlight today's date
                 if (date.Date == today)
                 {
-                    // Get all elements in this column and highlight them
-                    foreach (var child in CalendarGrid.Children)
+                    dayHeader.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+                    
+                    // Highlight the meal slots column
+                    if (_mealSlotsGrid != null)
                     {
-                        if (child is FrameworkElement element && Grid.GetColumn(element) == i)
+                        for (int row = 0; row < 3; row++)
                         {
-                            if (element is Border border)
+                            var cell = _mealSlotsGrid.Children[i + (row * 7)] as Border;
+                            if (cell != null)
                             {
-                                border.Background = (SolidColorBrush)Resources["TodayColumnBrush"];
+                                cell.Background = (SolidColorBrush)Resources["TodayColumnBrush"];
                             }
                         }
                     }
+                }
+                else
+                {
+                    dayHeader.FontWeight = Microsoft.UI.Text.FontWeights.Normal;
                 }
             }
         }
@@ -137,12 +164,16 @@ public sealed partial class MealPlannerPage : NavigatorPage
         {
             for (int col = 0; col < 7; col++)
             {
+                // Check if this slot is for today
+                var slotDate = _currentWeekStart.AddDays(col);
+                var isToday = slotDate.Date == DateTime.Today;
+
                 var border = new Border
                 {
                     BorderBrush = (SolidColorBrush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
                     BorderThickness = new Thickness(0, 0, 1, 1),
                     Padding = new Thickness(10),
-                    Background = (_currentWeekStart.AddDays(col).Date == DateTime.Today) ? 
+                    Background = isToday ? 
                         (SolidColorBrush)Resources["TodayColumnBrush"] : 
                         new SolidColorBrush(Microsoft.UI.Colors.Transparent)
                 };
