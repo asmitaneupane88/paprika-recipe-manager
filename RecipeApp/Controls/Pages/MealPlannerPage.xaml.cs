@@ -2,8 +2,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using RecipeApp.Models;
+using RecipeApp.Interfaces;
+using RecipeApp.Services;
 using Windows.Foundation;
 using System;
+using System.Linq;
+using Microsoft.UI.Xaml.Markup;
 
 namespace RecipeApp.Controls.Pages;
 
@@ -16,6 +20,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
     public MealPlannerPage(Navigator? nav = null) : base(nav)
     {
+        
         // Initialize date constraints (1 year past to 1 year future)
         var today = DateTime.Today;
         _minDate = today.AddYears(-1);
@@ -195,7 +200,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
         }
     }
 
-    private void AddButton_Click(object sender, RoutedEventArgs e)
+    private async void AddButton_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button button && button.Tag is Point position)
         {
@@ -224,18 +229,76 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 _ => "Day"
             };
 
-            // TODO: Show recipe selection dialog
-            // For now, just show a message that we'll implement the feature
+            var savedRecipes = await SavedRecipe.GetAll();
+            if (!savedRecipes.Any())
+            {
+                var noRecipesDialog = new ContentDialog
+                {
+                    Title = "No Saved Recipes",
+                    Content = "You don't have any saved recipes yet. Save some recipes first to add them to your meal plan.",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                };
+                await noRecipesDialog.ShowAsync();
+                return;
+            }
+
+            // Create the recipe selection dialog
+            var recipeListView = new ListView
+            {
+                ItemsSource = savedRecipes,
+                SelectionMode = ListViewSelectionMode.Single,
+                MaxHeight = 400,
+                MinWidth = 400
+            };
+
+            // Create a recipe item template
+            recipeListView.ItemTemplate = (DataTemplate)XamlReader.Load(
+                @"<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+                               xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
+                    <Grid Padding='8'>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height='Auto'/>
+                            <RowDefinition Height='Auto'/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text='{Binding Title}' 
+                                 Style='{StaticResource BodyStrongTextBlockStyle}'
+                                 TextWrapping='Wrap'/>
+                        <TextBlock Text='{Binding Category}' 
+                                 Grid.Row='1'
+                                 Style='{StaticResource CaptionTextBlockStyle}'
+                                 Opacity='0.6'
+                                 TextWrapping='Wrap'
+                                 MaxLines='2'/>
+                    </Grid>
+                </DataTemplate>");
+
             var dialog = new ContentDialog
             {
                 Title = $"Add {mealType} for {day}",
-                Content = "Recipe selection will be implemented here",
-                PrimaryButtonText = "OK",
-                DefaultButton = ContentDialogButton.Primary
+                Content = recipeListView,
+                PrimaryButtonText = "Add",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = this.XamlRoot
             };
 
-            // Show the dialog
-            _ = dialog.ShowAsync();
+            var result = await dialog.ShowAsync();
+            
+            if (result == ContentDialogResult.Primary && recipeListView.SelectedItem is SavedRecipe selectedRecipe)
+            {
+                // Get the grid cell
+                var cell = ((Grid)((Border)_mealSlotsGrid.Children[col + (row * 7)]).Child);
+                
+                // Update the cell content
+                if (cell.Children.Count > 0 && cell.Children[0] is TextBlock textBlock)
+                {
+                    textBlock.Text = selectedRecipe.Title;
+                    textBlock.Opacity = 1;
+                    textBlock.Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+                    textBlock.TextWrapping = TextWrapping.Wrap;
+                }
+            }
         }
     }
 
