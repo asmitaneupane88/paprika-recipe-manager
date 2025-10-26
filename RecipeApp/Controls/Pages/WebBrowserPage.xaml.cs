@@ -23,9 +23,11 @@ namespace RecipeApp.Controls.Pages;
 public sealed partial class WebBrowserPage : NavigatorPage
 {
     [ObservableProperty] private partial string SearchBarText { get; set; } = "";
+    [ObservableProperty] private partial string DownloadStatus { get; set; } = "";
+
 
     [ObservableProperty] private partial Visibility ProgressBarVis { get; set; } = Visibility.Collapsed;
-    [ObservableProperty] private partial bool CanDownload { get; set; } = false;
+    [ObservableProperty] private partial Visibility DownloadVis { get; set; } = Visibility.Visible;
     
     public WebBrowserPage(Navigator? nav = null) : base(nav)
     {
@@ -73,9 +75,18 @@ public sealed partial class WebBrowserPage : NavigatorPage
             WebViewControl.CoreWebView2.Navigate($"https://google.com/search?q={SearchBarText}");
     }
 
-    private void ButtonDownload_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonDownload_OnClick(object sender, RoutedEventArgs e)
     {
+        DownloadVis = Visibility.Collapsed;
+        ProgressBarVis = Visibility.Visible;
         
+        DownloadStatus = "Downloading HTML...";
+
+        var source = WebViewControl.Source;
+        string html = await (WebViewControl.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML")?.AsTask() ?? new Task<string>(() => ""));
+
+        DownloadStatus = "Trimming HTML...";
+
     }
 }
 
