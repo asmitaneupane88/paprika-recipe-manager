@@ -1,0 +1,200 @@
+﻿<local:NavigatorPage
+    x:Class="RecipeApp.Controls.Pages.StepEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RecipeApp.Controls.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:stepControls="clr-namespace:RecipeApp.Controls.StepControls"
+    xmlns:recipeSteps="clr-namespace:RecipeApp.Models.RecipeSteps"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:models="clr-namespace:RecipeApp.Models"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="500"/>
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.RowSpan="2"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto"
+            ZoomMode="Enabled"
+            ViewChanged="ScrollViewer_OnViewChanged">
+            <Canvas
+                x:Name="StepCanvas"
+                Width="20000"
+                Height="20000"
+                Background="Transparent"
+                PointerPressed="StepCanvas_OnPointerPressed"
+                PointerReleased="StepCanvas_OnPointerReleased"
+                PointerMoved="StepCanvas_OnPointerMoved"
+                PointerExited="StepCanvas_OnPointerExited">
+            </Canvas>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="0" Grid.Column="1" Background="{ThemeResource SurfaceColor}" BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" CornerRadius="8" Margin="10">
+            <StackPanel>
+                <TextBlock Margin="5" FontSize="20" Text="Toolbox"/>
+
+                <Button Content="Add Text Step" Click="ButtonAddText_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                <Button Content="Add Timer Step" Click="ButtonAddTimer_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                <Button Content="Add Split Step" Click="ButtonAddSplit_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                <Button Content="Add Merge Step" Click="ButtonAddMerge_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Background="{ThemeResource SurfaceColor}" BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" CornerRadius="8" Margin="10">
+            <StackPanel>
+                <TextBlock Margin="5" FontSize="20" Text="Properties"/>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedTextStep), Mode=OneWay}">
+                    <TextBox PlaceholderText="Title" Text="{x:Bind SelectedTextStep.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <TextBox PlaceholderText="Instructions" Text="{x:Bind SelectedTextStep.Instructions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <NumberBox PlaceholderText="Minutes To Complete" Value="{x:Bind SelectedTextStep.MinutesToComplete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" HorizontalAlignment="Stretch" Margin="5"/>
+
+                    <StackPanel Margin="5,5,5,20">
+                        <ScrollViewer MaxHeight="200">
+                            <ItemsRepeater ItemsSource="{x:Bind SelectedTextStep.OutNodes, Mode=OneWay}">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="recipeSteps:OutNode">
+                                        <Grid Margin="5">
+                                            <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                                            <Button Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}" Margin="5">
+                                                <SymbolIcon Symbol="Delete"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                        <Button Content="Add Node" Click="ButtonAddOutNode_OnClick"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedTimerStep), Mode=OneWay}">
+                    <TextBox PlaceholderText="Title" Text="{x:Bind SelectedTimerStep.Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Margin="5"/>
+                    <NumberBox PlaceholderText="Minutes To Complete" Value="{x:Bind SelectedTimerStep.MinutesToComplete, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Minimum="0" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedSplitStep), Mode=OneWay}">
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedMergeStep), Mode=OneWay}">
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5"/>
+                </StackPanel>
+
+                <StackPanel Visibility="{x:Bind IsNotNull(SelectedStartStep), Mode=OneWay}">
+                    <StackPanel Margin="5,5,5,20">
+                        <ScrollViewer MaxHeight="200">
+                            <ItemsRepeater ItemsSource="{x:Bind SelectedStartStep.Paths, Mode=OneWay}">
+                                <ItemsRepeater.ItemTemplate>
+                                    <DataTemplate x:DataType="recipeSteps:OutNode">
+                                        <Grid Margin="5">
+                                            <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                                            <Button Click="ButtonRemoveOutNode_OnClick" HorizontalAlignment="Right" Tag="{x:Bind}" Margin="5">
+                                                <SymbolIcon Symbol="Delete"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsRepeater.ItemTemplate>
+                            </ItemsRepeater>
+                        </ScrollViewer>
+                        <Button Content="Add Node" Click="ButtonAddOutNode_OnClick"/>
+                    </StackPanel>
+
+                </StackPanel>
+
+                <!--Used Claude Sonnet 4.5 to generate most of this UI with a few changes to make it work-->
+                <StackPanel Margin="5,5,5,20" Visibility="{x:Bind BothNull(SelectedMergeStep, SelectedSplitStep), Mode=OneWay}">
+                    <TextBlock Text="Ingredients" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                    <ScrollViewer MaxHeight="300">
+                        <ItemsRepeater ItemsSource="{x:Bind _selectedStep.Step.IngredientsToUse, Mode=OneWay}">
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="models:RecipeIngredient">
+                                    <Grid Margin="5" RowSpacing="5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Grid Grid.Row="0" ColumnSpacing="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <TextBox Grid.Column="0"
+                                                     PlaceholderText="Ingredient Name"
+                                                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     HorizontalAlignment="Stretch"/>
+
+                                            <Button Grid.Column="1"
+                                                    Click="ButtonRemoveIngredient_OnClick"
+                                                    Tag="{x:Bind}"
+                                                    Margin="0">
+                                                <SymbolIcon Symbol="Delete"/>
+                                            </Button>
+                                        </Grid>
+
+                                        <Grid Grid.Row="1" ColumnSpacing="5">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*"/>
+                                                <ColumnDefinition Width="3*"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <Grid Grid.Column="0" ColumnSpacing="5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <NumberBox Grid.Column="0"
+                                                           PlaceholderText="Qty"
+                                                           Value="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                           Minimum="0"/>
+
+                                                <ComboBox Grid.Column="1"
+                                                          SelectedItem="{Binding Unit, Mode=TwoWay}"
+                                                          HorizontalAlignment="Stretch">
+                                                    <system:String>TSP</system:String>
+                                                    <system:String>TBSP</system:String>
+                                                    <system:String>CUP</system:String>
+                                                    <system:String>PINT</system:String>
+                                                    <system:String>QUART</system:String>
+                                                    <system:String>GALLON</system:String>
+                                                    <system:String>OZ</system:String>
+                                                    <system:String>LB</system:String>
+                                                    <system:String>KG</system:String>
+                                                </ComboBox>
+                                            </Grid>
+
+                                            <TextBox Grid.Column="1"
+                                                     PlaceholderText="Modifier Note (optional)"
+                                                     Text="{Binding ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                     HorizontalAlignment="Stretch"/>
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </ScrollViewer>
+                    <Button Content="Add Ingredient" Click="ButtonAddIngredient_OnClick" Margin="0,5,0,30"/>
+
+                    <Button Content="Remove Step" Click="ButtonRemoveStep_OnClick" HorizontalAlignment="Stretch" Margin="5" Visibility="{x:Bind BothNull(SelectedStartStep, SelectedFinishStep), Mode=OneWay}"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</local:NavigatorPage>
+

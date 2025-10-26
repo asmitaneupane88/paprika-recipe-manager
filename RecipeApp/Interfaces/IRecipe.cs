@@ -1,4 +1,4 @@
-namespace RecipeApp.Models;
+namespace RecipeApp.Interfaces;
 
 public interface IRecipe
 {

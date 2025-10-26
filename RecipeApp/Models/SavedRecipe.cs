@@ -1,4 +1,6 @@
-﻿namespace RecipeApp.Models;
+﻿using RecipeApp.Models.RecipeSteps;
+
+namespace RecipeApp.Models;
 
 /// <summary>
 /// Handles the representation of a saved recipe along with loading and saving of the saved recipes.
@@ -14,12 +16,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
     [ObservableProperty] public partial string? Category { get; set; }
     public int Rating { get; set => SetProperty(ref field, Math.Clamp(value, 0, MaxRating)); }
-
     
-    //TODO: implement in sprint 2
-    // should be able to look at the steps and add it all up.
-    public List<RecipeIngredient> Ingredients => [];
-    public List<IRecipeStep> Steps => [];
+    [ObservableProperty] public partial StartStep? RootStepNode { get; set; }
     
     public const string HtmlHeader = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
     public const string HtmlFooter = "</body></html>";

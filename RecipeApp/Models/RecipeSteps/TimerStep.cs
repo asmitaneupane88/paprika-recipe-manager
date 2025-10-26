@@ -1,6 +1,26 @@
-﻿namespace RecipeApp.Models;
+﻿namespace RecipeApp.Models.RecipeSteps;
 
-public class TimerStep
+public partial class TimerStep : IStep
 {
-    //TODO: implement in sprint 2
+    public override string GetTitle()
+        => Title 
+        ?? "Timer";
+
+    public override string? GetDescription()
+        => Title is not null 
+            ? null 
+            : "A step that can be used to set a timer.";
+    
+    public override ObservableCollection<OutNode> GetOutNodes()
+        => [ NextStep ];
+    
+    public string? Title { get;
+        set
+        {
+            SetProperty(ref field, value);
+            OnPropertyChanged(nameof(BindableTitle));
+        }
+    }
+    
+    public OutNode NextStep { get; set; } = new OutNode("",null);
 }
