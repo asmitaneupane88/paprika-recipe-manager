@@ -36,6 +36,27 @@ public abstract partial class IStep : ObservableObject
 
     [ObservableProperty] public partial double MinutesToComplete { get; set; } = 0;
     [ObservableProperty] public partial ObservableCollection<RecipeIngredient> IngredientsToUse { get; set; } = [];
+
+    public List<MergeStep> GetAllPossibleMerges(List<IStep>? visitedSteps = null)
+    {
+        visitedSteps ??= [];
+        
+        visitedSteps.Add(this);
+
+        var mergeSteps = new List<MergeStep>();
+        foreach (var outNode in GetOutNodes())
+        {
+            if (outNode.Next is { } next && !visitedSteps.Contains(next))
+            {
+                mergeSteps.AddRange(next.GetAllPossibleMerges(visitedSteps));
+            }
+        }
+        
+        if (this is MergeStep ms)
+            mergeSteps.Add(ms);
+
+        return mergeSteps;
+    }
     
     /// <summary>
     /// Recursively searches through each out node of the current step to find the minimum and maximum time and ingredients.

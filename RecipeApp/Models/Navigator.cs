@@ -23,6 +23,12 @@ public partial class Navigator : ObservableObject
         {
             Icon = Symbol.Folder,
             Name = "Saved Recipes",
+            PageFactory = nav => new StepViewer(nav),
+        },
+        new()
+        {
+            Icon = Symbol.List,
+            Name = "Recipe Step Viewer",
             PageFactory = nav => new RecipeListPage(nav),
         },
         new()
