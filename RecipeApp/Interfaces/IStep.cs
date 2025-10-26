@@ -107,7 +107,7 @@ public abstract partial class IStep : ObservableObject
                     var newMinCookTime = minPath.MinCookTime + MinutesToComplete;
                     var newMaxCookTime = maxPath.MaxCookTime + MinutesToComplete;       
                 
-                    return [new PathInfo(null, outPaths.All(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
+                    return [new PathInfo(null, outPaths.Any(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
                 }
                 else
                 {
@@ -128,13 +128,13 @@ public abstract partial class IStep : ObservableObject
     
     private ObservableCollection<RecipeIngredient> CombineIngredients(ObservableCollection<RecipeIngredient> x, ObservableCollection<RecipeIngredient> y)
     {
-        foreach (var ingredient in y)
-            if (x.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase) && i.Unit == ingredient.Unit) is { } existingIngredient)
+        foreach (var ingredient in y??[])
+            if (x?.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase) && i.Unit == ingredient.Unit) is { } existingIngredient)
                 existingIngredient.Quantity += ingredient.Quantity;
             else
-                x.Add(ingredient);
+                x?.Add(ingredient);
 
-        return x;
+        return x??[];
     }
 }
 

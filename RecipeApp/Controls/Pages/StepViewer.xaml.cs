@@ -66,7 +66,7 @@ public sealed partial class StepViewer : NavigatorPage
             {
                 var dialog2 = new ContentDialog
                 {
-                    Title = "Error",
+                    Title = $"Error - {rc.SavedRecipe.Title}",
                     Content = "This recipe does not have a root step node!\nPlease edit the recipe's steps to use it here.",
                     PrimaryButtonText = "Ok",
                     XamlRoot = this.XamlRoot,
@@ -74,6 +74,19 @@ public sealed partial class StepViewer : NavigatorPage
                 
                 await dialog2.ShowAsync();
                 continue;
+            } 
+            if (rc.SavedRecipe.RootStepNode.GetNestedPathInfo() is { } pathInfo && pathInfo.Any(p => !p.IsValid))
+            {
+                var dialog2 = new ContentDialog
+                {
+                    Title = $"Error - {rc.SavedRecipe.Title}",
+                    Content = $"This recipe does has invalid paths.\nPlease edit the recipe's steps to use it here. The following paths might not lead to the final step guaranteed:\n{string.Join("\n", pathInfo.Select(pi => $"    {pi.OutNode.Title}"))}",
+                    PrimaryButtonText = "Ok",
+                    XamlRoot = this.XamlRoot,
+                };
+                
+                await dialog2.ShowAsync();
+                continue;            
             }
             
             var activeStep = new ActiveStepInfo
@@ -86,6 +99,7 @@ public sealed partial class StepViewer : NavigatorPage
             };
             
             Steps.Add(activeStep);
+            await ActiveStepInfo.Add(activeStep);
         }
     }
 

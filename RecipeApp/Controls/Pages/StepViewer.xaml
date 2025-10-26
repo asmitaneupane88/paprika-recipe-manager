@@ -37,7 +37,7 @@
         </Button>
 
         <ScrollView Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <ItemsControl ItemsSource="{x:Bind Steps}">
+            <ItemsControl ItemsSource="{x:Bind Steps, Mode=OneWay}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="models:ActiveStepInfo">
                         <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"

@@ -42,7 +42,7 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
             {
                 var maxString = path.MaxIngredients
                     .FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase))
-                    is { } maxIngredient 
+                    is { } maxIngredient && maxIngredient.Quantity > ingredient.Quantity
                     ? $"-{maxIngredient.Quantity}" 
                     : "";
                     
