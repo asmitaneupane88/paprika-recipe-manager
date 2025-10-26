@@ -52,7 +52,9 @@
 
                 <Button x:Name="TodayButton"
                         Click="TodayButton_Click"
-                        Style="{StaticResource AccentButtonStyle}">
+                        Style="{StaticResource AccentButtonStyle}"
+                        Height="32"
+                        Padding="12,0">
                     <TextBlock Text="Today" />
                     <ToolTipService.ToolTip>
                         <ToolTip Content="Go to Current Week"/>
