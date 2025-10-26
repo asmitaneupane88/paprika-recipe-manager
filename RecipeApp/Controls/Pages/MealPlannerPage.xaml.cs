@@ -89,6 +89,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
     private void UpdateDayHeaders()
     {
+        var today = DateTime.Today;
         for (int i = 0; i < 7; i++)
         {
             var date = _currentWeekStart.AddDays(i);
@@ -96,6 +97,27 @@ public sealed partial class MealPlannerPage : NavigatorPage
             if (dayHeader != null)
             {
                 dayHeader.Text = $"{date:ddd}\n{date:MMM d}";
+                
+                // Clear any previous highlight
+                var column = Grid.GetColumn(dayHeader);
+                var columnDefinition = CalendarGrid.ColumnDefinitions[column];
+                columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+                
+                // Highlight today's column
+                if (date.Date == today)
+                {
+                    // Get all elements in this column and highlight them
+                    foreach (var child in CalendarGrid.Children)
+                    {
+                        if (child is FrameworkElement element && Grid.GetColumn(element) == i)
+                        {
+                            if (element is Border border)
+                            {
+                                border.Background = (SolidColorBrush)Resources["TodayColumnBrush"];
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -114,7 +136,10 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 {
                     BorderBrush = (SolidColorBrush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
                     BorderThickness = new Thickness(0, 0, 1, 1),
-                    Padding = new Thickness(10)
+                    Padding = new Thickness(10),
+                    Background = (_currentWeekStart.AddDays(col).Date == DateTime.Today) ? 
+                        (SolidColorBrush)Resources["TodayColumnBrush"] : 
+                        new SolidColorBrush(Microsoft.UI.Colors.Transparent)
                 };
 
                 var grid = new Grid

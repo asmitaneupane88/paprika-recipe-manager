@@ -7,6 +7,10 @@
     xmlns:local="using:RecipeApp.Controls.Pages"
     mc:Ignorable="d">
 
+    <local:NavigatorPage.Resources>
+        <SolidColorBrush x:Key="TodayColumnBrush" Color="#10000000"/>
+    </local:NavigatorPage.Resources>
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -69,7 +73,7 @@
         </Grid>
 
         <!-- Calendar Grid -->
-        <Grid Grid.Row="1">
+        <Grid x:Name="CalendarGrid" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Days of week header -->
                 <RowDefinition Height="*"/> <!-- Breakfast -->
