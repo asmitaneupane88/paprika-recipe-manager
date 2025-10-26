@@ -7,20 +7,75 @@
     xmlns:local="using:RecipeApp.Controls.Pages"
     mc:Ignorable="d">
 
+    <local:NavigatorPage.Resources>
+        <SolidColorBrush x:Key="TodayColumnBrush" Color="#10000000"/>
+    </local:NavigatorPage.Resources>
+
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title -->
-        <TextBlock Text="Weekly Meal Planner"
-                 Grid.Row="0"
-                 Style="{StaticResource TitleTextBlockStyle}"
-                 Margin="0,0,0,20"/>
+        <!-- Header with navigation -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" 
+                        HorizontalAlignment="Left" 
+                        VerticalAlignment="Center">
+                <TextBlock Text="Weekly Meal Planner"
+                         Style="{StaticResource TitleTextBlockStyle}"/>
+                <TextBlock x:Name="DateRangeText"
+                         Style="{StaticResource SubtitleTextBlockStyle}"
+                         Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- Navigation Controls -->
+            <StackPanel Grid.Column="1" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Right"
+                        Spacing="4">
+                <Button x:Name="PreviousWeekButton" 
+                        Click="PreviousWeekButton_Click"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Width="32" Height="32"
+                        Padding="0">
+                    <FontIcon Glyph="&#xE76B;" FontFamily="Segoe Fluent Icons"/>
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Previous Week"/>
+                    </ToolTipService.ToolTip>
+                </Button>
+
+                <Button x:Name="TodayButton"
+                        Click="TodayButton_Click"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Height="32"
+                        Padding="12,0">
+                    <TextBlock Text="Today" />
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Go to Current Week"/>
+                    </ToolTipService.ToolTip>
+                </Button>
+
+                <Button x:Name="NextWeekButton"
+                        Click="NextWeekButton_Click"
+                        Style="{StaticResource AccentButtonStyle}"
+                        Width="32" Height="32"
+                        Padding="0">
+                    <FontIcon Glyph="&#xE76C;" FontFamily="Segoe Fluent Icons"/>
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Next Week"/>
+                    </ToolTipService.ToolTip>
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <!-- Calendar Grid -->
-        <Grid Grid.Row="1">
+        <Grid x:Name="CalendarGrid" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/> <!-- Days of week header -->
                 <RowDefinition Height="*"/> <!-- Breakfast -->
@@ -45,13 +100,13 @@
             <TextBlock Text="Dinner" Grid.Row="3" Grid.Column="0" Style="{StaticResource BaseTextBlockStyle}" Margin="5" VerticalAlignment="Center"/>
 
             <!-- Days of the week headers -->
-            <TextBlock Text="Monday" Grid.Row="0" Grid.Column="1" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
-            <TextBlock Text="Tuesday" Grid.Row="0" Grid.Column="2" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
-            <TextBlock Text="Wednesday" Grid.Row="0" Grid.Column="3" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
-            <TextBlock Text="Thursday" Grid.Row="0" Grid.Column="4" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
-            <TextBlock Text="Friday" Grid.Row="0" Grid.Column="5" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
-            <TextBlock Text="Saturday" Grid.Row="0" Grid.Column="6" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
-            <TextBlock Text="Sunday" Grid.Row="0" Grid.Column="7" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center"/>
+            <TextBlock x:Name="Day0Header" Grid.Row="0" Grid.Column="1" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Day1Header" Grid.Row="0" Grid.Column="2" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Day2Header" Grid.Row="0" Grid.Column="3" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Day3Header" Grid.Row="0" Grid.Column="4" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Day4Header" Grid.Row="0" Grid.Column="5" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Day5Header" Grid.Row="0" Grid.Column="6" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Day6Header" Grid.Row="0" Grid.Column="7" Style="{StaticResource BaseTextBlockStyle}" Margin="5" HorizontalAlignment="Center" TextAlignment="Center"/>
 
             <!-- Meal slots grid -->
             <Border Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Grid.ColumnSpan="7">
