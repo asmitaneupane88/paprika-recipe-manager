@@ -31,6 +31,12 @@ public partial class Navigator : ObservableObject
             Name = "MealDB Recipes",
             PageFactory = nav => new MealDbSearchPage(nav),
         },
+        new()
+        {
+            Icon = Symbol.Calendar,
+            Name = "Meal Planner",
+            PageFactory = nav => new MealPlannerPage(nav),
+        },
     ];
     
     /// <summary>
