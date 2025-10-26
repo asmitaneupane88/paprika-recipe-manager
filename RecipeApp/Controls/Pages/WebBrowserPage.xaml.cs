@@ -81,15 +81,18 @@ public sealed partial class WebBrowserPage : NavigatorPage
         var browserFetcher = new BrowserFetcher();
         await browserFetcher.DownloadAsync();
     
-        await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        var browser = await Puppeteer.LaunchAsync(new LaunchOptions
         {
             Headless = true
         });
     
-        await using var page = await browser.NewPageAsync();
+        var page = await browser.NewPageAsync();
         await page.GoToAsync(source.ToString(), WaitUntilNavigation.Networkidle2);
     
         var html = await page.GetContentAsync();
+        
+        await page.CloseAsync();
+        await browser.CloseAsync();
         
         // used Claude Sonnet 4.5 to generate a lot of the boilerplate for interacting with python using pythonnet (and python.included)
         // had to go through and really work to get his to work.
