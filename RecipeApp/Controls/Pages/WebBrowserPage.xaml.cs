@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
+﻿using System.Diagnostics;
+using Python.Runtime;
+using Python.Included;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -84,8 +73,43 @@ public sealed partial class WebBrowserPage : NavigatorPage
 
         var source = WebViewControl.Source;
         string html = await (WebViewControl.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML")?.AsTask() ?? new Task<string>(() => ""));
+        
+        // used Claude Sonnet 4.5 to generate a lot of the boilerplate for interacting with python using pythonnet (and python.included)
+        var recipeInfo = await Task.Run(async () =>
+        {
+            DownloadStatus = "Updating Python...";
+            
+            await Installer.SetupPython();
+            await Installer.InstallPip();
+            await Installer.PipInstallModule("recipe-scrapers");
+            
+            var result2 = Installer.IsModuleInstalled("recipe-scrapers");
+            Debug.WriteLine(result2);
+            
+            PythonEngine.Initialize();
+            
+            DownloadStatus = "Extracting Recipe...";
+            
+            using (Py.GIL())
+            {
+                dynamic scrapers = Py.Import("recipe_scrapers");
+                dynamic scraper = scrapers.scrape_html(html: html, org_url: source.ToString());
 
-        DownloadStatus = "Trimming HTML...";
+                return new
+                {
+                    Title = scraper.title().ToString(),
+                    Ingredients = ((IEnumerable<dynamic>)scraper.ingredients())
+                        .Select(i => i.ToString()).ToList(),
+                    Instructions = scraper.instructions().ToString(),
+                    TotalTime = scraper.total_time()?.ToString(),
+                    Yields = scraper.yields()?.ToString()
+                };
+            }
+        });
+        
+        PythonEngine.Shutdown();
+        
+        DownloadStatus = "Processing Recipe...";
 
     }
 }
