@@ -3,17 +3,101 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using RecipeApp.Models;
 using Windows.Foundation;
+using System;
 
 namespace RecipeApp.Controls.Pages;
 
 public sealed partial class MealPlannerPage : NavigatorPage
 {
     private Grid? _mealSlotsGrid;
+    private DateTime _currentWeekStart;
+    private readonly DateTime _minDate;
+    private readonly DateTime _maxDate;
 
     public MealPlannerPage(Navigator? nav = null) : base(nav)
     {
+        // Initialize date constraints (1 year past to 1 year future)
+        var today = DateTime.Today;
+        _minDate = today.AddYears(-1);
+        _maxDate = today.AddYears(1);
+        
+        // Start with current week
+        _currentWeekStart = GetStartOfWeek(today);
+        
         this.InitializeComponent();
+        UpdateDateDisplay();
+        UpdateDayHeaders();
         InitializeMealSlots();
+    }
+
+    private DateTime GetStartOfWeek(DateTime date)
+    {
+        // Assuming Monday is the start of the week
+        int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
+        return date.AddDays(-diff).Date;
+    }
+
+    private void UpdateDateDisplay()
+    {
+        // Update the date range display
+        var weekEnd = _currentWeekStart.AddDays(6);
+        
+        // Format: "October 23 - 29, 2023" or "October 30 - November 5, 2023"
+        string dateRange;
+        if (_currentWeekStart.Month == weekEnd.Month)
+        {
+            dateRange = $"{_currentWeekStart:MMMM} {_currentWeekStart.Day} - {weekEnd.Day}, {_currentWeekStart.Year}";
+        }
+        else
+        {
+            dateRange = $"{_currentWeekStart:MMMM} {_currentWeekStart.Day} - {weekEnd:MMMM} {weekEnd.Day}, {weekEnd.Year}";
+        }
+        
+        DateRangeText.Text = dateRange;
+        
+        // Update navigation button states
+        PreviousWeekButton.IsEnabled = _currentWeekStart > _minDate;
+        NextWeekButton.IsEnabled = _currentWeekStart < _maxDate;
+    }
+
+    private void PreviousWeekButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentWeekStart > _minDate)
+        {
+            _currentWeekStart = _currentWeekStart.AddDays(-7);
+            UpdateDateDisplay();
+            UpdateDayHeaders();
+        }
+    }
+
+    private void NextWeekButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentWeekStart < _maxDate)
+        {
+            _currentWeekStart = _currentWeekStart.AddDays(7);
+            UpdateDateDisplay();
+            UpdateDayHeaders();
+        }
+    }
+
+    private void TodayButton_Click(object sender, RoutedEventArgs e)
+    {
+        _currentWeekStart = GetStartOfWeek(DateTime.Today);
+        UpdateDateDisplay();
+        UpdateDayHeaders();
+    }
+
+    private void UpdateDayHeaders()
+    {
+        for (int i = 0; i < 7; i++)
+        {
+            var date = _currentWeekStart.AddDays(i);
+            var dayHeader = this.FindName($"Day{i}Header") as TextBlock;
+            if (dayHeader != null)
+            {
+                dayHeader.Text = $"{date:ddd}\n{date:MMM d}";
+            }
+        }
     }
 
     private void InitializeMealSlots()
