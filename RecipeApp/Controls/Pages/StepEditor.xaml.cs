@@ -16,10 +16,13 @@ public sealed partial class StepEditor : NavigatorPage
 
     private (Ellipse, OutNode, StepConnectorLine, IStepControl)? _draggingNode;
     private (IStepControl, IStep, Point)? _draggingStep;
-    private IStepControl? _selectedStep { get;
+    private IStepControl? _selectedStepField;
+    private IStepControl? _selectedStep
+    {
+        get => _selectedStepField;
         set
         {
-            SetField(ref field, value);
+            _selectedStepField = value;
             Bindings.Update();
         }
     }
@@ -213,13 +216,15 @@ public sealed partial class StepEditor : NavigatorPage
 
     private void WidgetOnInNodeMouseUp(Ellipse arg1, InNode arg2, IStepControl arg3)
     {
-        if (arg2.Source is null && _draggingNode is { Item4: { } stepControl } && stepControl != arg3)
+        if (arg2.Source is null && _draggingNode is (var ellipse, var outNode, var connectorLine, var stepControl) && stepControl != arg3)
         {
-            _draggingNode?.Item3.SetEndLocation(null, arg1);
-            
-            arg2.Source = _draggingNode?.Item1;
-            _draggingNode?.Item2.Next = arg3.Step;
-            NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2, _draggingNode?.Item4!));
+            connectorLine.SetEndLocation(null, arg1);
+            arg2.Source = ellipse;
+            if (outNode != null)
+            {
+                outNode.Next = arg3.Step;
+            }
+            NodeLines.Add(ellipse, (connectorLine, outNode, arg2, stepControl));
         }
 
         PointerUp();
@@ -331,8 +336,14 @@ public sealed partial class StepEditor : NavigatorPage
         {
             if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is var lineToRemove)
             {
-                lineToRemove.Value.Item3?.Source = null;
-                lineToRemove.Value.Item1?.Dispose();
+                if (lineToRemove.Value.Item3 != null)
+                {
+                    lineToRemove.Value.Item3.Source = null;
+                }
+                if (lineToRemove.Value.Item1 != null)
+                {
+                    lineToRemove.Value.Item1.Dispose();
+                }
                 if (lineToRemove.Key is not null)
                     NodeLines.Remove(lineToRemove.Key);
             }
