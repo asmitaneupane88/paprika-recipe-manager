@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using RecipeApp.Models;
 using RecipeApp.Interfaces;
@@ -17,6 +18,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
     private DateTime _currentWeekStart;
     private readonly DateTime _minDate;
     private readonly DateTime _maxDate;
+    private readonly MealPlanCollection _mealPlans = new();
 
     public MealPlannerPage(Navigator? nav = null) : base(nav)
     {
@@ -189,16 +191,49 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                 // Add the placeholder text
-                var textBlock = new TextBlock
+                var date = _currentWeekStart.AddDays(col);
+                var mealType = row switch
                 {
-                    Text = "No meal planned",
-                    Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Opacity = 0.6
+                    0 => MealType.Breakfast,
+                    1 => MealType.Lunch,
+                    2 => MealType.Dinner,
+                    _ => MealType.Breakfast // Default to breakfast, though this case should never occur
                 };
-                Grid.SetRow(textBlock, 0);
-                grid.Children.Add(textBlock);
+
+                var mealPlan = _mealPlans.GetMealPlan(date, mealType);
+                // Remove any existing content from the grid
+                var existingContent = grid.Children.Where(c => Grid.GetRow(c) == 0).ToList();
+                foreach (var content in existingContent)
+                {
+                    grid.Children.Remove(content);
+                }
+
+                if (mealPlan != null)
+                {
+                    // Add the recipe information
+                    var recipeInfo = new TextBlock
+                    {
+                        Text = $"{mealPlan.Recipe.Title}",
+                        TextWrapping = TextWrapping.Wrap,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    Grid.SetRow(recipeInfo, 0);
+                    grid.Children.Add(recipeInfo);
+                }
+                else
+                {
+                    var textBlock = new TextBlock
+                    {
+                        Text = "No meal planned",
+                        Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Opacity = 0.6
+                    };
+                    Grid.SetRow(textBlock, 0);
+                    grid.Children.Add(textBlock);
+                }
 
                 // Add the plus button
                 var addButton = new Button
@@ -239,26 +274,16 @@ public sealed partial class MealPlannerPage : NavigatorPage
             var col = (int)position.Y;
             
             // Get the meal type based on row
-            string mealType = row switch
+            var mealType = row switch
             {
-                0 => "Breakfast",
-                1 => "Lunch",
-                2 => "Dinner",
-                _ => "Meal"
+                0 => MealType.Breakfast,
+                1 => MealType.Lunch,
+                2 => MealType.Dinner,
+                _ => MealType.Breakfast // Default to breakfast, though this case should never occur
             };
 
-            // Get the day based on column
-            string day = col switch
-            {
-                0 => "Monday",
-                1 => "Tuesday",
-                2 => "Wednesday",
-                3 => "Thursday",
-                4 => "Friday",
-                5 => "Saturday",
-                6 => "Sunday",
-                _ => "Day"
-            };
+            // Get the exact date based on column
+            var date = _currentWeekStart.AddDays(col);
 
             var savedRecipes = await SavedRecipe.GetAll();
             if (!savedRecipes.Any())
@@ -285,28 +310,20 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
             // Create a recipe item template
             recipeListView.ItemTemplate = (DataTemplate)XamlReader.Load(
-                @"<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
-                               xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>
-                    <Grid Padding='8'>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height='Auto'/>
-                            <RowDefinition Height='Auto'/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Text='{Binding Title}' 
-                                 Style='{StaticResource BodyStrongTextBlockStyle}'
-                                 TextWrapping='Wrap'/>
-                        <TextBlock Text='{Binding Category}' 
-                                 Grid.Row='1'
-                                 Style='{StaticResource CaptionTextBlockStyle}'
-                                 Opacity='0.6'
-                                 TextWrapping='Wrap'
-                                 MaxLines='2'/>
-                    </Grid>
-                </DataTemplate>");
+                "<DataTemplate xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">" +
+                    "<Grid Padding=\"8\">" +
+                        "<Grid.RowDefinitions>" +
+                            "<RowDefinition Height=\"Auto\"/>" +
+                            "<RowDefinition Height=\"Auto\"/>" +
+                        "</Grid.RowDefinitions>" +
+                        "<TextBlock Text=\"{Binding Title}\" Style=\"{StaticResource BodyStrongTextBlockStyle}\" TextWrapping=\"Wrap\"/>" +
+                        "<TextBlock Text=\"{Binding Category}\" Grid.Row=\"1\" Style=\"{StaticResource CaptionTextBlockStyle}\" Opacity=\"0.8\"/>" +
+                    "</Grid>" +
+                "</DataTemplate>");
 
             var dialog = new ContentDialog
             {
-                Title = $"Add {mealType} for {day}",
+                Title = $"Select Recipe for {mealType.ToString()} on {date:MMM d}",
                 Content = recipeListView,
                 PrimaryButtonText = "Add",
                 CloseButtonText = "Cancel",
@@ -316,18 +333,35 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
             var result = await dialog.ShowAsync();
             
-            if (result == ContentDialogResult.Primary && recipeListView.SelectedItem is SavedRecipe selectedRecipe)
+            if (result == ContentDialogResult.Primary && recipeListView.SelectedItem is SavedRecipe savedRecipe)
             {
-                // Get the grid cell
-                var cell = ((Grid)((Border)_mealSlotsGrid.Children[col + (row * 7)]).Child);
+                // Add the meal plan
+                _mealPlans.AddMealPlan(date, savedRecipe, mealType);
                 
-                // Update the cell content
-                if (cell.Children.Count > 0 && cell.Children[0] is TextBlock textBlock)
+                // Update just this specific cell
+                var border = _mealSlotsGrid?.Children
+                    .Cast<Border>()
+                    .FirstOrDefault(b => Grid.GetRow(b) == row && Grid.GetColumn(b) == col);
+
+                if (border?.Child is Grid cellGrid)
                 {
-                    textBlock.Text = selectedRecipe.Title;
-                    textBlock.Opacity = 1;
-                    textBlock.Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorPrimaryBrush"];
-                    textBlock.TextWrapping = TextWrapping.Wrap;
+                    // Clear existing content in the first row (keeping the add button in the second row)
+                    var itemsToRemove = cellGrid.Children.Where(c => Grid.GetRow(c) == 0).ToList();
+                    foreach (var item in itemsToRemove)
+                    {
+                        cellGrid.Children.Remove(item);
+                    }
+
+                    // Add the recipe information
+                    var recipeInfo = new TextBlock
+                    {
+                        Text = $"{savedRecipe.Title}",
+                        TextWrapping = TextWrapping.Wrap,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    };
+                    Grid.SetRow(recipeInfo, 0);
+                    cellGrid.Children.Add(recipeInfo);
                 }
             }
         }
