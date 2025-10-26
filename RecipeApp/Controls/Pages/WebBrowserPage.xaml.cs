@@ -185,34 +185,57 @@ public sealed partial class WebBrowserPage : NavigatorPage
                     dynamic scrapers = Py.Import("recipe_scrapers");
                     dynamic scraper = scrapers.scrape_html(html: html, org_url: source.ToString());
 
-                    // can't serialize until converting it to a C# list due to pointers to the python objects.
-                    var ingredients = scraper.ingredients();
-                    var ingredientsList = new List<string>();
+                    string TryValue(Func<dynamic> getter) {
+                        try { return getter()?.ToString(); }catch { return null; }
+                    }
                     
-                    if (ingredients != null)
-                    {
-                        using PyObject pyIngredients = ingredients;
-                        var length = (int)pyIngredients.Length();
-                            
-                        for (var i = 0; i < length; i++)
+                    // can't serialize until converting it to a C# list due to pointers to the python objects.
+                    List<string> TryList(Func<dynamic> getter) {
+                        try
                         {
-                            using PyObject item = pyIngredients[i];
-                            ingredientsList.Add(item.ToString());
+                            var result = getter();
+                            if (result == null) return new List<string>();
+        
+                            using PyObject pyList = result;
+                            var list = new List<string>();
+                            var length = (int)pyList.Length();
+        
+                            for (var i = 0; i < length; i++)
+                            {
+                                using PyObject item = pyList[i];
+                                list.Add(item.ToString());
+                            }
+                            return list;
+                        }
+                        catch
+                        {
+                            return new List<string>();
                         }
                     }
-
+                    
                     return new
                     {
-                        Title = scraper.title()?.ToString(),
-                        Ingredients = ingredientsList,
-                        Instructions = scraper.instructions()?.ToString(),
-                        TotalTime = scraper.total_time()?.ToString(),
-                        Yields = scraper.yields()?.ToString(),
-                        Image = scraper.image()?.ToString(),
-                        Author = scraper.author()?.ToString(),
-                        Description = scraper.description()?.ToString(),
-                        PrepTime = scraper.prep_time()?.ToString(),
-                        CookTime = scraper.cook_time()?.ToString()
+                        Title = TryValue(() => scraper.title()),
+                        Ingredients = TryList(() => scraper.ingredients()),
+                        InstructionsList = TryList(() => scraper.instructions_list()),
+                        Instructions = TryValue(() => scraper.instructions()),
+                        TotalTime = TryValue(() => scraper.total_time()),
+                        Yields = TryValue(() => scraper.yields()),
+                        Image = TryValue(() => scraper.image()),
+                        Images = TryList(() => scraper.images()),
+                        Author = TryValue(() => scraper.author()),
+                        Description = TryValue(() => scraper.description()),
+                        PrepTime = TryValue(() => scraper.prep_time()),
+                        CookTime = TryValue(() => scraper.cook_time()),
+                        Ratings = TryValue(() => scraper.ratings()),
+                        Reviews = TryValue(() => scraper.reviews()),
+                        Cuisine = TryValue(() => scraper.cuisine()),
+                        Category = TryValue(() => scraper.category()),
+                        Nutrients = TryValue(() => scraper.nutrients()),
+                        Language = TryValue(() => scraper.language()),
+                        CanonicalUrl = TryValue(() => scraper.canonical_url()),
+                        Host = TryValue(() => scraper.host()),
+                        Equipment = TryList(() => scraper.equipment())
                     };
                 }
             });
