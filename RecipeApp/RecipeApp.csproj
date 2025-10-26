@@ -34,11 +34,35 @@
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="AutoGen" />
+      <PackageReference Include="AutoGen.LMStudio" />
       <PackageReference Include="PuppeteerSharp" />
       <PackageReference Include="UglyToad.PdfPig" />
     </ItemGroup>
     <ItemGroup>
       <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Controls\StepControls\FinishWidget.xaml.cs">
+        <DependentUpon>FinishWidget.xaml</DependentUpon>
+        <IsDefaultItem>true</IsDefaultItem>
+      </Compile>
+      <Compile Update="Controls\StepControls\MergeWidget.xaml.cs">
+        <DependentUpon>MergeWidget.xaml</DependentUpon>
+        <IsDefaultItem>true</IsDefaultItem>
+      </Compile>
+      <Compile Update="Controls\StepControls\SplitWidget.xaml.cs">
+        <DependentUpon>SplitWidget.xaml</DependentUpon>
+        <IsDefaultItem>true</IsDefaultItem>
+      </Compile>
+      <Compile Update="Controls\StepControls\TimeWidget.xaml.cs">
+        <DependentUpon>TimeWidget.xaml</DependentUpon>
+        <IsDefaultItem>true</IsDefaultItem>
+      </Compile>
+      <Compile Update="Controls\StepControls\TextWidget.xaml.cs">
+        <DependentUpon>TextWidget.xaml</DependentUpon>
+        <IsDefaultItem>true</IsDefaultItem>
+      </Compile>
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
-﻿namespace RecipeApp.Interfaces;
+﻿using System.Text.Json.Serialization.Metadata;
+
+namespace RecipeApp.Interfaces;
 
 /// <summary>
 /// Handles the saving and loading of a list of items automatically.
@@ -12,6 +14,13 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
     private static string? SaveFilePath { get; set; }
     private static bool _inSave;
     private static bool _requireResave;
+    
+    private static JsonSerializerOptions _jsonOptions = new()
+    {
+        ReferenceHandler = ReferenceHandler.Preserve,
+
+    };
+
     
     /// <summary>
     /// Loading data if needed.
@@ -70,7 +79,7 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
             {
                 try
                 {
-                    Items = JsonSerializer.Deserialize<List<T>>(fileData) ?? throw new Exception();
+                    Items = JsonSerializer.Deserialize<List<T>>(fileData, _jsonOptions) ?? throw new Exception();
                     
                     foreach (var item in Items)
                         item.PropertyChanged += ListObjectChanged;
@@ -107,7 +116,7 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
         if (!Directory.Exists(Path.GetDirectoryName(SaveFilePath)))
             Directory.CreateDirectory(Path.GetDirectoryName(SaveFilePath)!); 
         
-        var json = JsonSerializer.Serialize(Items);
+        var json = JsonSerializer.Serialize(Items, _jsonOptions);
         await File.WriteAllTextAsync(SaveFilePath, json);
         
         _inSave = false;
@@ -128,6 +137,11 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
     }
     
     private static async void ListObjectChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        await SaveItems();
+    }
+    
+    public static async Task SaveAll()
     {
         await SaveItems();
     }

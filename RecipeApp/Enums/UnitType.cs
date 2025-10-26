@@ -1,4 +1,4 @@
-﻿namespace RecipeApp.Models;
+﻿namespace RecipeApp.Enums;
 
 //TODO: verify that these are all of them and not too many
 public enum UnitType
@@ -12,4 +12,5 @@ public enum UnitType
     OZ,
     LB,
     KG,
+    ITEM
 }
