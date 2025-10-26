@@ -63,7 +63,9 @@ public sealed partial class WebBrowserPage : NavigatorPage
         else
             WebViewControl.CoreWebView2.Navigate($"https://google.com/search?q={SearchBarText}");
     }
-
+    
+    
+    private static bool _pythonInitialized = false;
     private async void ButtonDownload_OnClick(object sender, RoutedEventArgs e)
     {
         DownloadVis = Visibility.Collapsed;
@@ -75,45 +77,117 @@ public sealed partial class WebBrowserPage : NavigatorPage
         string html = await (WebViewControl.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML")?.AsTask() ?? new Task<string>(() => ""));
         
         // used Claude Sonnet 4.5 to generate a lot of the boilerplate for interacting with python using pythonnet (and python.included)
-        // had to go trough and fix it a bit after.
-        var recipeInfo = await Task.Run(async () =>
+        // had to go through and really work to get his to work.
+        try
         {
-            DownloadStatus = "Updating Python...";
-            
-            await Installer.SetupPython(true);
-            await Installer.TryInstallPip(true);
-            await Installer.PipInstallModule("recipe-scrapers");
-            var result3 = Installer.IsPipInstalled();
-            Debug.WriteLine(result3);
-            
-            var result2 = Installer.IsModuleInstalled("recipe_scrapers");
-            Debug.WriteLine(result2);
-            
-            PythonEngine.Initialize();
-            
-            DownloadStatus = "Extracting Recipe...";
-            
-            using (Py.GIL())
+            var recipeInfo = await Task.Run(async () =>
             {
-                dynamic scrapers = Py.Import("recipe_scrapers");
-                dynamic scraper = scrapers.scrape_html(html: html, org_url: source.ToString());
-
-                return new
+                if (!_pythonInitialized)
                 {
-                    Title = scraper.title().ToString(),
-                    Ingredients = ((IEnumerable<dynamic>)scraper.ingredients())
-                        .Select(i => i.ToString()).ToList(),
-                    Instructions = scraper.instructions().ToString(),
-                    TotalTime = scraper.total_time()?.ToString(),
-                    Yields = scraper.yields()?.ToString()
-                };
-            }
-        });
-        
-        PythonEngine.Shutdown();
-        
-        DownloadStatus = "Processing Recipe...";
+                    DownloadStatus = "Verifying python installation...";
 
+                    if (!Installer.IsPythonInstalled())
+                    {
+                        Debug.WriteLine("Installing python...");
+                    }
+
+                    await Installer.SetupPython();
+
+                    DownloadStatus = "Verifying python installation...";
+
+                    if (!Installer.IsPipInstalled())
+                    {
+                        Debug.WriteLine("Installing pip...");
+                        await Installer.TryInstallPip();
+                    }
+
+                    DownloadStatus = "Verifying python installation...";
+
+                    if (!Installer.IsModuleInstalled("setuptools"))
+                    {
+                        Debug.WriteLine("Installing setuptools...");
+                        await Installer.PipInstallModule("setuptools");
+                    }
+
+                    DownloadStatus = "Verifying python installation...";
+
+                    if (!Installer.IsModuleInstalled("wheel"))
+                    {
+                        Debug.WriteLine("Installing wheel...");
+                        await Installer.PipInstallModule("wheel");
+                    }
+
+                    DownloadStatus = "Verifying python installation...";
+
+                    // This is way too complicated, why can't it be simple for just once.
+                    // have to use the no build isolation flag for this to work due to the embedded python runtime
+                    if (!Installer.IsModuleInstalled("recipe_scrapers"))
+                    {
+                        DownloadStatus = "Installing recipe scrapers...";
+
+                        var process = new Process
+                        {
+                            StartInfo = new ProcessStartInfo
+                            {
+                                FileName = Path.Combine(Installer.EmbeddedPythonHome, "python.exe"),
+                                Arguments = "-m pip install --no-build-isolation recipe-scrapers",
+                                UseShellExecute = false,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                CreateNoWindow = true,
+                                WorkingDirectory = Installer.EmbeddedPythonHome
+                            }
+                        };
+                        
+                        process.Start();
+                        
+                        var outputTask = process.StandardOutput.ReadToEndAsync();
+                        var errorTask = process.StandardError.ReadToEndAsync();
+    
+                        await process.WaitForExitAsync();
+    
+                        string output = await outputTask;
+                        string error = await errorTask;
+    
+                        Debug.WriteLine($"Exit Code: {process.ExitCode}");
+                        Debug.WriteLine($"Output: {output}");
+                        Debug.WriteLine($"Error: {error}");
+                    }
+
+                    PythonEngine.Initialize();
+                    
+                    _pythonInitialized = true;
+                }
+            
+                DownloadStatus = "Extracting Recipe...";
+            
+                using (Py.GIL())
+                {
+                    dynamic scrapers = Py.Import("recipe_scrapers");
+                    dynamic scraper = scrapers.scrape_html(html: html, org_url: source.ToString());
+
+                    return new
+                    {
+                        Title = scraper.title().ToString(),
+                        Ingredients = ((IEnumerable<dynamic>)scraper.ingredients())
+                            .Select(i => i.ToString()).ToList(),
+                        Instructions = scraper.instructions().ToString(),
+                        TotalTime = scraper.total_time()?.ToString(),
+                        Yields = scraper.yields()?.ToString()
+                    };
+                }
+            });
+            
+            DownloadStatus = "Processing Recipe...";
+
+        }
+        catch (Exception exception)
+        {
+            DownloadStatus = $"Error: {exception.Message}";
+            await Task.Delay(5000);
+        }
+        
+        DownloadVis = Visibility.Visible;
+        ProgressBarVis = Visibility.Collapsed;
     }
 }
-
