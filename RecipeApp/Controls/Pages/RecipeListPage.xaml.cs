@@ -11,6 +11,7 @@ public sealed partial class RecipeListPage : NavigatorPage
 {
     private const int AllCategorySortOrder = -20252025;
     
+    [ObservableProperty] private partial ObservableCollection<RecipeCard> AllRecipes { get; set; } = [];
     [ObservableProperty] private partial ObservableCollection<RecipeCard> FilteredRecipes { get; set; } = [];
     
     private string SearchText
@@ -29,9 +30,19 @@ public sealed partial class RecipeListPage : NavigatorPage
     {
         this.InitializeComponent();
         
-        UpdateShownCategories()
-            .ContinueWith(_ => UpdateShownRecipes());
+        InitializeRecipes()
+            .ContinueWith(_ => UpdateShownCategories()
+                .ContinueWith(_ => UpdateShownRecipes()));
         
+    }
+
+    private async Task InitializeRecipes()
+    {
+        var recipes = await SavedRecipe.GetAll();
+        
+        AllRecipes = recipes
+            .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
+            .ToObservableCollection();
     }
 
     private async Task UpdateShownCategories()
@@ -50,18 +61,13 @@ public sealed partial class RecipeListPage : NavigatorPage
     
     private async Task UpdateShownRecipes()
     {
-        var recipes = await SavedRecipe.GetAll();
-
-        FilteredRecipes = recipes
-            .Where(r => r.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
+        FilteredRecipes = AllRecipes
+            .Where(r => r.SavedRecipe.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
             .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
-                        || (r.Category is not null 
-                        && r.Category.Trim()
-                            .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
-            .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
+                        || (r.SavedRecipe.Category is not null 
+                            && r.SavedRecipe.Category.Trim()
+                                .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
             .ToObservableCollection();
-        
-        RefreshSelected();
     }
     
     private void RefreshSelected()

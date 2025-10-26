@@ -32,14 +32,37 @@ public sealed partial class StepViewer : NavigatorPage
     }
 
 
-    private void ButtonAddRecipe_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonAddRecipe_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        var search = new SavedRecipeSearch();
+        
+        var dialog = new ContentDialog
+        {
+            Title = "Add Recipe",
+            Content = search,
+            PrimaryButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = this.XamlRoot,
+        };
+        
+        search.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(search.SelectedRecipes))
+            {
+                dialog.PrimaryButtonText = search.SelectedRecipes.Count == 0 ? "Cancel" : $"Add {search.SelectedRecipes.Count} Recipes";
+            }
+        };
+        
+        var result = await dialog.ShowAsync();
+        if (result == ContentDialogResult.Primary)
+        {
+            
+        }
     }
 
     private void ButtonResetAll_OnClick(object sender, RoutedEventArgs e)
     {
-        throw new NotImplementedException();
+        
     }
 }
 
