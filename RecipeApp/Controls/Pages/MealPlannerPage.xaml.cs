@@ -156,9 +156,10 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 var textBlock = new TextBlock
                 {
                     Text = "No meal planned",
-                    Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                    Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
                     HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Opacity = 0.6
                 };
                 Grid.SetRow(textBlock, 0);
                 grid.Children.Add(textBlock);
