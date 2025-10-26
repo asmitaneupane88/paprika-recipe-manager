@@ -148,7 +148,10 @@ public class AiHelper
 
         var jsonString = response.Value.Content[0].Text;
         
-        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(jsonString)?.recipe;
+        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(jsonString, new JsonSerializerOptions
+        {
+            Converters = { new UnitTypeJsonConverter() }
+        })?.recipe;
         
         if (recipe is null) return null;
 
