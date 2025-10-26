@@ -24,13 +24,18 @@ public sealed partial class StepViewer : NavigatorPage
 {
     [ObservableProperty] public partial ObservableCollection<ActiveStepInfo> Steps { get; set; } = [];
     
-    [ObservableProperty] public partial ObservableCollection<SavedRecipe> Recipes { get; set; } = [];
     
     public StepViewer(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
+        
+        _ = Initialize();
     }
 
+    private async Task Initialize()
+    {
+        Steps = (await ActiveStepInfo.GetAll()).ToObservableCollection();
+    }
 
     private async void ButtonAddRecipe_OnClick(object sender, RoutedEventArgs e)
     {
@@ -53,16 +58,41 @@ public sealed partial class StepViewer : NavigatorPage
             }
         };
         
-        var result = await dialog.ShowAsync();
-        if (result == ContentDialogResult.Primary)
+        await dialog.ShowAsync();
+
+        foreach (var rc in search.SelectedRecipes)
         {
+            if (rc.SavedRecipe.RootStepNode is null)
+            {
+                var dialog2 = new ContentDialog
+                {
+                    Title = "Error",
+                    Content = "This recipe does not have a root step node!\nPlease edit the recipe's steps to use it here.",
+                    PrimaryButtonText = "Ok",
+                    XamlRoot = this.XamlRoot,
+                };
+                
+                await dialog2.ShowAsync();
+                continue;
+            }
             
+            var activeStep = new ActiveStepInfo
+            {
+                RecipeTitle = rc.SavedRecipe.Title,
+                RecipeImageUrl = rc.SavedRecipe.ImageUrl,
+                RecipeId = Guid.NewGuid(), // used for when we need to split the steps
+                CurrentStep = rc.SavedRecipe.RootStepNode,
+                IngredientsUsed = []
+            };
+            
+            Steps.Add(activeStep);
         }
     }
 
-    private void ButtonResetAll_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonResetAll_OnClick(object sender, RoutedEventArgs e)
     {
-        
+        await Task.WhenAll(Steps.Select(s => ActiveStepInfo.Remove(s)));
+        Steps.Clear();
     }
 }
 
