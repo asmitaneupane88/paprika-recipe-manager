@@ -209,6 +209,21 @@ public class AiHelper
                     
             currentStep = newStep;
         }
+
+        var finishStep = new FinishStep();
+        
+        switch (currentStep)
+        {
+            case TimerStep timeS:
+                timeS.NextStep = new OutNode("Next", finishStep);
+                break;
+            case TextStep textS:
+                textS.OutNodes = [new OutNode("Next", finishStep)];
+                break;
+            case StartStep startS:
+                startS.Paths = [new OutNode("Start", finishStep)];
+                break;
+        }
         
         return savedRecipe;
     }

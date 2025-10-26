@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
+using Microsoft.Extensions.AI;
+using PuppeteerSharp;
 using Python.Runtime;
 using Python.Included;
+using RecipeApp.Services;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -74,7 +77,19 @@ public sealed partial class WebBrowserPage : NavigatorPage
         DownloadStatus = "Downloading HTML...";
 
         var source = WebViewControl.Source;
-        string html = await (WebViewControl.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML")?.AsTask() ?? new Task<string>(() => ""));
+        
+        var browserFetcher = new BrowserFetcher();
+        await browserFetcher.DownloadAsync();
+    
+        await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+        {
+            Headless = true
+        });
+    
+        await using var page = await browser.NewPageAsync();
+        await page.GoToAsync(source.ToString(), WaitUntilNavigation.Networkidle2);
+    
+        var html = await page.GetContentAsync();
         
         // used Claude Sonnet 4.5 to generate a lot of the boilerplate for interacting with python using pythonnet (and python.included)
         // had to go through and really work to get his to work.
@@ -155,6 +170,7 @@ public sealed partial class WebBrowserPage : NavigatorPage
                     }
 
                     PythonEngine.Initialize();
+                    PythonEngine.BeginAllowThreads();
                     
                     _pythonInitialized = true;
                 }
@@ -166,20 +182,48 @@ public sealed partial class WebBrowserPage : NavigatorPage
                     dynamic scrapers = Py.Import("recipe_scrapers");
                     dynamic scraper = scrapers.scrape_html(html: html, org_url: source.ToString());
 
+                    // can't serialize until converting it to a C# list due to pointers to the python objects.
+                    var ingredients = scraper.ingredients();
+                    var ingredientsList = new List<string>();
+                    
+                    if (ingredients != null)
+                    {
+                        using PyObject pyIngredients = ingredients;
+                        var length = (int)pyIngredients.Length();
+                            
+                        for (var i = 0; i < length; i++)
+                        {
+                            using PyObject item = pyIngredients[i];
+                            ingredientsList.Add(item.ToString());
+                        }
+                    }
+
                     return new
                     {
-                        Title = scraper.title().ToString(),
-                        Ingredients = ((IEnumerable<dynamic>)scraper.ingredients())
-                            .Select(i => i.ToString()).ToList(),
-                        Instructions = scraper.instructions().ToString(),
+                        Title = scraper.title()?.ToString(),
+                        Ingredients = ingredientsList,
+                        Instructions = scraper.instructions()?.ToString(),
                         TotalTime = scraper.total_time()?.ToString(),
-                        Yields = scraper.yields()?.ToString()
+                        Yields = scraper.yields()?.ToString(),
+                        Image = scraper.image()?.ToString(),
+                        Author = scraper.author()?.ToString(),
+                        Description = scraper.description()?.ToString(),
+                        PrepTime = scraper.prep_time()?.ToString(),
+                        CookTime = scraper.cook_time()?.ToString()
                     };
                 }
             });
             
             DownloadStatus = "Processing Recipe...";
-
+            
+            var aiResponse = await AiHelper.StringToSavedRecipe(JsonSerializer.Serialize(recipeInfo));
+            
+            if (aiResponse is null)
+                throw new Exception("Error processing recipe");
+            
+            await SavedRecipe.Add(aiResponse);
+            DownloadStatus = "Recipe Saved!";
+            Navigator.Navigate(new EditRecipe(Navigator, aiResponse), $"Edit Recipe: {aiResponse.Title}");
         }
         catch (Exception exception)
         {
