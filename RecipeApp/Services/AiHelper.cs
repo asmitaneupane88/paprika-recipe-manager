@@ -1,17 +1,12 @@
 ﻿using System.ClientModel;
-using AutoGen.Core;
-using AutoGen.OpenAI;
-using AutoGen.OpenAI.Extension;
 using OpenAI;
 using OpenAI.Chat;
 using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Services;
 
-
 /// <summary>
-/// good documentation here for the NuGet package used:
-/// https://microsoft.github.io/autogen-for-net/articles/Consume-LLM-server-from-LM-Studio.html
+/// Used to make calls to an OpenAI API easier.
 /// </summary>
 public class AiHelper
 {
@@ -38,6 +33,10 @@ public class AiHelper
         return _client;
     }
 
+    /// <summary>
+    /// tries to get a list of models from the endpoint
+    /// </summary>
+    /// <returns></returns>
     public static async Task<List<string>> GetModels()
     {
         _client ??= await InitClient();
@@ -46,6 +45,11 @@ public class AiHelper
         return modelsResponse?.Value?.Select(m => m.Id).ToList() ?? new List<string>();
     }
 
+    /// <summary>
+    /// sets the current model to use
+    /// </summary>
+    /// <param name="modelId"></param>
+    /// <returns></returns>
     public static async Task<bool> SetModel(string modelId)
     {
         _currentModel = modelId;
@@ -54,11 +58,22 @@ public class AiHelper
         return true;
     }
 
+    /// <summary>
+    /// converts a mealDb recipe to json and passes it to the StringToSavedRecipe function.
+    /// </summary>
+    /// <param name="mealDbRecipe"></param>
+    /// <returns></returns>
     public static async Task<SavedRecipe?> MealDbToSavedRecipe(MealDbRecipe mealDbRecipe)
     {
         return await StringToSavedRecipe(JsonSerializer.Serialize(mealDbRecipe));
     }
 
+    /// <summary>
+    /// calls the endpoint with a predefined JSON schema to convert the given string into something that almost looks like a recipe.
+    /// </summary>
+    /// <param name="content"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public static async Task<SavedRecipe?> StringToSavedRecipe(string content)
     {
         _client ??= await InitClient();

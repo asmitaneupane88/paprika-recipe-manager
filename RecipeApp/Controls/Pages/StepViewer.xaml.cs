@@ -1,25 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using RecipeApp.Models.RecipeSteps;
-
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+﻿using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Controls.Pages;
 
 /// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
+/// PPage to view active steps while cooking.
 /// </summary>
 public sealed partial class StepViewer : NavigatorPage
 {
@@ -38,6 +22,11 @@ public sealed partial class StepViewer : NavigatorPage
         Steps = (await ActiveStepInfo.GetAll()).ToObservableCollection();
     }
 
+    /// <summary>
+    /// shows a popup for the saved recipes and adds active steps for the selected saved recipes.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void ButtonAddRecipe_OnClick(object sender, RoutedEventArgs e)
     {
         var search = new SavedRecipeSearch();
@@ -104,12 +93,22 @@ public sealed partial class StepViewer : NavigatorPage
         }
     }
 
+    /// <summary>
+    /// removes all active steps.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void ButtonResetAll_OnClick(object sender, RoutedEventArgs e)
     {
         await Task.WhenAll(Steps.Select(s => ActiveStepInfo.Remove(s)));
         Steps.Clear();
     }
 
+    /// <summary>
+    /// on click for any button on a step. This finds the outnode through the tag and checks parents to find the tag for the active step.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void ButtonOutNode_OnClick(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement { Tag: OutNode node } element)
@@ -133,6 +132,9 @@ public sealed partial class StepViewer : NavigatorPage
         }
     }
 
+    /// <summary>
+    /// goes through and checks to see if any merge steps can merge
+    /// </summary>
     private async Task UpdateMergeSteps()
     {
         var merges = Steps
@@ -148,7 +150,13 @@ public sealed partial class StepViewer : NavigatorPage
             ;
         }
     }
-
+    
+    /// <summary>
+    /// updates an active step to the next node's step.
+    /// </summary>
+    /// <param name="step">current active step</param>
+    /// <param name="node">the current active step's outnode to go to</param>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     private async Task UpdateActiveStep(ActiveStepInfo step, OutNode node)
     {
         switch (node.Next)

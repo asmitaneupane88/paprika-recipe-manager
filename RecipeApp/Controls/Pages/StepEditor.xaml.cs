@@ -8,6 +8,10 @@ using Uno.Extensions.Specialized;
 
 namespace RecipeApp.Controls.Pages;
 
+/// <summary>
+/// Used for editing the steps of a recipe through a canvas showing the current steps,
+/// a toolbox for adding steps, and a properties panel for editing an individual step.
+/// </summary>
 public sealed partial class StepEditor : NavigatorPage
 {
     private SavedRecipe _savedRecipe;
@@ -30,12 +34,22 @@ public sealed partial class StepEditor : NavigatorPage
     public StartStep? SelectedStartStep => _selectedStep?.Step as StartStep;
     public FinishStep? SelectedFinishStep => _selectedStep?.Step as FinishStep;
 
-    
+    /// <summary>
+    /// helper method for use in xaml
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public Visibility IsNotNull(object? obj)
     {
         return obj is not null ? Visibility.Visible : Visibility.Collapsed;
     }
     
+    /// <summary>
+    /// helper method for use in xaml
+    /// </summary>
+    /// <param name="obj1"></param>
+    /// <param name="obj2"></param>
+    /// <returns></returns>
     public Visibility BothNull(object? obj1, object? obj2)
     {
         return obj1 is null && obj2 is null && _selectedStep is not null ? Visibility.Visible : Visibility.Collapsed;

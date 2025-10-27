@@ -3,19 +3,41 @@ using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Models;
 
+/// <summary>
+/// Used for the step viewer to keep track of necessary info for navigating through steps
+/// </summary>
 public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
 {
     [ObservableProperty] public partial string RecipeTitle { get; set; }
     [ObservableProperty] public partial string RecipeImageUrl { get; set; }
+    /// <summary>
+    /// not a reference to the original recipe, just an indicator to group up steps that started with the same root step.
+    /// </summary>
     [ObservableProperty] public partial Guid RecipeId { get; set; }
     
+    /// <summary>
+    /// time left on the timer, in minutes.
+    /// </summary>
     [ObservableProperty] public partial double TimeLeft { get; set; }
         
+    /// <summary>
+    /// the current step to display, this updates the bindable content automatically
+    /// </summary>
     public IStep CurrentStep { get; set { SetProperty( ref field, value); ResetBindableContent(); }}
     
+    /// <summary>
+    /// a list of ISteps and the ingredients used for that step
+    /// </summary>
     [ObservableProperty] public partial List<StepIngredientUsage> IngredientsUsed { get; set; }
 
+    /// <summary>
+    /// content to display on the step viewer
+    /// </summary>
     [JsonIgnore] public object BindableContent => GetBindableContent();
+    
+    /// <summary>
+    /// true for every step except the merge step
+    /// </summary>
     [JsonIgnore] public Visibility NextButtonsVisible => CurrentStep is MergeStep ? Visibility.Collapsed : Visibility.Visible;
 
     private object GetBindableContent()
@@ -152,6 +174,9 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
         return timeSpan.ToString(@"mm\:ss");
     }
     
+    /// <summary>
+    /// triggers an update for the bindable content and visibility of the next buttons.
+    /// </summary>
     public void ResetBindableContent()
     {
         OnPropertyChanged(nameof(BindableContent));
@@ -177,6 +202,10 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
     }
 }
 
+/// <summary>
+/// Basically a tuple of the IStep and the ingredients used in that step.
+/// A dictionary does not work with ISteps.
+/// </summary>
 public class StepIngredientUsage
 {
     public IStep Step { get; set; } = null!;

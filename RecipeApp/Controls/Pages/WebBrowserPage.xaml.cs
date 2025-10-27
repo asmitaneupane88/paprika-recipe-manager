@@ -6,15 +6,13 @@ using Python.Runtime;
 using Python.Included;
 using RecipeApp.Services;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace RecipeApp.Controls.Pages;
 
-/// <summary>
-/// An empty page that can be used on its own or navigated to within a Frame.
-/// </summary>
 public sealed partial class WebBrowserPage : NavigatorPage
 {
+    
+    private static bool _pythonInitialized = false;
+
     [ObservableProperty] private partial string SearchBarText { get; set; } = "";
     [ObservableProperty] private partial string DownloadStatus { get; set; } = "";
 
@@ -29,37 +27,47 @@ public sealed partial class WebBrowserPage : NavigatorPage
         InitializeWebView();
     }
 
+    /// <summary>
+    /// sets up some events and navigates to google
+    /// </summary>
     private async void InitializeWebView()
     {
-        try
+        await WebViewControl.EnsureCoreWebView2Async();
+        WebViewControl.CoreWebView2.Navigate("https://google.com");
+        WebViewControl.CoreWebView2.SourceChanged += (_, _) 
+            => { SearchBarText=WebViewControl.CoreWebView2.Source; };
+        WebViewControl.CoreWebView2.NewWindowRequested += (_, args) =>
         {
-            await WebViewControl.EnsureCoreWebView2Async();
-            WebViewControl.CoreWebView2.Navigate("https://google.com");
-            WebViewControl.CoreWebView2.SourceChanged += (_, _) 
-                => { SearchBarText=WebViewControl.CoreWebView2.Source; };
-            WebViewControl.CoreWebView2.NewWindowRequested += (_, args) =>
-            {
-                args.Handled = true;
-                WebViewControl.CoreWebView2.Navigate(args.Uri);
-            };
-        }
-        catch (Exception ex)
-        {
-            // Handle initialization errors
-        }
+            args.Handled = true;
+            WebViewControl.CoreWebView2.Navigate(args.Uri);
+        };
     }
 
+    /// <summary>
+    /// routes to webview go back
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void ButtonBack_OnClick(object sender, RoutedEventArgs e)
     {
         WebViewControl.GoBack();
     }
 
+    /// <summary>
+    /// routes to webview go forward
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void ButtonForward_OnClick(object sender, RoutedEventArgs e)
     {
         WebViewControl.GoForward();
-
     }
 
+    /// <summary>
+    /// checks if the text is a valid url, if it is it navigates to it, otherwise it navigates to google.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void ButtonGo_OnClick(object sender, RoutedEventArgs e)
     {
         if (Uri.TryCreate(SearchBarText, UriKind.Absolute, out var uri))
@@ -69,7 +77,13 @@ public sealed partial class WebBrowserPage : NavigatorPage
     }
     
     
-    private static bool _pythonInitialized = false;
+    /// <summary>
+    /// handles downloading the html, setting up python with the recipe scrapers module, passing the recipe to the ai processing model, and saving the recipe.
+    /// Do not change any package versions for the python stuff, this barely works.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    /// <exception cref="Exception"></exception>
     private async void ButtonDownload_OnClick(object sender, RoutedEventArgs e)
     {
         DownloadVis = Visibility.Collapsed;
