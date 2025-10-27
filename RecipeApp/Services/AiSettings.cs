@@ -1,4 +1,8 @@
-﻿namespace RecipeApp.Models;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
+    
+namespace RecipeApp.Services;
 
 public partial class AiSettings : ObservableObject
 {
@@ -6,20 +10,22 @@ public partial class AiSettings : ObservableObject
     [ObservableProperty] public partial string Endpoint { get; set; }
     [ObservableProperty] public partial string LastUsedModel { get; set; }
 
+    private static string? _saveFilePath;
+    private static AiSettings? _settings;
+    private static bool _inSave;
+    private static bool _requireResave;
+
     public AiSettings()
     {
         PropertyChanged += (_, _) => _ = SaveSettings();
     }
     
-    private static string? _saveFilePath { get; set; }
-    private static AiSettings? _settings;
-    private static bool _inSave;
-    private static bool _requireResave;
     public static async Task<AiSettings> GetSettings()
     {
         if (_settings is not null) return _settings;
 
         _saveFilePath ??= GetSaveFilePath();
+        Console.WriteLine($"[DEBUG] Loading AI settings from: {_saveFilePath}");
         
         if (File.Exists(_saveFilePath) && await File.ReadAllTextAsync(_saveFilePath) is { Length: > 0 } fileData)
         {
@@ -28,10 +34,12 @@ public partial class AiSettings : ObservableObject
                 try
                 {
                     _settings = JsonSerializer.Deserialize<AiSettings>(fileData) ?? throw new Exception();
+                    Console.WriteLine($"[DEBUG] Endpoint loaded: {_settings.Endpoint}");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // ignored.
+                    Console.WriteLine($"[ERROR] Failed to load AiSettings.json: {ex.Message}");
+                    _settings = new AiSettings();
                 }
             }
 
@@ -56,12 +64,13 @@ public partial class AiSettings : ObservableObject
         }
 
         _inSave = true;
-
-        if (!Directory.Exists(Path.GetDirectoryName(_saveFilePath)))
-            Directory.CreateDirectory(Path.GetDirectoryName(_saveFilePath)!); 
         
-        var json = JsonSerializer.Serialize(_settings);
+        var dir = Path.GetDirectoryName(_saveFilePath);
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir!); 
+        
+        var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions {WriteIndented = true});
         await File.WriteAllTextAsync(_saveFilePath, json);
+        Console.WriteLine($"[DEBUG] Saved AI settings to {_saveFilePath}");
         
         _inSave = false;
 
@@ -75,8 +84,8 @@ public partial class AiSettings : ObservableObject
     private static string GetSaveFilePath()
     {
         const string fileName = "AiSettings.json";
-        var appdata = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var LocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         
-        return Path.Combine(appdata, "RecipeApp", fileName);
+        return Path.Combine(LocalAppData, "O=RecipeApp", "com.companyname.RecipeApp", "Settings", fileName);
     }
 }

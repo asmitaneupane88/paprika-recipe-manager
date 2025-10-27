@@ -1,15 +1,37 @@
-﻿using System.Drawing.Printing;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text;
-using Windows.Graphics.Printing;
+using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+
+using Windows.Storage;
+using Windows.Storage.Pickers;
+
+using RecipeApp.Models;
 using RecipeApp.Services;
 using Uno.Extensions;
+
+using System.Drawing.Printing;
+using Windows.Devices.Midi;
+using Windows.Graphics.Printing;
 
 namespace RecipeApp.Controls.Pages;
 
 public sealed partial class RecipeListPage : NavigatorPage
 {
-    private const int AllCategorySortOrder = -20252025;
+    public RecipeListPage()
+    {
+        this.InitializeComponent();
+    }
+
+private const int AllCategorySortOrder = -20252025;
+
+    private readonly string PdfSavePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "SavedPdfs");
     
     [ObservableProperty] private partial ObservableCollection<RecipeCard> AllRecipes { get; set; } = [];
     [ObservableProperty] private partial ObservableCollection<RecipeCard> FilteredRecipes { get; set; } = [];
@@ -154,17 +176,121 @@ public sealed partial class RecipeListPage : NavigatorPage
         await UpdateShownRecipes();
     }
     
-    private async void OnButtonUploadPdfClick(object sender, RoutedEventArgs e)
-    {
+    private async void OnButtonUploadPdfClick(object sender, RoutedEventArgs e)=>
         await UploadRecipePdfAsync();
-    }
-
     private async Task UploadRecipePdfAsync()
     {
         var picker = new FileOpenPicker();
         picker.FileTypeFilter.Add(".pdf");
         picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+
+#if WINDOWS
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.Instance));
+#endif
+        var file = await picker.PickSingleFileAsync();
+        if (file == null)
+            return;
+
+        try
+        {
+            var localFolderPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "RecipeAppFiles");
+            Directory.CreateDirectory(localFolderPath);
+
+            var savedFilePath = Path.Combine(localFolderPath, file.Name);
+            await file.CopyAsync(await StorageFolder.GetFolderFromPathAsync(localFolderPath), file.Name,
+                NameCollisionOption.GenerateUniqueName);
+
+            var htmlText = await FileHelper.ConvertPdfToTextAsync(savedFilePath);
+            var htmlPath = Path.Combine(localFolderPath, $"{Path.GetFileNameWithoutExtension(savedFilePath)}.html");
+            await File.WriteAllTextAsync(htmlPath, htmlText);
+
+            var selectedRecipe = GetSelectedRecipes().FirstOrDefault();
+            if (selectedRecipe != null)
+            {
+                selectedRecipe.PdfPath = savedFilePath;
+                selectedRecipe.HtmlPath = htmlPath;
+                await SavedRecipe.Update(selectedRecipe);
+            }
+
+            try
+            {
+                var aiRecipe = await AiHelper.StringToSavedRecipe(htmlText);
+                if (aiRecipe != null)
+                    await SavedRecipe.Add(aiRecipe);
+
+                var aiDialog = new ContentDialog
+                {
+                    Title = "AI Recipe Created",
+                    Content = aiRecipe != null? $"Created new recipe from PDF:\n{aiRecipe.Title}": "AI returned no recipe",
+                    CloseButtonText = "OK",
+                    XamlRoot = XamlRoot
+                };
+                await aiDialog.ShowAsync();
+            }
+            catch (Exception aiEx)
+            {
+                await new ContentDialog
+                {
+                    Title = "AI Conversion Failed",
+                    Content = $"Could not generate recipe automatically.\n{aiEx.Message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
+
+            await new ContentDialog
+            {
+                Title = "PDF Upload & Converted",
+                Content = $"File saved:\n{savedFilePath}\n\nHTML created:\n{htmlPath}",
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            }.ShowAsync();
+            await UpdateShownRecipes();
+        }
+        catch (Exception ex)
+        {
+            await new ContentDialog
+            {
+                Title = "PDF Upload Failed",
+                Content = ex.Message,
+                CloseButtonText = "OK",
+                XamlRoot = this.XamlRoot
+            }.ShowAsync();
+        }
     }
+
+    private async void OnPdfIconClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: RecipeCard card } && !string.IsNullOrEmpty(card.SavedRecipe.PdfPath))
+        {
+            var pdfPath = card.SavedRecipe.PdfPath;
+
+            if (File.Exists(pdfPath))
+            {
+#if WINDOWS
+            var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(pdfPath);
+            await Windows.System.Launcher.LaunchFileAsync(file);
+#else
+                // For Uno on other platforms (if any)
+                var uri = new Uri(pdfPath);
+                await Windows.System.Launcher.LaunchUriAsync(uri);
+#endif
+            }
+            else
+            {
+                await new ContentDialog
+                {
+                    Title = "PDF Not Found",
+                    Content = $"The file could not be found:\n{pdfPath}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+            }
+        }
+
+    }
+
 
     private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)
     {

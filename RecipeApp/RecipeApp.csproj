@@ -39,6 +39,7 @@
       <PackageReference Include="AutoGen.LMStudio" />
       <PackageReference Include="PuppeteerSharp" />
       <PackageReference Include="Python.Included" />
+      <PackageReference Include="UglyToad.PdfPig" />
     </ItemGroup>
     <ItemGroup>
       <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />

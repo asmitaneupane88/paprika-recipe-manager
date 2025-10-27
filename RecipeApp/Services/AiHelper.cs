@@ -5,6 +5,7 @@ using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Services;
 
+
 /// <summary>
 /// Used to make calls to an OpenAI API easier.
 /// </summary>
@@ -163,10 +164,14 @@ public class AiHelper
 
         var jsonString = response.Value.Content[0].Text;
         
-        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(jsonString, new JsonSerializerOptions
-        {
-            Converters = { new UnitTypeJsonConverter() }
-        })?.recipe;
+        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(
+            jsonString,
+            new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
+                PropertyNameCaseInsensitive = true
+            }
+        )?.recipe;
         
         if (recipe is null) return null;
 

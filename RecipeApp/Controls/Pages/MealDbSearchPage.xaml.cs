@@ -16,7 +16,7 @@ namespace RecipeApp.Controls.Pages
         {
             if (sender is FrameworkElement element && element.DataContext is MealDbRecipe mealDbRecipe)
             {
-                var recipe = mealDbRecipe.ToRecipe();
+                var recipe = mealDbRecipe.ToSavedRecipe();
                 Navigator.Navigate(new RecipeDetailsPage(Navigator, recipe), recipe.Title);
             }
         }
