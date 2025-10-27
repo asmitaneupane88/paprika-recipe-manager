@@ -9,7 +9,7 @@ This feature allows users to upload recipe PDFs, convert them into readable text
 1. User clicks to **Upload** button on the `Saved Recipe` page.
 2. `RecipeListPage.xaml.cs` opens a file picker for `.pdf` files.
 3. The selected PDF is saved in `Documents\RecipeAppFiles`.
-4. `FileHelper.ConvertPdfToTextAsync()` converts the file into HTLM.
+4. `FileHelper.ConvertPdfToTextAsync()` converts the file into HTML.
 5. The text is sent to `AiHelpper.StringToSavedRecipe()` to create a structured recipe.
 6. The new recipe is stored via `SavedRecipe.Add(aiRecipe`.
 7. User receives dialogs summarizing upload, conversion, and AI generation results.
@@ -163,7 +163,7 @@ If AI succeeds, a new recipe appears in Saved Recipes:
 1. Implement `HasPdf` property to display 📄 icon on recipe cards.
 2. Add offline detection when LM Studio server is not running (Optional)
 3. Merge duplicate recipes created from identical PDFs.
-4. Extend AI schema to include prep time, servings, and nutrition (Optional)
+
 
 
 

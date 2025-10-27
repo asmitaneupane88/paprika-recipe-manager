@@ -14,10 +14,13 @@
       href: recipe-views.md
     - name: Recipe ViewModels
       href: recipe-viewmodels.md
-- name: Developer Documentation
+- name: Services
   items:
     - name: MealDB API Search Feature
       href: mealdb-api.md
+  items:
+    - name: PDF Upload and AI Conversion Feature
+      href: PdfUploaded.md
 - name: Application UI
   href: application-ui.md
 - name: Application Logic

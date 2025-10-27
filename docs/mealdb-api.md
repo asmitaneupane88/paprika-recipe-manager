@@ -28,3 +28,20 @@ var results = await _recipeService.SearchAsync(Query);
 Recipes.Clear();
 foreach (var r in results)
     Recipes.Add(r);
+
+5. **Configure API Connectivity**
+- **Purpose**: Ensure the application can connect to the **MealDB** API for recipe search functionality (handled by `Services/ApiControl.cs` and `ViewModels/SearchViewModel.cs`)
+- **Steps**:
+  1. **Verify Internet Access**:
+     - Ensure a stable internet connection, as the MealDB API requires online access.
+     - Test connectivity by pinging the API endpoint:
+  ```bash
+     ping www.themealdb.com
+  ```
+
+## Check API Configuration:
+- The MealDB API's free tier does not required an API key, and the current implementation hardcodes the API URL in `Services/ApiControl.cs`.
+## Test API Connectivity:
+- Run the application (`dotnet run --project ReceipeApp/RecipeApp.csproj`)
+- Navigate to the search page (`Controls/Pages/MealDbSearchPage`) and perform a test search (e.g., "chicken")
+- Verify that `SearchViewModel.cs` polulates `SearchResults` with data from `MealDBRecipe.cs`.
