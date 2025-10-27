@@ -211,13 +211,24 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 if (mealPlan != null)
                 {
                     // Add the recipe information
-                    var recipeInfo = new TextBlock
+                    // Create a stack panel to hold the recipe info and date
+                    var stackPanel = new StackPanel
                     {
-                        Text = $"{mealPlan.Recipe.Title}",
-                        TextWrapping = TextWrapping.Wrap,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
+
+                    var recipeInfo = new TextBlock
+                    {
+                        Text = mealPlan.Recipe.Title,
+                        TextWrapping = TextWrapping.Wrap,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                    };
+                    stackPanel.Children.Add(recipeInfo);
+
+                    Grid.SetRow(stackPanel, 0);
+                    grid.Children.Add(stackPanel);
                     Grid.SetRow(recipeInfo, 0);
                     grid.Children.Add(recipeInfo);
                 }
@@ -352,16 +363,24 @@ public sealed partial class MealPlannerPage : NavigatorPage
                         cellGrid.Children.Remove(item);
                     }
 
-                    // Add the recipe information
-                    var recipeInfo = new TextBlock
+                    // Create a stack panel to hold the recipe info and meal type
+                    var stackPanel = new StackPanel
                     {
-                        Text = $"{savedRecipe.Title}",
-                        TextWrapping = TextWrapping.Wrap,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     };
-                    Grid.SetRow(recipeInfo, 0);
-                    cellGrid.Children.Add(recipeInfo);
+
+                    var recipeInfo = new TextBlock
+                    {
+                        Text = savedRecipe.Title,
+                        TextWrapping = TextWrapping.Wrap,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                    };
+                    stackPanel.Children.Add(recipeInfo);
+
+                    Grid.SetRow(stackPanel, 0);
+                    cellGrid.Children.Add(stackPanel);
                 }
             }
         }

@@ -24,9 +24,10 @@ public class MealPlanCollection
 
     public void AddMealPlan(DateTime date, IRecipe recipe, MealType mealType)
     {
-        // Remove any existing meal plan for this slot
+        // Ensure we're comparing exact dates, not just days of the week
+        var exactDate = date.Date; // Normalize to start of day
         var existingPlan = MealPlans.FirstOrDefault(mp => 
-            mp.Date.Date == date.Date && 
+            mp.Date.Date.Equals(exactDate) && 
             mp.MealType == mealType);
         
         if (existingPlan != null)
@@ -45,8 +46,10 @@ public class MealPlanCollection
 
     public MealPlan? GetMealPlan(DateTime date, MealType mealType)
     {
+        // Ensure we're comparing exact dates, not just days of the week
+        var exactDate = date.Date; // Normalize to start of day
         return MealPlans.FirstOrDefault(mp => 
-            mp.Date.Date == date.Date && 
+            mp.Date.Date.Equals(exactDate) && 
             mp.MealType == mealType);
     }
 }
