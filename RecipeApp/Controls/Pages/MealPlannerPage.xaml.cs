@@ -13,7 +13,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
     private DateTime _currentWeekStart;
     private readonly DateTime _minDate;
     private readonly DateTime _maxDate;
-
+    // test master rulesets
     public MealPlannerPage(Navigator? nav = null) : base(nav)
     {
         // Initialize date constraints (1 year past to 1 year future)
