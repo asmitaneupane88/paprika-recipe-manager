@@ -9,6 +9,7 @@ using Windows.Foundation;
 using System;
 using System.Linq;
 using Microsoft.UI.Xaml.Markup;
+using RecipeApp.Controls.Dialogs;
 
 namespace RecipeApp.Controls.Pages;
 
@@ -289,41 +290,10 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 return;
             }
 
-            // Create the recipe selection dialog
-            var recipeListView = new ListView
-            {
-                ItemsSource = savedRecipes,
-                SelectionMode = ListViewSelectionMode.Single,
-                MaxHeight = 400,
-                MinWidth = 400
-            };
-
-            // Create a recipe item template
-            recipeListView.ItemTemplate = (DataTemplate)XamlReader.Load(
-                "<DataTemplate xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">" +
-                    "<Grid Padding=\"8\">" +
-                        "<Grid.RowDefinitions>" +
-                            "<RowDefinition Height=\"Auto\"/>" +
-                            "<RowDefinition Height=\"Auto\"/>" +
-                        "</Grid.RowDefinitions>" +
-                        "<TextBlock Text=\"{Binding Title}\" Style=\"{StaticResource BodyStrongTextBlockStyle}\" TextWrapping=\"Wrap\"/>" +
-                        "<TextBlock Text=\"{Binding Category}\" Grid.Row=\"1\" Style=\"{StaticResource CaptionTextBlockStyle}\" Opacity=\"0.8\"/>" +
-                    "</Grid>" +
-                "</DataTemplate>");
-
-            var dialog = new ContentDialog
-            {
-                Title = $"Select Recipe for {mealType.ToString()} on {date:MMM d}",
-                Content = recipeListView,
-                PrimaryButtonText = "Add",
-                CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary,
-                XamlRoot = this.XamlRoot
-            };
-
-            var result = await dialog.ShowAsync();
+            var dialog = new RecipeSelectionDialog(this.XamlRoot, savedRecipes, date, mealType);
+            var savedRecipe = await dialog.ShowAsync();
             
-            if (result == ContentDialogResult.Primary && recipeListView.SelectedItem is SavedRecipe savedRecipe)
+            if (savedRecipe != null)
             {
                 // Add the meal plan
                 await MealPlanCollection.AddMealPlan(date, savedRecipe, mealType);
