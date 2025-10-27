@@ -14,5 +14,6 @@
     <PackageVersion Include="NUnit" Version="4.1.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
     <PackageVersion Include="PuppeteerSharp" Version="20.2.4" />
+    <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
   </ItemGroup>
 </Project>
