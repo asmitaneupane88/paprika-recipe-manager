@@ -10,17 +10,19 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
     
     [ObservableProperty] public partial double TimeLeft { get; set; }
         
-    [ObservableProperty] public partial IStep CurrentStep { get; set; }
+    public IStep CurrentStep { get; set { SetProperty( ref field, value); ResetBindableContent(); }}
     
-    [ObservableProperty] public partial Dictionary<IStep, RecipeIngredient> IngredientsUsed { get; set; }
+    [ObservableProperty] public partial List<StepIngredientUsage> IngredientsUsed { get; set; }
 
     [JsonIgnore] public object BindableContent => GetBindableContent();
+    [JsonIgnore] public Visibility NextButtonsVisible => CurrentStep is MergeStep ? Visibility.Collapsed : Visibility.Visible;
 
     private object GetBindableContent()
     {
         return CurrentStep switch
         {
             StartStep startStep => GetStartDescription(startStep),
+            MergeStep mergeStep => "Waiting for other steps to be completed...",
             TextStep textStep => textStep.BindableDescription??"",
             TimerStep timerStep => GetTimerContent(timerStep),
             _ => "",
@@ -40,9 +42,9 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
             sb.AppendLine($"    Ingredients: ");
             foreach (var ingredient in path.MinIngredients.OrderBy(i => i.Name))
             {
-                var maxString = path.MaxIngredients
+                var maxString = (path.MaxIngredients
                     .FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase))
-                    is { } maxIngredient && maxIngredient.Quantity > ingredient.Quantity
+                    is { } maxIngredient && (maxIngredient.Quantity - 0.001) > ingredient.Quantity)
                     ? $"-{maxIngredient.Quantity}" 
                     : "";
                     
@@ -56,6 +58,41 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
 
     private StackPanel GetTimerContent(TimerStep timerStep)
     {
-        throw new NotImplementedException();
+        return new StackPanel();
     }
+    
+    public void ResetBindableContent()
+    {
+        OnPropertyChanged(nameof(BindableContent));
+        OnPropertyChanged(nameof(NextButtonsVisible));
+    }
+    
+    public void AddIngredientsForStep(IStep step, List<RecipeIngredient> ingredients)
+    {
+        var existing = IngredientsUsed.FirstOrDefault(x => ReferenceEquals(x.Step, step));
+        
+        if (existing != null)
+        {
+            existing.Ingredients = ingredients;
+        }
+        else
+        {
+            IngredientsUsed.Add(new StepIngredientUsage
+            {
+                Step = step,
+                Ingredients = ingredients
+            });
+        }
+    }
+    
+    public List<RecipeIngredient>? GetIngredientsForStep(IStep step)
+    {
+        return IngredientsUsed.FirstOrDefault(x => ReferenceEquals(x.Step, step))?.Ingredients;
+    }
+}
+
+public class StepIngredientUsage
+{
+    public IStep Step { get; set; } = null!;
+    public List<RecipeIngredient> Ingredients { get; set; } = [];
 }

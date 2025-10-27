@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using RecipeApp.Models.RecipeSteps;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -107,6 +108,91 @@ public sealed partial class StepViewer : NavigatorPage
     {
         await Task.WhenAll(Steps.Select(s => ActiveStepInfo.Remove(s)));
         Steps.Clear();
+    }
+
+    private async void ButtonOutNode_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: OutNode node } element)
+        {
+            ActiveStepInfo? step = null;
+            var parent = VisualTreeHelper.GetParent(element);
+            while (step is null)
+            {
+                if (parent is null) 
+                    return;
+                
+                if (parent is FrameworkElement { Tag: ActiveStepInfo stepInfo })
+                    step = stepInfo;
+                
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            step.AddIngredientsForStep(step.CurrentStep, step.CurrentStep.IngredientsToUse?.ToList()??[]);
+
+            switch (node.Next)
+            {
+                case FinishStep finishStep:
+                    //TODO we have the ingredients used, remove from pantry
+                    
+                    Steps.Remove(step);
+                    await ActiveStepInfo.Remove(step);
+                    break;
+                case SplitStep splitStep:
+                    foreach (var outNode in splitStep.OutNodes.Where(on => on.Next is not null))
+                    {
+                        var newActive = new ActiveStepInfo
+                        {
+                            RecipeTitle = step.RecipeTitle,
+                            RecipeImageUrl = step.RecipeImageUrl,
+                            RecipeId = step.RecipeId,
+                            CurrentStep = outNode.Next!,
+                            IngredientsUsed = step.IngredientsUsed,
+                        };
+                        
+                        Steps.Add(newActive);
+                        await ActiveStepInfo.Add(newActive);
+                    }
+                    
+                    Steps.Remove(step);
+                    await ActiveStepInfo.Remove(step);
+                    break;
+                case MergeStep mergeStep:
+                    if (Steps.Any(i => i.CurrentStep == mergeStep))
+                    {
+                        Steps.Remove(step);
+                        await ActiveStepInfo.Remove(step);
+                    }
+                    else
+                    {
+                        step.CurrentStep = node.Next;
+                    }
+                    break;
+                case TextStep textStep:
+                case TimerStep timerStep:
+                    step.TimeLeft = node.Next.MinutesToComplete;
+                    step.CurrentStep = node.Next;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            UpdateMergeSteps();
+        }
+    }
+
+    private void UpdateMergeSteps()
+    {
+        var merges = Steps
+            .Where(s => s.CurrentStep is MergeStep)
+            .ToList();
+        
+        foreach (var merge in merges)
+        {
+            var waitingOnCount = Steps.Count(s => s.RecipeId == merge.RecipeId && s.CurrentStep.GetAllPossibleMerges().Contains(merge.CurrentStep));
+            
+            if (waitingOnCount == 0 && merge.CurrentStep is MergeStep { NextStep: { Next: { } next } } ms)
+                merge.CurrentStep = next;
+        }
     }
 }
 
