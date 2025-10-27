@@ -25,6 +25,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
             this.InitializeComponent();
             _currentWeekStart = GetStartOfWeek(DateTime.Today);
             UpdateDateDisplay();
+            UpdateDayHeaders();
             LoadAndInitializeMealPlans();
         }    private DateTime GetStartOfWeek(DateTime date)
     {
