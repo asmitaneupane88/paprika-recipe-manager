@@ -129,7 +129,29 @@ public sealed partial class StepViewer : NavigatorPage
 
             step.AddIngredientsForStep(step.CurrentStep, step.CurrentStep.IngredientsToUse?.ToList()??[]);
             
-            switch (node.Next)
+            await UpdateActiveStep(step, node);
+        }
+    }
+
+    private async Task UpdateMergeSteps()
+    {
+        var merges = Steps
+            .Where(s => s.CurrentStep is MergeStep)
+            .ToList();
+        
+        foreach (var merge in merges)
+        {
+            var waitingOnCount = Steps.Where(s => s != merge).Count(s => s.RecipeId == merge.RecipeId && s.CurrentStep.GetAllPossibleMerges().Contains(merge.CurrentStep));
+            
+            if (waitingOnCount == 0 && merge.CurrentStep is MergeStep { NextStep: { } nextNode } ms)
+                await UpdateActiveStep(merge, nextNode);
+            ;
+        }
+    }
+
+    private async Task UpdateActiveStep(ActiveStepInfo step, OutNode node)
+    {
+        switch (node.Next)
             {
                 case FinishStep finishStep:
                     //TODO we have the ingredients used, remove from pantry
@@ -182,23 +204,7 @@ public sealed partial class StepViewer : NavigatorPage
                     throw new ArgumentOutOfRangeException();
             }
 
-            UpdateMergeSteps();
-        }
-    }
-
-    private void UpdateMergeSteps()
-    {
-        var merges = Steps
-            .Where(s => s.CurrentStep is MergeStep)
-            .ToList();
-        
-        foreach (var merge in merges)
-        {
-            var waitingOnCount = Steps.Count(s => s.RecipeId == merge.RecipeId && s.CurrentStep.GetAllPossibleMerges().Contains(merge.CurrentStep));
-            
-            if (waitingOnCount == 0 && merge.CurrentStep is MergeStep { NextStep: { Next: { } next } } ms)
-                merge.CurrentStep = next;
-        }
+            await UpdateMergeSteps();
     }
 }
 
