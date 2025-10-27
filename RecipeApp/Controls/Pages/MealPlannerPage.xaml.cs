@@ -190,6 +190,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
         _currentWeekStart = GetStartOfWeek(DateTime.Today);
         UpdateDateDisplay();
         UpdateDayHeaders();
+        LoadAndInitializeMealPlans(); // Reload meal plans for the current week
     }
 
     private void ClearAllHighlights()
