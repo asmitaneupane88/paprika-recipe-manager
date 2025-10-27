@@ -176,6 +176,7 @@
                                                     <system:String>OZ</system:String>
                                                     <system:String>LB</system:String>
                                                     <system:String>KG</system:String>
+                                                    <system:String>ITEM</system:String>
                                                 </ComboBox>
                                             </Grid>
 

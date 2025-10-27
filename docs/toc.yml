@@ -18,8 +18,17 @@
   items:
     - name: MealDB API Search Feature
       href: mealdb-api.md
+- name: NuGet Packages
+  href: nuget-packages.md
 - name: Application UI
   href: application-ui.md
+  items:
+    - name: UI Quickstart
+      href: ui-quickstart.md
+    - name: Pages
+      href: pages.md
+    - name: Controls
+      href: controls.md
 - name: Application Logic
   href: application-logic.md
   items:

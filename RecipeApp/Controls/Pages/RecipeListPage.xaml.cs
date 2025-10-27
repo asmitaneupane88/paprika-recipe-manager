@@ -11,28 +11,38 @@ public sealed partial class RecipeListPage : NavigatorPage
 {
     private const int AllCategorySortOrder = -20252025;
     
-    private ObservableCollection<RecipeCard> FilteredRecipes { get; set => SetField(ref field, value); } = [];
+    [ObservableProperty] private partial ObservableCollection<RecipeCard> AllRecipes { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<RecipeCard> FilteredRecipes { get; set; } = [];
     
     private string SearchText
     {
         get;
-        set { SetField(ref field, value); _ = UpdateShownRecipes(); }
+        set { SetProperty(ref field, value); _ = UpdateShownRecipes(); }
     } = "";
     
-    private SavedCategory SelectedCategory { get; set { SetField(ref field, value); _ = UpdateShownRecipes(); } }
-    private ObservableCollection<SavedCategory> Categories { get; set => SetField(ref field, value); } = [];
-    
-    private bool CardsSelected { get; set => SetField(ref field, value); } = false;
-    private Visibility ListVisibility { get; set => SetField(ref field, value); } = Visibility.Visible;
-    private Visibility GridVisibility { get; set => SetField(ref field, value); } = Visibility.Collapsed;
+    private SavedCategory SelectedCategory { get; set { SetProperty(ref field, value); _ = UpdateShownRecipes(); } }
+    [ObservableProperty] private partial ObservableCollection<SavedCategory> Categories { get; set; } = [];
+    [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
+    [ObservableProperty] private partial Visibility ListVisibility { get; set; } = Visibility.Visible;
+    [ObservableProperty] private partial Visibility GridVisibility { get; set; } = Visibility.Collapsed;
     
     public RecipeListPage(Navigator? nav = null) : base(nav)
     {
         this.InitializeComponent();
         
-        UpdateShownCategories()
-            .ContinueWith(_ => UpdateShownRecipes());
+        InitializeRecipes()
+            .ContinueWith(_ => UpdateShownCategories()
+                .ContinueWith(_ => UpdateShownRecipes()));
         
+    }
+
+    private async Task InitializeRecipes()
+    {
+        var recipes = await SavedRecipe.GetAll();
+        
+        AllRecipes = recipes
+            .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
+            .ToObservableCollection();
     }
 
     private async Task UpdateShownCategories()
@@ -51,18 +61,13 @@ public sealed partial class RecipeListPage : NavigatorPage
     
     private async Task UpdateShownRecipes()
     {
-        var recipes = await SavedRecipe.GetAll();
-
-        FilteredRecipes = recipes
-            .Where(r => r.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
+        FilteredRecipes = AllRecipes
+            .Where(r => r.SavedRecipe.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
             .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
-                        || (r.Category is not null 
-                        && r.Category.Trim()
-                            .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
-            .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
+                        || (r.SavedRecipe.Category is not null 
+                            && r.SavedRecipe.Category.Trim()
+                                .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
             .ToObservableCollection();
-        
-        RefreshSelected();
     }
     
     private void RefreshSelected()
@@ -141,9 +146,10 @@ public sealed partial class RecipeListPage : NavigatorPage
 
     private async void OnButtonRemoveClick(object sender, RoutedEventArgs e)
     {
-        var recipesToRemove = GetSelectedRecipes();
+        var recipesToRemove = GetSelectedRecipeCards();
         
-        await SavedRecipe.Remove(recipesToRemove);
+        await SavedRecipe.Remove(recipesToRemove.Select(r => r.SavedRecipe).ToArray());
+        recipesToRemove.ForEach(r => AllRecipes.Remove(r));
         
         await UpdateShownRecipes();
     }

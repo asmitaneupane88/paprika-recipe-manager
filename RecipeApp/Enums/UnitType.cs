@@ -12,4 +12,5 @@ public enum UnitType
     OZ,
     LB,
     KG,
+    ITEM
 }

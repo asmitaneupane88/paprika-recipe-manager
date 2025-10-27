@@ -36,6 +36,27 @@ public abstract partial class IStep : ObservableObject
 
     [ObservableProperty] public partial double MinutesToComplete { get; set; } = 0;
     [ObservableProperty] public partial ObservableCollection<RecipeIngredient> IngredientsToUse { get; set; } = [];
+
+    public List<MergeStep> GetAllPossibleMerges(List<IStep>? visitedSteps = null)
+    {
+        visitedSteps ??= [];
+        
+        visitedSteps.Add(this);
+
+        var mergeSteps = new List<MergeStep>();
+        foreach (var outNode in GetOutNodes())
+        {
+            if (outNode.Next is { } next && !visitedSteps.Contains(next))
+            {
+                mergeSteps.AddRange(next.GetAllPossibleMerges(visitedSteps));
+            }
+        }
+        
+        if (this is MergeStep ms)
+            mergeSteps.Add(ms);
+
+        return mergeSteps;
+    }
     
     /// <summary>
     /// Recursively searches through each out node of the current step to find the minimum and maximum time and ingredients.
@@ -86,7 +107,7 @@ public abstract partial class IStep : ObservableObject
                     var newMinCookTime = minPath.MinCookTime + MinutesToComplete;
                     var newMaxCookTime = maxPath.MaxCookTime + MinutesToComplete;       
                 
-                    return [new PathInfo(null, outPaths.All(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
+                    return [new PathInfo(null, outPaths.Any(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
                 }
                 else
                 {
@@ -107,13 +128,13 @@ public abstract partial class IStep : ObservableObject
     
     private ObservableCollection<RecipeIngredient> CombineIngredients(ObservableCollection<RecipeIngredient> x, ObservableCollection<RecipeIngredient> y)
     {
-        foreach (var ingredient in y)
-            if (x.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase) && i.Unit == ingredient.Unit) is { } existingIngredient)
+        foreach (var ingredient in y??[])
+            if (x?.FirstOrDefault(i => (i.Name?.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)??false) && i?.Unit == ingredient?.Unit) is { } existingIngredient)
                 existingIngredient.Quantity += ingredient.Quantity;
             else
-                x.Add(ingredient);
+                x?.Add(ingredient);
 
-        return x;
+        return x??[];
     }
 }
 
