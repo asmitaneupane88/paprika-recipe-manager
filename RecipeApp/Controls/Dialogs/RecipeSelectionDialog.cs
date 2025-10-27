@@ -31,31 +31,9 @@ public class RecipeSelectionDialog
             ItemsSource = _recipes,
             SelectionMode = ListViewSelectionMode.Single,
             MaxHeight = 400,
-            MinWidth = 400
+            MinWidth = 400,
+            ItemTemplate = (DataTemplate)Application.Current.Resources["RecipeListItemTemplate"]
         };
-
-        // Create a recipe item template
-        recipeListView.ItemTemplate = (DataTemplate)XamlReader.Load(
-            "<DataTemplate xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\">" +
-                "<Grid Padding=\"8\">" +
-                    "<Grid.ColumnDefinitions>" +
-                        "<ColumnDefinition Width=\"Auto\"/>" +
-                        "<ColumnDefinition Width=\"*\"/>" +
-                    "</Grid.ColumnDefinitions>" +
-                    "<Image Width=\"60\" Height=\"60\" Stretch=\"UniformToFill\" Margin=\"0,0,12,0\">" +
-                        "<Image.Source>" +
-                            "<BitmapImage UriSource=\"{Binding ImageUrl}\"/>" +
-                        "</Image.Source>" +
-                        "<Image.Clip>" +
-                            "<RectangleGeometry RadiusX=\"4\" RadiusY=\"4\" Rect=\"0,0,60,60\"/>" +
-                        "</Image.Clip>" +
-                    "</Image>" +
-                    "<StackPanel Grid.Column=\"1\" VerticalAlignment=\"Center\">" +
-                        "<TextBlock Text=\"{Binding Title}\" Style=\"{StaticResource BodyStrongTextBlockStyle}\" TextWrapping=\"Wrap\"/>" +
-                        "<TextBlock Text=\"{Binding Category}\" Style=\"{StaticResource CaptionTextBlockStyle}\" Opacity=\"0.8\"/>" +
-                    "</StackPanel>" +
-                "</Grid>" +
-            "</DataTemplate>");
 
         var dialog = new ContentDialog
         {

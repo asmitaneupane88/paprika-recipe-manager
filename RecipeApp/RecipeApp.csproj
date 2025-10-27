@@ -37,6 +37,11 @@
       <PackageReference Include="PuppeteerSharp" />
     </ItemGroup>
     <ItemGroup>
+      <Page Include="Styles\RecipeTemplates.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
       <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />
     </ItemGroup>
     <ItemGroup>
