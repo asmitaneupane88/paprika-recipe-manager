@@ -18,31 +18,149 @@ public sealed partial class MealPlannerPage : NavigatorPage
     private DateTime _currentWeekStart;
     private readonly DateTime _minDate;
     private readonly DateTime _maxDate;
-    private readonly MealPlanCollection _mealPlans = new();
 
-    public MealPlannerPage(Navigator? nav = null) : base(nav)
-    {
-        // Use current system date
-        var today = DateTime.Today;
-        
-        // Initialize date constraints (1 year past to 1 year future from today)
-        _minDate = today.AddYears(-1);
-        _maxDate = today.AddYears(1);
-        
-        // Start with current week
-        _currentWeekStart = GetStartOfWeek(today);
-        
-        this.InitializeComponent();
-        InitializeMealSlots(); // Initialize slots first
-        UpdateDateDisplay();
-        UpdateDayHeaders(); // This will ensure day headers are properly highlighted
-    }
-
-    private DateTime GetStartOfWeek(DateTime date)
+        public MealPlannerPage(Navigator navigator) : base(navigator)
+        {
+            this.InitializeComponent();
+            _currentWeekStart = GetStartOfWeek(DateTime.Today);
+            UpdateDateDisplay();
+            LoadAndInitializeMealPlans();
+        }    private DateTime GetStartOfWeek(DateTime date)
     {
         // Assuming Monday is the start of the week
         int diff = (7 + (date.DayOfWeek - DayOfWeek.Monday)) % 7;
         return date.AddDays(-diff).Date;
+    }
+
+    private async void LoadAndInitializeMealPlans()
+    {
+        try
+        {
+            // Initialize meal slots first
+            _mealSlotsGrid = this.FindName("MealSlotsGrid") as Grid;
+            if (_mealSlotsGrid == null) return;
+
+            // Create meal slots for each day and meal time
+            for (int row = 0; row < 3; row++)
+            {
+                for (int col = 0; col < 7; col++)
+                {
+                    // Check if this slot is for today
+                    var slotDate = _currentWeekStart.AddDays(col);
+                    var isToday = slotDate.Date == DateTime.Today;
+
+                    var border = new Border
+                    {
+                        BorderBrush = (SolidColorBrush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+                        BorderThickness = new Thickness(0, 0, 1, 1),
+                        Padding = new Thickness(10),
+                        Background = isToday ? 
+                            (SolidColorBrush)Resources["TodayColumnBrush"] : 
+                            new SolidColorBrush(Microsoft.UI.Colors.Transparent)
+                    };
+
+                    var grid = new Grid
+                    {
+                        Background = null, // Transparent background
+                        AllowDrop = true
+                    };
+
+                    // Add row definitions for content layout
+                    grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                    grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    // Add the placeholder text
+                    var date = _currentWeekStart.AddDays(col);
+                    var mealType = row switch
+                    {
+                        0 => MealType.Breakfast,
+                        1 => MealType.Lunch,
+                        2 => MealType.Dinner,
+                        _ => MealType.Breakfast // Default to breakfast, though this case should never occur
+                    };
+
+                    // Load meal plans from storage
+                    var allMealPlans = await MealPlanCollection.GetAll();
+                    var mealPlan = allMealPlans.FirstOrDefault()?.GetMealPlan(date, mealType);
+
+                    // Remove any existing content from the grid
+                    var existingContent = grid.Children.Where(c => Grid.GetRow(c) == 0).ToList();
+                    foreach (var content in existingContent)
+                    {
+                        grid.Children.Remove(content);
+                    }
+
+                    if (mealPlan != null)
+                    {
+                        // Add the recipe information
+                        // Create a stack panel to hold the recipe info and date
+                        var stackPanel = new StackPanel
+                        {
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center
+                        };
+
+                        var recipeInfo = new TextBlock
+                        {
+                            Text = mealPlan.Recipe.Title,
+                            TextWrapping = TextWrapping.Wrap,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+                        };
+                        stackPanel.Children.Add(recipeInfo);
+
+                        Grid.SetRow(stackPanel, 0);
+                        grid.Children.Add(stackPanel);
+                    }
+                    else
+                    {
+                        var textBlock = new TextBlock
+                        {
+                            Text = "No meal planned",
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Opacity = 0.6
+                        };
+                        Grid.SetRow(textBlock, 0);
+                        grid.Children.Add(textBlock);
+                    }
+
+                    // Add the plus button
+                    var addButton = new Button
+                    {
+                        Content = "\uE710", // Plus symbol
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        Style = (Style)Application.Current.Resources["AccentButtonStyle"],
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Bottom,
+                        Margin = new Thickness(0, 5, 0, 0),
+                        Padding = new Thickness(8, 4, 8, 4)
+                    };
+                    
+                    // Store the row and column in the button's Tag for use in the click handler
+                    addButton.Tag = new Point(row, col);
+                    addButton.Click += AddButton_Click;
+                    Grid.SetRow(addButton, 1);
+                    grid.Children.Add(addButton);
+
+                    border.Child = grid;
+
+                    Grid.SetRow(border, row);
+                    Grid.SetColumn(border, col);
+                    _mealSlotsGrid.Children.Add(border);
+
+                    // Add drop handlers
+                    grid.DragOver += Grid_DragOver;
+                    grid.Drop += Grid_Drop;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading meal plans: {ex.Message}");
+            // You could show an error message to the user here if needed
+        }
     }
 
     private void UpdateDateDisplay()
@@ -156,7 +274,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
         }
     }
 
-    private void InitializeMealSlots()
+    private async Task InitializeMealSlotsAsync()
     {
         _mealSlotsGrid = this.FindName("MealSlotsGrid") as Grid;
         if (_mealSlotsGrid == null) return;
@@ -200,7 +318,8 @@ public sealed partial class MealPlannerPage : NavigatorPage
                     _ => MealType.Breakfast // Default to breakfast, though this case should never occur
                 };
 
-                var mealPlan = _mealPlans.GetMealPlan(date, mealType);
+                var allMealPlans = await MealPlanCollection.GetAll();
+                var mealPlan = allMealPlans.FirstOrDefault()?.GetMealPlan(date, mealType);
                 // Remove any existing content from the grid
                 var existingContent = grid.Children.Where(c => Grid.GetRow(c) == 0).ToList();
                 foreach (var content in existingContent)
@@ -347,7 +466,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
             if (result == ContentDialogResult.Primary && recipeListView.SelectedItem is SavedRecipe savedRecipe)
             {
                 // Add the meal plan
-                _mealPlans.AddMealPlan(date, savedRecipe, mealType);
+                await MealPlanCollection.AddMealPlan(date, savedRecipe, mealType);
                 
                 // Update just this specific cell
                 var border = _mealSlotsGrid?.Children

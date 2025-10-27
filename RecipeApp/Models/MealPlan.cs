@@ -1,5 +1,5 @@
 using System;
-using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
 
 namespace RecipeApp.Models;
 
@@ -12,44 +12,15 @@ public enum MealType
 
 public class MealPlan
 {
+    [JsonPropertyName("id")]
     public string Id { get; init; } = Guid.NewGuid().ToString();
+
+    [JsonPropertyName("date")]
     public required DateTime Date { get; init; }
+
+    [JsonPropertyName("recipe")]
     public required IRecipe Recipe { get; init; }
+
+    [JsonPropertyName("mealType")]
     public required MealType MealType { get; init; }
-}
-
-public class MealPlanCollection
-{
-    public ObservableCollection<MealPlan> MealPlans { get; } = new();
-
-    public void AddMealPlan(DateTime date, IRecipe recipe, MealType mealType)
-    {
-        // Ensure we're comparing exact dates, not just days of the week
-        var exactDate = date.Date; // Normalize to start of day
-        var existingPlan = MealPlans.FirstOrDefault(mp => 
-            mp.Date.Date.Equals(exactDate) && 
-            mp.MealType == mealType);
-        
-        if (existingPlan != null)
-        {
-            MealPlans.Remove(existingPlan);
-        }
-
-        // Add the new meal plan
-        MealPlans.Add(new MealPlan
-        {
-            Date = date.Date,
-            Recipe = recipe,
-            MealType = mealType
-        });
-    }
-
-    public MealPlan? GetMealPlan(DateTime date, MealType mealType)
-    {
-        // Ensure we're comparing exact dates, not just days of the week
-        var exactDate = date.Date; // Normalize to start of day
-        return MealPlans.FirstOrDefault(mp => 
-            mp.Date.Date.Equals(exactDate) && 
-            mp.MealType == mealType);
-    }
 }
