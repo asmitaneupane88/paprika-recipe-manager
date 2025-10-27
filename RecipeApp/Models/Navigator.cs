@@ -49,12 +49,6 @@ public partial class Navigator : ObservableObject
             Name = "Web Browser",
             PageFactory = nav => new WebBrowserPage(nav),
         },
-        new()
-        {
-            Icon = Symbol.Library,
-            Name = "My Pantry",
-            PageFactory = nav => new PantryIngredientsPage(nav),
-        },
     ];
     
     /// <summary>
