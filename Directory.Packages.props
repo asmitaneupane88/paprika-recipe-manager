@@ -8,11 +8,12 @@
   <ItemGroup>
     <PackageVersion Include="AutoGen" Version="0.2.3" />
     <PackageVersion Include="AutoGen.LMStudio" Version="0.2.3" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="FluentAssertions" Version="8.8.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="9.0.10" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageVersion Include="NUnit" Version="4.1.0" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageVersion Include="NUnit" Version="4.4.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
     <PackageVersion Include="PuppeteerSharp" Version="20.2.4" />
     <PackageVersion Include="Python.Included" Version="3.11.4" />
     <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
