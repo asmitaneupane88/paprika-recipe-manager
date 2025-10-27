@@ -8,6 +8,10 @@ using Uno.Extensions.Specialized;
 
 namespace RecipeApp.Controls.Pages;
 
+/// <summary>
+/// Used for editing the steps of a recipe through a canvas showing the current steps,
+/// a toolbox for adding steps, and a properties panel for editing an individual step.
+/// </summary>
 public sealed partial class StepEditor : NavigatorPage
 {
     private SavedRecipe _savedRecipe;
@@ -16,13 +20,10 @@ public sealed partial class StepEditor : NavigatorPage
 
     private (Ellipse, OutNode, StepConnectorLine, IStepControl)? _draggingNode;
     private (IStepControl, IStep, Point)? _draggingStep;
-    private IStepControl? _selectedStepField;
-    private IStepControl? _selectedStep
-    {
-        get => _selectedStepField;
+    private IStepControl? _selectedStep { get;
         set
         {
-            _selectedStepField = value;
+            SetProperty(ref field, value);
             Bindings.Update();
         }
     }
@@ -33,12 +34,22 @@ public sealed partial class StepEditor : NavigatorPage
     public StartStep? SelectedStartStep => _selectedStep?.Step as StartStep;
     public FinishStep? SelectedFinishStep => _selectedStep?.Step as FinishStep;
 
-    
+    /// <summary>
+    /// helper method for use in xaml
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public Visibility IsNotNull(object? obj)
     {
         return obj is not null ? Visibility.Visible : Visibility.Collapsed;
     }
     
+    /// <summary>
+    /// helper method for use in xaml
+    /// </summary>
+    /// <param name="obj1"></param>
+    /// <param name="obj2"></param>
+    /// <returns></returns>
     public Visibility BothNull(object? obj1, object? obj2)
     {
         return obj1 is null && obj2 is null && _selectedStep is not null ? Visibility.Visible : Visibility.Collapsed;
@@ -216,15 +227,13 @@ public sealed partial class StepEditor : NavigatorPage
 
     private void WidgetOnInNodeMouseUp(Ellipse arg1, InNode arg2, IStepControl arg3)
     {
-        if (arg2.Source is null && _draggingNode is (var ellipse, var outNode, var connectorLine, var stepControl) && stepControl != arg3)
+        if (arg2.Source is null && _draggingNode is { Item4: { } stepControl } && stepControl != arg3)
         {
-            connectorLine.SetEndLocation(null, arg1);
-            arg2.Source = ellipse;
-            if (outNode != null)
-            {
-                outNode.Next = arg3.Step;
-            }
-            NodeLines.Add(ellipse, (connectorLine, outNode, arg2, stepControl));
+            _draggingNode?.Item3.SetEndLocation(null, arg1);
+            
+            arg2.Source = _draggingNode?.Item1;
+            _draggingNode?.Item2.Next = arg3.Step;
+            NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2, _draggingNode?.Item4!));
         }
 
         PointerUp();
@@ -336,14 +345,8 @@ public sealed partial class StepEditor : NavigatorPage
         {
             if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is var lineToRemove)
             {
-                if (lineToRemove.Value.Item3 != null)
-                {
-                    lineToRemove.Value.Item3.Source = null;
-                }
-                if (lineToRemove.Value.Item1 != null)
-                {
-                    lineToRemove.Value.Item1.Dispose();
-                }
+                lineToRemove.Value.Item3?.Source = null;
+                lineToRemove.Value.Item1?.Dispose();
                 if (lineToRemove.Key is not null)
                     NodeLines.Remove(lineToRemove.Key);
             }

@@ -30,11 +30,16 @@
             MVUX;
             ThemeService;
             SkiaRenderer;
+            WebView;
         </UnoFeatures>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
+      <PackageReference Include="AutoGen" />
+      <PackageReference Include="AutoGen.LMStudio" />
       <PackageReference Include="PuppeteerSharp" />
+      <PackageReference Include="Python.Included" />
+      <PackageReference Include="UglyToad.PdfPig" />
     </ItemGroup>
     <ItemGroup>
       <Page Include="Styles\RecipeTemplates.xaml">

@@ -1,20 +1,14 @@
-<local:NavigatorPage
-    x:Class="RecipeApp.Controls.Pages.RecipeListPage"
+﻿<UserControl
+    x:Class="RecipeApp.Controls.SavedRecipeSearch"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:RecipeApp.Controls.Pages"
+    xmlns:local="using:RecipeApp.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:RecipeApp.Models"
-    xmlns:converters="using:RecipeApp.Converters"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
-    <Page.Resources>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-    </Page.Resources>
-
-    <Grid>
+     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -33,7 +27,7 @@
             PlaceholderText="Recipe Title"
             Margin="10"
             Text="{x:Bind SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            Width="300"/>
+            Width="250"/>
 
         <!-- note that placeholder text does not render correctly -->
         <ComboBox
@@ -45,53 +39,14 @@
             ItemsSource="{x:Bind Categories, Mode=OneWay}"
             DisplayMemberPath="Name"/>
 
-        <StackPanel
-            Grid.Column="2"
-            Grid.Row="0"
-            Orientation="Horizontal"
-            HorizontalAlignment="Right">
-
-            <Button Margin="10"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Click="OnButtonPrintClick">
-                <SymbolIcon Symbol="Print"/>
-            </Button>
-
-            <!--TODO: remove the visibility=collapsed when implemented-->
-            <Button Margin="10"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Click="OnButtonGroceryListClick"
-                    Visibility="Collapsed">
-                <SymbolIcon Symbol="Shop"/>
-            </Button>
-
-            <Button Margin="10"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Click="OnButtonRemoveClick">
-                <SymbolIcon Symbol="Delete"/>
-            </Button>
-
-            <Button Margin="10"
-                    Click="OnButtonAddClick">
-                <SymbolIcon Symbol="Edit"/>
-            </Button>
-
-            <Button Margin="10"
-                    Click="OnButtonUploadPdfClick">
-                <SymbolIcon Symbol="Upload"/>
-            </Button>
-        </StackPanel>
-
         <ListView
             Grid.Row="1"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            ItemsSource="{x:Bind FilteredRecipes, Mode=OneWay}"
-            IsItemClickEnabled="True"
-            SelectionChanged="OnRecipeCardClicked">
+            ItemsSource="{x:Bind FilteredRecipes, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:RecipeCard">
-                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" Margin="10" Padding="10" CornerRadius="8" Tag="{x:Bind}">
+                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" Margin="5" Padding="0" CornerRadius="8" Tag="{x:Bind}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -99,7 +54,7 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0"
-                                    Margin="10"
+                                    Margin="5"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
                                     CornerRadius="10"
@@ -108,7 +63,7 @@
                                     Background="{ThemeResource SurfaceVariantColor}">
                                 <Image
                                     Source="{x:Bind SavedRecipe.ImageUrl}"
-                                    Width="80" Height="80"
+                                    Width="40" Height="40"
                                     Stretch="UniformToFill"/>
                             </Border>
 
@@ -121,28 +76,13 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                    <TextBlock
+
+                                    <TextBlock Grid.Column="0"
                                                Text="{x:Bind SavedRecipe.Title}"
                                                FontWeight="Bold"
                                                FontSize="18"
                                                MaxLines="1"
                                                VerticalAlignment="Center"/>
-                                    <Button
-                                        ClickMode="Press"
-                                        Grid.Column="0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Padding="0"
-                                        ToolTipService.ToolTip="Open PDF file"
-                                        Visibility="{x:Bind SavedRecipe.HasPdf, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Click="OnPdfIconClick">
-
-                                         <FontIcon Glyph="&#xE8A7;"
-                                                   Foreground="DarkRed"
-                                                    FontSize="18"/>
-                                    </Button>
-                                </StackPanel>
 
                                     <RatingControl Grid.Column="1"
                                                    Value="{x:Bind SavedRecipe.Rating}"
@@ -156,9 +96,6 @@
                                         Checked="OnRecipeCardChecked"
                                         Unchecked="OnRecipeCardChecked"/>
                                 </Grid>
-
-                                <TextBlock Text="{x:Bind SavedRecipe.Description}"
-                                           MaxLines="3"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -166,4 +103,5 @@
             </ListView.ItemTemplate>
         </ListView>
     </Grid>
-</local:NavigatorPage>
+</UserControl>
+

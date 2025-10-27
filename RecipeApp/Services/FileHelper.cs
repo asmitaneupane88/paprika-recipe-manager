@@ -1,5 +1,15 @@
 ﻿// cannot be a global using!
+using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using Windows.Data.Pdf;
+using Windows.Storage.Pickers;  
 using PuppeteerSharp;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
+
+    
 
 namespace RecipeApp.Services;
 
@@ -41,5 +51,43 @@ public class FileHelper
         await using var page = await browser.NewPageAsync();
         await page.SetContentAsync(html);
         await page.PdfAsync(filePath);
+        
+        await page.CloseAsync();
+        await browser.CloseAsync();
+    }
+
+    public static async Task<string> ConvertPdfToTextAsync(string pdfPath)
+    {
+        if (!File.Exists(pdfPath))
+            throw new FileLoadException("PDF not found", pdfPath);
+        var sb = new StringBuilder();
+
+        await Task.Run(() =>
+        {
+            using var document = UglyToad.PdfPig.PdfDocument.Open(pdfPath);
+            foreach (var page in document.GetPages())
+            {
+                sb.AppendLine(page.Text);
+            }
+        });
+        return sb.ToString();
+    }
+
+    public static async Task<string> ConvertPdftoHtmlAsync(string pdfPath)
+    {
+        var text = await ConvertPdfToTextAsync(pdfPath);
+
+        var html = $"""
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset=""UTF-8""><title>Converted PDF</title></head>
+        <body><pre>{System.Net.WebUtility.HtmlEncode(text)}</pre></body>
+        </html>
+        """;
+        
+        var htmlPath = Path.ChangeExtension(pdfPath, ".html");
+        await File.WriteAllTextAsync(htmlPath, html);
+        
+        return htmlPath;
     }
 }
