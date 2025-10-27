@@ -10,17 +10,29 @@ public enum MealType
     Dinner
 }
 
-public class MealPlan
+public class MealPlan : IAutosavingClass<MealPlan>
 {
-    [JsonPropertyName("id")]
-    public string Id { get; init; } = Guid.NewGuid().ToString();
-
-    [JsonPropertyName("date")]
+    public Guid Id { get; init; } = Guid.NewGuid();
     public required DateTime Date { get; init; }
-
-    [JsonPropertyName("recipe")]
-    public required IRecipe Recipe { get; init; }
-
-    [JsonPropertyName("mealType")]
+    public required SavedRecipe Recipe { get; init; }
     public required MealType MealType { get; init; }
+    
+    public static async Task AddMealPlan(DateTime date, SavedRecipe recipe, MealType mealType)
+    {
+        var allMealPlans = await GetAll();
+        
+        // Remove any existing meal plan for this date and meal type
+        var existingMealPlan = allMealPlans.FirstOrDefault(mp => mp.Date.Date == date.Date && mp.MealType == mealType);
+        if (existingMealPlan != null)
+        {
+            await Remove(existingMealPlan);
+        }
+
+        await Add(new MealPlan 
+        {
+            Date = date,
+            MealType = mealType,
+            Recipe = recipe
+        });
+    }
 }

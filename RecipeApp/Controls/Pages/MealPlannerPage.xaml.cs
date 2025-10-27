@@ -44,8 +44,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
             // Clear existing content
             _mealSlotsGrid.Children.Clear();
 
-            // Load all meal plans once to avoid multiple database calls
-            var allMealPlans = await MealPlanCollection.GetAll();
+            var allMealPlans = await MealPlan.GetAll();
 
             // Create meal slots for each day and meal time
             for (int row = 0; row < 3; row++)
@@ -76,7 +75,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
                     grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     // Get meal plan for this slot
-                    var mealPlan = allMealPlans.FirstOrDefault()?.GetMealPlan(date, mealType);
+                    var mealPlan = allMealPlans.FirstOrDefault(mp => mp.Date.Date == date.Date && mp.MealType == mealType);
 
                     // Add meal content
                     var contentPanel = new StackPanel
@@ -295,8 +294,7 @@ public sealed partial class MealPlannerPage : NavigatorPage
             
             if (savedRecipe != null)
             {
-                // Add the meal plan
-                await MealPlanCollection.AddMealPlan(date, savedRecipe, mealType);
+                await MealPlan.AddMealPlan(date, savedRecipe, mealType);
                 
                 // Update just this specific cell
                 var border = _mealSlotsGrid?.Children
