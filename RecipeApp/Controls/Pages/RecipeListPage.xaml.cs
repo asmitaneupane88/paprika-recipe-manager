@@ -146,9 +146,10 @@ public sealed partial class RecipeListPage : NavigatorPage
 
     private async void OnButtonRemoveClick(object sender, RoutedEventArgs e)
     {
-        var recipesToRemove = GetSelectedRecipes();
+        var recipesToRemove = GetSelectedRecipeCards();
         
-        await SavedRecipe.Remove(recipesToRemove);
+        await SavedRecipe.Remove(recipesToRemove.Select(r => r.SavedRecipe).ToArray());
+        recipesToRemove.ForEach(r => AllRecipes.Remove(r));
         
         await UpdateShownRecipes();
     }
