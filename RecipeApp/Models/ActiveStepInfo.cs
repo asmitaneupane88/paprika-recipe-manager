@@ -66,7 +66,7 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
             foreach (var ingredient in path.MinIngredients.OrderBy(i => i.Name))
             {
                 var maxString = (path.MaxIngredients
-                    .FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase))
+                    .FirstOrDefault(i => (i.Name?.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)??false))
                     is { } maxIngredient && (maxIngredient.Quantity - 0.001) > ingredient.Quantity)
                     ? $"-{maxIngredient.Quantity}" 
                     : "";

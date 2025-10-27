@@ -129,7 +129,7 @@ public abstract partial class IStep : ObservableObject
     private ObservableCollection<RecipeIngredient> CombineIngredients(ObservableCollection<RecipeIngredient> x, ObservableCollection<RecipeIngredient> y)
     {
         foreach (var ingredient in y??[])
-            if (x?.FirstOrDefault(i => i.Name.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase) && i.Unit == ingredient.Unit) is { } existingIngredient)
+            if (x?.FirstOrDefault(i => (i.Name?.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)??false) && i?.Unit == ingredient?.Unit) is { } existingIngredient)
                 existingIngredient.Quantity += ingredient.Quantity;
             else
                 x?.Add(ingredient);
