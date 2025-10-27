@@ -11,8 +11,53 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-<ListView
-            Grid.Row="1"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Button Grid.Column="0" Click="ButtonAddIngredient_OnClick" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                <TextBlock Text="Add Ingredient" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                <SymbolIcon Symbol="Add" IsHitTestVisible="False"/>
+            </StackPanel>
+        </Button>
+
+        <Button Grid.Row="0" Grid.Column="2" Click="ButtonRemoveIngredient_OnClick" HorizontalAlignment="Right" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
+            </StackPanel>
+        </Button>
+
+        <Grid Grid.Row="1"
+              Grid.Column="0"
+              Grid.ColumnSpan="3"
+              CornerRadius="8"
+              Background="{ThemeResource SurfaceVariantColor}"
+              Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Text="Modifier Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
+            <TextBlock Grid.Column="2" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="150"/>
+            <TextBlock Grid.Column="3" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
+        </Grid>
+
+        <ListView
+            Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
             ItemsSource="{x:Bind AllIngredients, Mode=OneWay}">
@@ -28,28 +73,19 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Text="{x:Bind Ingredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="1" Text="{x:Bind Ingredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+
+                            <TextBox Grid.Column="0" Text="{Binding Ingredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="1" Text="{Binding Ingredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
 
                             <NumberBox Grid.Column="2"
                                        PlaceholderText="Qty"
-                                       Value="{x:Bind Ingredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                       Minimum="0"/>
+                                       Value="{Binding Ingredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       Minimum="0" Width="150"/>
 
                             <ComboBox Grid.Column="3"
-                                      SelectedItem="{x:Bind Ingredient.Unit, Mode=TwoWay}"
-                                      Width="150">
-                                <system:String>TSP</system:String>
-                                <system:String>TBSP</system:String>
-                                <system:String>CUP</system:String>
-                                <system:String>PINT</system:String>
-                                <system:String>QUART</system:String>
-                                <system:String>GALLON</system:String>
-                                <system:String>OZ</system:String>
-                                <system:String>LB</system:String>
-                                <system:String>KG</system:String>
-                                <system:String>ITEM</system:String>
-                            </ComboBox>
+                                      ItemsSource="{Binding Ingredient.UnitOptions}"
+                                      SelectedItem="{Binding Ingredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Width="100"/>
 
                             <!--Got to use "Binding" here over x:Bind-->
                             <CheckBox
