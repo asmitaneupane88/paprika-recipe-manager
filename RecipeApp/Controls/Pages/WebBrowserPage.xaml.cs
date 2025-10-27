@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.AI;
 using PuppeteerSharp;
 using Python.Runtime;
@@ -76,23 +77,12 @@ public sealed partial class WebBrowserPage : NavigatorPage
         
         DownloadStatus = "Downloading HTML...";
 
+        var html = await WebViewControl.ExecuteScriptAsync("document.documentElement.outerHTML;");
+
+        html = Regex.Unescape(html);
+        html = html.Substring(1, html.Length - 2);
+        
         var source = WebViewControl.Source;
-        
-        var browserFetcher = new BrowserFetcher();
-        await browserFetcher.DownloadAsync();
-    
-        var browser = await Puppeteer.LaunchAsync(new LaunchOptions
-        {
-            Headless = true
-        });
-    
-        var page = await browser.NewPageAsync();
-        await page.GoToAsync(source.ToString(), WaitUntilNavigation.Networkidle2);
-    
-        var html = await page.GetContentAsync();
-        
-        await page.CloseAsync();
-        await browser.CloseAsync();
         
         // used Claude Sonnet 4.5 to generate a lot of the boilerplate for interacting with python using pythonnet (and python.included)
         // had to go through and really work to get his to work.
