@@ -128,7 +128,7 @@ public sealed partial class StepViewer : NavigatorPage
             }
 
             step.AddIngredientsForStep(step.CurrentStep, step.CurrentStep.IngredientsToUse?.ToList()??[]);
-
+            
             switch (node.Next)
             {
                 case FinishStep finishStep:
@@ -157,8 +157,14 @@ public sealed partial class StepViewer : NavigatorPage
                     await ActiveStepInfo.Remove(step);
                     break;
                 case MergeStep mergeStep:
-                    if (Steps.Any(i => i.CurrentStep == mergeStep))
+                    if (Steps.FirstOrDefault(i => i.CurrentStep == mergeStep) is { } ms)
                     {
+                        foreach (var ingredientUsed in step.IngredientsUsed)
+                        {
+                            if (ms.IngredientsUsed.All(i => i.Step != ingredientUsed.Step))
+                                ms.IngredientsUsed.Add(ingredientUsed);
+                        }
+                        
                         Steps.Remove(step);
                         await ActiveStepInfo.Remove(step);
                     }
