@@ -54,5 +54,6 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
         
         await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
         selected.ForEach(i => AllIngredients.Remove(i));
+        RefreshSelected();
     }
 }
