@@ -70,7 +70,7 @@ public sealed partial class StepViewer : NavigatorPage
                 var dialog2 = new ContentDialog
                 {
                     Title = $"Error - {rc.SavedRecipe.Title}",
-                    Content = $"This recipe does has invalid paths.\nPlease edit the recipe's steps to use it here. The following paths might not lead to the final step guaranteed:\n{string.Join("\n", pathInfo.Select(pi => $"    {pi.OutNode.Title}"))}",
+                    Content = $"This recipe has invalid paths.\nPlease edit the recipe's steps to use it here. The following paths might not lead to the final step guaranteed:\n{string.Join("\n", pathInfo.Select(pi => $"    {pi.OutNode.Title}"))}",
                     PrimaryButtonText = "Ok",
                     XamlRoot = this.XamlRoot,
                 };
