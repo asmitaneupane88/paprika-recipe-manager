@@ -68,6 +68,8 @@ public abstract partial class IStep : ObservableObject
     {
         visitedSteps ??= [];
         
+        if (visitedSteps.Contains(this)) return [ new PathInfo(null, true, [], []) ];
+        
         visitedSteps.Add(this);
         
         switch (this)
@@ -90,7 +92,7 @@ public abstract partial class IStep : ObservableObject
             {
                 var outNodes = GetOutNodes();
                 var outPaths = outNodes
-                    .Select(n => (n.Next?.GetNestedPathInfo().First() ?? new PathInfo(n, false, [], [])) with { OutNode = n }) //TODO clean up this line
+                    .Select(n => (n.Next?.GetNestedPathInfo(visitedSteps).First() ?? new PathInfo(n, false, [], [])) with { OutNode = n }) //TODO clean up this line
                     .ToList();
             
                 if (outPaths.Count == 0) return [ new PathInfo(null, false, [], []) ];
