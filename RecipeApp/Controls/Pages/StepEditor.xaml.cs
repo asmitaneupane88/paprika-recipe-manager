@@ -232,8 +232,11 @@ public sealed partial class StepEditor : NavigatorPage
             _draggingNode?.Item3.SetEndLocation(null, arg1);
             
             arg2.Source = _draggingNode?.Item1;
-            _draggingNode?.Item2.Next = arg3.Step;
-            NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2, _draggingNode?.Item4!));
+            if (_draggingNode is (var ellipse, var outNode, var line, var control))
+            {
+                outNode.Next = arg3.Step;
+                NodeLines.Add(ellipse, (line, outNode, arg2, control));
+            }
         }
 
         PointerUp();
@@ -343,12 +346,14 @@ public sealed partial class StepEditor : NavigatorPage
     {
         foreach (var outNode in _selectedStep?.Step?.BindableGetOutNodes??[])
         {
-            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is var lineToRemove)
+            var lineToRemove = NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode);
+            if (lineToRemove.Key != default)
             {
-                lineToRemove.Value.Item3?.Source = null;
-                lineToRemove.Value.Item1?.Dispose();
-                if (lineToRemove.Key is not null)
-                    NodeLines.Remove(lineToRemove.Key);
+                var (line, _, inNode, _) = lineToRemove.Value;
+                if (inNode != null)
+                    inNode.Source = null;
+                line?.Dispose();
+                NodeLines.Remove(lineToRemove.Key);
             }
         }
         
