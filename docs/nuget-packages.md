@@ -30,6 +30,8 @@ Used for unit tests within the app
 ### FluentAssertions - Latest
 Used for unit tests within the app to make assertions easier.
 
-# TODO
+## UglyToad.PdfPig - Latest
+Used to convert PDF to HTML.
 
-# need autogen or only openai?
+## OpenAi - Latest
+Used to call the OpenAI API service for converting text such as HTML to a SavedRecipe.
