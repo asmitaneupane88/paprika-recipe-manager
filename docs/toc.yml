@@ -52,3 +52,42 @@
           href: enums.md
         - name: Classes
           href: classes.md
+- name: Recipe Management
+  items:
+    - name: Overview
+      href: recipe-management.md
+    - name: Recipe Model
+      href: recipe-model.md
+    - name: Recipe Views
+      href: recipe-views.md
+    - name: Recipe ViewModels
+      href: recipe-viewmodels.md
+    - name: Meal Planner
+      href: meal-planner.md
+- name: Services
+  items:
+    - name: MealDB API Search Feature
+      href: mealdb-api.md
+    - name: PDF Upload and AI Conversion Feature
+      href: PdfUploaded.md
+- name: NuGet Packages
+  href: nuget-packages.md
+- name: Application UI
+  href: application-ui.md
+  items:
+    - name: UI Quickstart
+      href: ui-quickstart.md
+    - name: Pages
+      href: pages.md
+    - name: Controls
+      href: controls.md
+- name: Application Logic
+  href: application-logic.md
+  items:
+    - name: Interfaces / Abstract Classes
+      href: interfaces-and-abstract-classes.md
+    - name: Enums
+      href: enums.md
+    - name: Classes
+      href: classes.md
+

@@ -60,18 +60,22 @@ public partial class ActiveStepInfo : IAutosavingClass<ActiveStepInfo>
 
         foreach (var path in paths)
         {
+            var maxTimeString = ((path.MaxTotalTime - 0.001) > path.MinTotalTime)
+                ? $"-{path.MaxTotalTime}" 
+                : "";
+            
             sb.AppendLine(path.OutNode.Title);
-            sb.AppendLine($"    Cook time: {path.MinTotalTime}-{path.MaxTotalTime} minutes");
+            sb.AppendLine($"    Cook time: {path.MinTotalTime}{maxTimeString} minutes");
             sb.AppendLine($"    Ingredients: ");
             foreach (var ingredient in path.MinIngredients.OrderBy(i => i.Name))
             {
-                var maxString = (path.MaxIngredients
+                var maxIngredientString = (path.MaxIngredients
                     .FirstOrDefault(i => (i.Name?.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)??false))
                     is { } maxIngredient && (maxIngredient.Quantity - 0.001) > ingredient.Quantity)
                     ? $"-{maxIngredient.Quantity}" 
                     : "";
                     
-                sb.AppendLine($"        {ingredient.Name} ({ingredient.Quantity}{maxString} {ingredient.Unit})");
+                sb.AppendLine($"        {ingredient.Name} ({ingredient.Quantity}{maxIngredientString} {ingredient.Unit})");
             }
             sb.AppendLine();
         }

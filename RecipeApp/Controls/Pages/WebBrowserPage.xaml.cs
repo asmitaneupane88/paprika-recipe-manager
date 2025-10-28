@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.AI;
-using PuppeteerSharp;
 using Python.Runtime;
 using Python.Included;
 using RecipeApp.Services;

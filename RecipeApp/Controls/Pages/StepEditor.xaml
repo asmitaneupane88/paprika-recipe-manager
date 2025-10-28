@@ -165,18 +165,9 @@
                                                            Minimum="0"/>
 
                                                 <ComboBox Grid.Column="1"
-                                                          SelectedItem="{Binding Unit, Mode=TwoWay}"
+                                                          ItemsSource="{Binding UnitOptions}"
+                                                          SelectedItem="{Binding Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                           HorizontalAlignment="Stretch">
-                                                    <system:String>TSP</system:String>
-                                                    <system:String>TBSP</system:String>
-                                                    <system:String>CUP</system:String>
-                                                    <system:String>PINT</system:String>
-                                                    <system:String>QUART</system:String>
-                                                    <system:String>GALLON</system:String>
-                                                    <system:String>OZ</system:String>
-                                                    <system:String>LB</system:String>
-                                                    <system:String>KG</system:String>
-                                                    <system:String>ITEM</system:String>
                                                 </ComboBox>
                                             </Grid>
 
