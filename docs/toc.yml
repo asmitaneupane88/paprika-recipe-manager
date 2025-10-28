@@ -1,46 +1,58 @@
 - name: Home
   href: index.md
-- name: Installation Guide
-  href: installation.md
-- name: Recipe Management
-  items:
-    - name: Overview
-      href: recipe-management.md
-    - name: Recipe Model
-      href: recipe-model.md
-    - name: Recipe Views
-      href: recipe-views.md
-    - name: Recipe ViewModels
-      href: recipe-viewmodels.md
-    - name: Meal Planner
-      href: meal-planner.md
 
-- name: NuGet Packages
-  href: nuget-packages.md
-- name: Application UI
-  href: application-ui.md
+- name: Getting Started
   items:
-    - name: Core UI
-      href: core-ui.md
-    - name: Pages
-      href: pages.md
-    - name: Controls
-      href: controls.md
-- name: Application Logic
-  href: application-logic.md
+    - name: Installation Guide
+      href: installation.md
+
+- name: Core Features
   items:
-    - name: Interfaces / Abstract Classes
-      href: interfaces-and-abstract-classes.md
-    - name: Enums
-      href: enums.md
-    - name: Classes
-      href: classes.md
-    - name: Services
+    - name: Recipe Management
+      items:
+        - name: Overview
+          href: recipe-management.md
+        - name: Recipe Model
+          href: recipe-model.md
+        - name: Recipe Views
+          href: recipe-views.md
+        - name: Recipe ViewModels
+          href: recipe-viewmodels.md
+        - name: Meal Planner
+          href: meal-planner.md
+
+    - name: Recipe Import & Discovery
       items:
         - name: MealDB API Search Feature
           href: mealdb-api.md
         - name: PDF Upload and AI Conversion Feature
-          href: PdfUploaded.md
+          href: pdf-upload-ai.md
+
+    - name: NuGet Packages
+      href: nuget-packages.md
+
+- name: Application Architecture
+  items:
+    - name: Application UI
+      href: application-ui.md
+      items:
+        - name: Core UI
+          href: core-ui.md
+        - name: Pages
+          href: pages.md
+        - name: Controls
+          href: controls.md
+
+    - name: Application Logic
+      href: application-logic.md
+      items:
+        - name: Interfaces / Abstract Classes
+          href: interfaces-and-abstract-classes.md
+        - name: Enums
+          href: enums.md
+        - name: Classes
+          href: classes.md
+    - name: Services
+      items:
         - name: AiHelper
           href: AiHelper.md
-
