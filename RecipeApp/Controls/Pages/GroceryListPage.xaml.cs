@@ -1,5 +1,4 @@
-﻿using RecipeApp.Models;
-using RecipeApp.Services;
+
 
 namespace RecipeApp.Controls.Pages;
 
@@ -17,12 +16,7 @@ public sealed partial class GroceryListPage : NavigatorPage
     private async Task ShowIngredients()
     {
         AllIngredients = (await RecipeIngredient.GetAll())
-            .Select(i => new IngredientCard
-            {
-                Ingredient = i,
-                IsSelected = false,
-                PIngredient = null
-            })
+            .Select(i => new IngredientCard() { Ingredient = i, IsSelected = false})
             .ToObservableCollection();
     }
     
@@ -50,12 +44,7 @@ public sealed partial class GroceryListPage : NavigatorPage
     {
         var newIngredient = new RecipeIngredient();
         
-        AllIngredients.Add(new IngredientCard
-        {
-            Ingredient = newIngredient,
-            IsSelected = false,
-            PIngredient = null
-        });
+        AllIngredients.Add(new IngredientCard() { Ingredient = newIngredient, IsSelected = false });
         await RecipeIngredient.Add(newIngredient);
     }
 
@@ -65,33 +54,6 @@ public sealed partial class GroceryListPage : NavigatorPage
         
         await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
         selected.ForEach(i => AllIngredients.Remove(i));
-        RefreshSelected();
-    }
-    
-    private async void ButtonPurchased_OnClick(object sender, RoutedEventArgs e)
-    {
-        var selected = GetSelectedIngredientCards();
-
-        if (selected.Count == 0)
-            return;
-
-        foreach (var card in selected.ToList())
-        {
-            var ingredient = card.Ingredient;
-
-            var pantryItem = new PantryIngredient
-            {
-                Name = ingredient.Name ?? "New Item",
-                Quantity = ingredient.Quantity,
-                Unit = ingredient.Unit,
-                ModifierNote = ingredient.ModifierNote
-            };
-
-            await PantryIngredient.Add(pantryItem);
-            await RecipeIngredient.Remove(ingredient);
-            AllIngredients.Remove(card);
-        }
-
         RefreshSelected();
     }
 }

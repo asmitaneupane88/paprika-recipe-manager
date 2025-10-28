@@ -9,21 +9,7 @@ namespace RecipeApp.Controls.Pages;
 
 public sealed partial class PantryIngredientsPage : NavigatorPage
 {
-    [ObservableProperty]
-    private partial ObservableCollection<IngredientCard> PantryIngredients { get; set; } = new();
-    
-    [ObservableProperty]
-    private partial bool CardsSelected { get; set; }
-
-    public ObservableCollection<Grouping<string, IngredientCard>> GroupedPantry { get; set; } = new();
-    
-    public ObservableCollection<string> CategoryOptions { get; } =
-    [
-        "All Categories", "Vegetables", "Fruits", "Dairy", "Meat", "Seafood",
-        "Baking", "Beverages", "Snacks", "Chicken", "Pasta", "Others", "Uncategorized"
-    ];
-
-    
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> PantryIngredients { get; set; } = [];
     public PantryIngredientsPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
@@ -33,28 +19,9 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     
     private async Task ShowIngredients()
     {
-        var allItems = (await PantryIngredient.GetAll())
-            .Select(i => new IngredientCard
-            {
-                Ingredient = null,
-                PIngredient = i,
-                IsSelected = false
-                
-            })
-            .OrderBy(c => c.PIngredient.Category)
-            .ThenBy(c => c.PIngredient.Name)
-            .ToList();
-
-        var grouped = allItems
-            .GroupBy(c => string.IsNullOrWhiteSpace(c.PIngredient.Category)
-                ? "Uncategorized"
-                : c.PIngredient.Category)
-            .Select(g => new Grouping<string, IngredientCard>(g.Key, g))
-            .ToList();
-
-        GroupedPantry.Clear();
-        foreach (var group in grouped)
-            GroupedPantry.Add(group);
+        PantryIngredients = (await RecipeIngredient.GetAll())
+            .Select(i => new IngredientCard() { Ingredient = i, IsSelected = false})
+            .ToObservableCollection();
     }
     
     private void OnRecipeCardChecked(object sender, RoutedEventArgs e)
@@ -69,80 +36,25 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     
     private List<IngredientCard> GetSelectedIngredientCards()
     {
-        return GroupedPantry.SelectMany(g => g).Where(c => c.IsSelected).ToList();
+        return PantryIngredients
+            .Where(c => c.IsSelected)
+            .ToList();
     }
 
     private async void ButtonAddIngredient_OnClick(object sender, RoutedEventArgs e)
     {
-        var newIngredient = new PantryIngredient
-        {
-            Name = string.Empty,
-            Category = "Uncategorized"
-        };
+        var newIngredient = new RecipeIngredient();
         
-        await PantryIngredient.Add(newIngredient);
-
-        var card = new IngredientCard
-        {
-            Ingredient = null!,
-            PIngredient = newIngredient,
-            IsSelected = false
-        };
-        var group = GroupedPantry.FirstOrDefault(g => g.Key == newIngredient.Category);
-        if (group == null)
-        {
-            group = new Grouping<string, IngredientCard>(newIngredient.Category, Enumerable.Empty<IngredientCard>());
-            GroupedPantry.Add(group);
-        }
-
-        group.Add(card);
-        RefreshSelected();
+        PantryIngredients.Add(new IngredientCard() { Ingredient = newIngredient, IsSelected = false });
+        await RecipeIngredient.Add(newIngredient);
     }
 
     private async void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
         var selected = GetSelectedIngredientCards();
-        if (selected.Count == 0) return;
         
-        foreach (var card in selected)
-        {
-            await PantryIngredient.Remove(card.PIngredient);
-            var group = GroupedPantry.FirstOrDefault(g => g.Contains(card));
-            group?.Remove(card);
-        }
-        foreach (var empty in GroupedPantry.Where(g => g.Count == 0).ToList())
-            GroupedPantry.Remove(empty);
-
-        RefreshSelected();
-    }
-      
-    private async void ButtonRestock_OnClick(object sender, RoutedEventArgs e)
-    {
-        var selected = GetSelectedIngredientCards();
-        if (selected.Count == 0) return;
-
-        foreach (var card in selected.ToList())
-        { 
-            var pantry = card.PIngredient;
-
-            var groceryItem = new RecipeIngredient
-            {
-                Name = pantry.Name,
-                Quantity = pantry.Quantity,
-                Unit = pantry.Unit,
-                ModifierNote = pantry.ModifierNote,
-                ScaleFactor = pantry.ScaleFactor
-            };
-
-         
-            await RecipeIngredient.Add(groceryItem);
-            await PantryIngredient.Remove(pantry);
-            var group = GroupedPantry.FirstOrDefault(g => g.Contains(card));
-            group?.Remove(card);
-        }
-        foreach (var empty in GroupedPantry.Where(g => g.Count == 0).ToList())
-            GroupedPantry.Remove(empty);
-
+        await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
+        selected.ForEach(i => PantryIngredients.Remove(i));
         RefreshSelected();
     }
     private async void CategoryFilterBox_SelectionChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)

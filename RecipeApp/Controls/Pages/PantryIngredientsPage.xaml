@@ -110,31 +110,10 @@
 
 
         <ListView
-            x:Name="ListViewPantry"
-            Grid.Row="3"
-            ItemsSource="{Binding Source={StaticResource GroupedPantrySource}}"
-            SelectionMode="None"
-            Margin="10,0,10,10">
-
-            <ListView.GroupStyle>
-                <GroupStyle>
-                    <GroupStyle.HeaderTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Key}"
-                                       FontWeight="Bold"
-                                       FontSize="18"
-                                       Margin="8,12,0,6"
-                                       Foreground="{ThemeResource SystemAccentColor}" />
-                        </DataTemplate>
-                    </GroupStyle.HeaderTemplate>
-                </GroupStyle>
-            </ListView.GroupStyle>
-
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                </Style>
-            </ListView.ItemContainerStyle>
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:IngredientCard">
