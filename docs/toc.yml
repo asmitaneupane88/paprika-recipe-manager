@@ -53,4 +53,4 @@
     - name: Services
       items:
         - name: AiHelper
-          href: AiHelper.md
+          href: ai-helper.md
