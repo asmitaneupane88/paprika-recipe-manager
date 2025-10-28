@@ -165,8 +165,8 @@
                                                            Minimum="0"/>
 
                                                 <ComboBox Grid.Column="1"
-                                                          ItemsSource="{Binding Ingredient.UnitOptions}"
-                                                          SelectedItem="{Binding Ingredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          ItemsSource="{Binding UnitOptions}"
+                                                          SelectedItem="{Binding Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                           HorizontalAlignment="Stretch">
                                                 </ComboBox>
                                             </Grid>
