@@ -203,13 +203,13 @@ public class AiHelper
                     MinutesToComplete = step.MinutesToComplete,
                     Title = step.Title,
                     Instructions = step.Instruction ?? string.Empty,
-                    IngredientsToUse = step.Ingredients.ToObservableCollection()
+                    IngredientsToUse = step.Ingredients?.ToObservableCollection() ?? [],
                 },
                 "Timer" => new TimerStep()
                 {
                     MinutesToComplete = step.MinutesToComplete,
                     Title = step.Title,
-                    IngredientsToUse = step.Ingredients.ToObservableCollection()
+                    IngredientsToUse = step.Ingredients?.ToObservableCollection() ?? [],
                 },
                 _ => throw new Exception("Unknown step type")
             };
