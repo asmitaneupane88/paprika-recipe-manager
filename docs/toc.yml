@@ -1,9 +1,7 @@
 - name: Home
   href: index.md
-- name: Getting Started
-  items:
-    - name: Installation Guide
-      href: installation.md
+- name: Installation Guide
+  href: installation.md
 - name: Recipe Management
   items:
     - name: Overview
@@ -16,19 +14,14 @@
       href: recipe-viewmodels.md
     - name: Meal Planner
       href: meal-planner.md
-- name: Services
-  items:
-    - name: MealDB API Search Feature
-      href: mealdb-api.md
-    - name: PDF Upload and AI Conversion Feature
-      href: PdfUploaded.md
+
 - name: NuGet Packages
   href: nuget-packages.md
 - name: Application UI
   href: application-ui.md
   items:
-    - name: UI Quickstart
-      href: ui-quickstart.md
+    - name: Core UI
+      href: core-ui.md
     - name: Pages
       href: pages.md
     - name: Controls
@@ -42,4 +35,12 @@
       href: enums.md
     - name: Classes
       href: classes.md
+    - name: Services
+      items:
+        - name: MealDB API Search Feature
+          href: mealdb-api.md
+        - name: PDF Upload and AI Conversion Feature
+          href: PdfUploaded.md
+        - name: AiHelper
+          href: AiHelper.md
 
