@@ -1,8 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using CommunityToolkit.Mvvm.ComponentModel;
-    
-namespace RecipeApp.Services;
+﻿namespace RecipeApp.Services;
 
 public partial class AiSettings : ObservableObject
 {
@@ -25,7 +21,6 @@ public partial class AiSettings : ObservableObject
         if (_settings is not null) return _settings;
 
         _saveFilePath ??= GetSaveFilePath();
-        Console.WriteLine($"[DEBUG] Loading AI settings from: {_saveFilePath}");
         
         if (File.Exists(_saveFilePath) && await File.ReadAllTextAsync(_saveFilePath) is { Length: > 0 } fileData)
         {
@@ -34,11 +29,9 @@ public partial class AiSettings : ObservableObject
                 try
                 {
                     _settings = JsonSerializer.Deserialize<AiSettings>(fileData) ?? throw new Exception();
-                    Console.WriteLine($"[DEBUG] Endpoint loaded: {_settings.Endpoint}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[ERROR] Failed to load AiSettings.json: {ex.Message}");
                     _settings = new AiSettings();
                 }
             }
@@ -70,7 +63,6 @@ public partial class AiSettings : ObservableObject
         
         var json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions {WriteIndented = true});
         await File.WriteAllTextAsync(_saveFilePath, json);
-        Console.WriteLine($"[DEBUG] Saved AI settings to {_saveFilePath}");
         
         _inSave = false;
 
@@ -84,8 +76,7 @@ public partial class AiSettings : ObservableObject
     private static string GetSaveFilePath()
     {
         const string fileName = "AiSettings.json";
-        var LocalAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         
-        return Path.Combine(LocalAppData, "O=RecipeApp", "com.companyname.RecipeApp", "Settings", fileName);
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "RecipeApp", fileName);
     }
 }
