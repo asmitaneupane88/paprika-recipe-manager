@@ -2,7 +2,7 @@
 
 namespace RecipeApp.Models;
 
-public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
+public partial class GroceryIngredient: IAutosavingClass<GroceryIngredient>
 {
     [ObservableProperty] public partial string Name { get; set; }
     
@@ -22,3 +22,17 @@ public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
     [ObservableProperty] public partial double ScaleFactor { get; set; }
 }
 
+// had Claude 4.5 Sonnet quickly generate this converter to fix an issue
+public partial class UnitTypeJsonConverter : JsonConverter<UnitType>
+{
+    public override UnitType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var value = reader.GetString();
+        return Enum.TryParse<UnitType>(value, true, out var result) ? result : UnitType.ITEM;
+    }
+
+    public override void Write(Utf8JsonWriter writer, UnitType value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
+    }
+}
