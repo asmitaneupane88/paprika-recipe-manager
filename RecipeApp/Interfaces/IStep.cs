@@ -137,6 +137,7 @@ public abstract partial class IStep : ObservableObject
                 {
                     newIngredient.Name = existingIngredient.Name;
                     newIngredient.Quantity = existingIngredient.Quantity + ingredient.Quantity;
+                    newIngredient.ModifierNote = existingIngredient.ModifierNote;
                     newIngredient.Unit = existingIngredient.Unit;
                 }
 
