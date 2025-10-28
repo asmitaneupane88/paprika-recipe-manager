@@ -1,10 +1,8 @@
 - name: Home
   href: index.md
 
-- name: Getting Started
-  items:
-    - name: Installation Guide
-      href: installation.md
+- name: Installation Guide
+  href: installation.md
 
 - name: Core Features
   items:
@@ -28,11 +26,11 @@
         - name: PDF Upload and AI Conversion Feature
           href: pdf-upload-ai.md
 
+- name: Application Architecture
+  items:
     - name: NuGet Packages
       href: nuget-packages.md
 
-- name: Application Architecture
-  items:
     - name: Application UI
       href: application-ui.md
       items:

@@ -1,5 +1,4 @@
 ﻿# Application UI
-The framework used is Uno Platform, which supports almost any platform.
-The window holds the @RecipeApp.Controls.Shell which acts as the main container.
-
+This category has subcategories which go into details about the [Core Ui](core-ui.md),
+[Controls](controls.md), and [Pages](pages.md) used in the application.
 

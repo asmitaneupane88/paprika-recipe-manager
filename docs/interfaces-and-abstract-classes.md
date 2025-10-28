@@ -11,7 +11,7 @@ This class contains static Add, Remove, and GetAll methods which should be used 
 See @RecipeApp.Interfaces.IAutosavingClass`1 for more information.
 
 ## IStep
-This class is used by the [RecipeSteps](classes.md#step-classes) located in this the linked section of the classes.
+This class is used by the [RecipeSteps](classes.md#step-classes) located in this linked section of the classes.
 
 This class implements some shared properties along with containing information at the top of the file to help the JSON
 serializer know how to deserialize into the correct step type. This abstract class also implements a search function
