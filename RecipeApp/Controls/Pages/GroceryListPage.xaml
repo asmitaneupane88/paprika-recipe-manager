@@ -1,5 +1,5 @@
 ﻿<local:NavigatorPage
-    x:Class="RecipeApp.Controls.Pages.PantryIngredientsPage"
+    x:Class="RecipeApp.Controls.Pages.GroceryListPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RecipeApp.Controls.Pages"
@@ -60,7 +60,7 @@
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
+            ItemsSource="{x:Bind AllIngredients, Mode=OneWay}">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:IngredientCard">
