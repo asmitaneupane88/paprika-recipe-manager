@@ -7,8 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoGen" />
-        <PackageReference Include="AutoGen.LMStudio" />
         <PackageReference Include="FluentAssertions"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="NUnit"/>
@@ -17,6 +15,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="OpenAI" />
         <PackageReference Include="Python.Included" />
     </ItemGroup>
 

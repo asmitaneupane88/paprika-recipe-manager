@@ -35,8 +35,7 @@
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="AutoGen" />
-      <PackageReference Include="AutoGen.LMStudio" />
+      <PackageReference Include="OpenAI" />
       <PackageReference Include="PuppeteerSharp" />
       <PackageReference Include="Python.Included" />
       <PackageReference Include="UglyToad.PdfPig" />
