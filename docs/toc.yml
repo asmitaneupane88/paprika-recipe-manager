@@ -24,7 +24,7 @@
         - name: MealDB API Search Feature
           href: mealdb-api.md
         - name: PDF Upload and AI Conversion Feature
-          href: pdf-upload-ai.md
+          href: PdfUploaded.md
 
 - name: Application Architecture
   items:
