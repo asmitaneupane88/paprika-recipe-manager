@@ -85,7 +85,7 @@ public abstract partial class IStep : ObservableObject
                 return returnInfo;
             }
             case FinishStep:
-                return [ new PathInfo(null!, true, IngredientsToUse, IngredientsToUse, 0, 0, 0, MinutesToComplete) ];
+                return [ new PathInfo(null!, true, IngredientsToUse?.ToObservableCollection()??[], IngredientsToUse?.ToObservableCollection()??[], 0, 0, 0, MinutesToComplete) ];
             default:
             {
                 var outNodes = GetOutNodes();
@@ -130,7 +130,17 @@ public abstract partial class IStep : ObservableObject
     {
         foreach (var ingredient in y??[])
             if (x?.FirstOrDefault(i => (i.Name?.Equals(ingredient.Name, StringComparison.CurrentCultureIgnoreCase)??false) && i?.Unit == ingredient?.Unit) is { } existingIngredient)
-                existingIngredient.Quantity += ingredient.Quantity;
+            {
+                var newIngredient = new RecipeIngredient();
+                {
+                    newIngredient.Name = existingIngredient.Name;
+                    newIngredient.Quantity = existingIngredient.Quantity + ingredient.Quantity;
+                    newIngredient.Unit = existingIngredient.Unit;
+                }
+
+                x?.Remove(existingIngredient);
+                x?.Add(newIngredient);
+            }
             else
                 x?.Add(ingredient);
 
