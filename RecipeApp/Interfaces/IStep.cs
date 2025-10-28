@@ -97,7 +97,7 @@ public abstract partial class IStep : ObservableObject
             
                 if (outPaths.Count == 0) return [ new PathInfo(null, false, [], []) ];
 
-                if (this is SplitStep)
+                if (this is SplitStep or MergeStep)
                 {
                     // got to look for the highest min cook time here
                     var minPath = outPaths.OrderByDescending(p => p.MinCookTime).First();
