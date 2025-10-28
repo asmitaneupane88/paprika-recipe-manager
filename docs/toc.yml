@@ -14,11 +14,12 @@
       href: recipe-views.md
     - name: Recipe ViewModels
       href: recipe-viewmodels.md
+    - name: Meal Planner
+      href: meal-planner.md
 - name: Services
   items:
     - name: MealDB API Search Feature
       href: mealdb-api.md
-  items:
     - name: PDF Upload and AI Conversion Feature
       href: PdfUploaded.md
 - name: NuGet Packages
