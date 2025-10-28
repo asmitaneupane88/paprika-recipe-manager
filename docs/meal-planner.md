@@ -63,30 +63,6 @@ Defines the possible meal categories:
 4. Choose a recipe from your saved recipes
 5. Click "Save" to add the meal to your plan
 
-### Editing a Planned Meal
-
-1. Find the meal you want to modify in the calendar
-2. Click on the meal entry
-3. Choose to either:
-   - Select a different recipe
-   - Remove the planned meal
-   - Change the meal type
-
-### Viewing Meal Details
-
-- Click on any planned meal to view:
-  - Recipe details
-  - Preparation time
-  - Ingredients needed
-  - Cooking instructions
-
-## Best Practices
-
-1. **Plan Ahead**: Use the meal planner to organize your meals for the upcoming week
-2. **Variety**: Mix different types of recipes throughout the week
-3. **Shopping Lists**: Use the planned meals to create shopping lists for ingredients
-4. **Time Management**: Consider preparation times when planning multiple meals
-
 ## Technical Implementation
 
 The meal planner feature is implemented using:
