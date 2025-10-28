@@ -1,6 +1,22 @@
 ﻿# Classes
+
 Note that this is not a complete list of classes.
 Only the most important classes are documented here (view the API docs for the full list).
+
+## Meal Planning Classes
+
+### MealPlan
+
+Represents a meal plan entry that associates a recipe with a specific date and meal type (breakfast, lunch, or dinner).
+Each meal plan entry includes:
+
+- Date of the meal
+- Associated recipe
+- Meal type (breakfast, lunch, or dinner)
+- Unique identifier
+
+See @RecipeApp.Models.MealPlan for details.
+
 
 ## SavedRecipe
 Represents a saved recipe stored in a json file.
