@@ -69,6 +69,10 @@
         <DependentUpon>TextWidget.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
+      <Compile Update="Controls\Pages\GroceryListPage.xaml.cs">
+        <DependentUpon>GroceryListPage.xaml</DependentUpon>
+        <IsDefaultItem>true</IsDefaultItem>
+      </Compile>
     </ItemGroup>
 
 </Project>

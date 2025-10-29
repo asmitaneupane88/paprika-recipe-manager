@@ -28,6 +28,12 @@ public partial class Navigator : ObservableObject
         new()
         {
             Icon = Symbol.Library,
+            Name = "My Grocery List",
+            PageFactory = nav => new GroceryListPage(nav),
+        },
+        new()
+        {
+            Icon = Symbol.Library,
             Name = "My Pantry",
             PageFactory = nav => new PantryIngredientsPage(nav),
         },

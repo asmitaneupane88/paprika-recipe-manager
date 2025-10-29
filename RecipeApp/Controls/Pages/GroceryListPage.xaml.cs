@@ -3,10 +3,10 @@
 namespace RecipeApp.Controls.Pages;
 
 
-public sealed partial class PantryIngredientsPage : NavigatorPage
+public sealed partial class GroceryListPage : NavigatorPage
 {
-    [ObservableProperty] private partial ObservableCollection<IngredientCard> PantryIngredients { get; set; } = [];
-    public PantryIngredientsPage(Navigator? nav) : base(nav)
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
+    public GroceryListPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
 
@@ -15,7 +15,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
 
     private async Task ShowIngredients()
     {
-        PantryIngredients = (await RecipeIngredient.GetAll())
+        AllIngredients = (await RecipeIngredient.GetAll())
             .Select(i => new IngredientCard() { Ingredient = i, IsSelected = false})
             .ToObservableCollection();
     }
@@ -35,7 +35,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     
     private List<IngredientCard> GetSelectedIngredientCards()
     {
-        return PantryIngredients
+        return AllIngredients
             .Where(c => c.IsSelected)
             .ToList();
     }
@@ -44,7 +44,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     {
         var newIngredient = new RecipeIngredient();
         
-        PantryIngredients.Add(new IngredientCard() { Ingredient = newIngredient, IsSelected = false });
+        AllIngredients.Add(new IngredientCard() { Ingredient = newIngredient, IsSelected = false });
         await RecipeIngredient.Add(newIngredient);
     }
 
@@ -53,7 +53,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
         var selected = GetSelectedIngredientCards();
         
         await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
-        selected.ForEach(i => PantryIngredients.Remove(i));
+        selected.ForEach(i => AllIngredients.Remove(i));
         RefreshSelected();
     }
 }
