@@ -21,8 +21,6 @@ public class AiHelper
     private static async Task<OpenAIClient> InitClient()
     {
         var settings = await AiSettings.GetSettings();
-        
-        Console.WriteLine($"[DEBUG] Loaded AI Endpoint: {settings?.Endpoint ?? "null"}");
 
         var options = new OpenAIClientOptions
         {
@@ -150,14 +148,10 @@ public class AiHelper
 
         var jsonString = response.Value.Content[0].Text;
         
-        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(
-            jsonString,
-            new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-                PropertyNameCaseInsensitive = true
-            }
-        )?.recipe;
+        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(jsonString, new JsonSerializerOptions
+        {
+            Converters = { new UnitTypeJsonConverter() }
+        })?.recipe;
         
         if (recipe is null) return null;
 
