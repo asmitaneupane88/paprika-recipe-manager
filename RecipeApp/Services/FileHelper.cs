@@ -51,6 +51,9 @@ public class FileHelper
         await using var page = await browser.NewPageAsync();
         await page.SetContentAsync(html);
         await page.PdfAsync(filePath);
+        
+        await page.CloseAsync();
+        await browser.CloseAsync();
     }
 
     public static async Task<string> ConvertPdfToTextAsync(string pdfPath)

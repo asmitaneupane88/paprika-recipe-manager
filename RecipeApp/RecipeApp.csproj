@@ -30,14 +30,20 @@
             MVUX;
             ThemeService;
             SkiaRenderer;
+            WebView;
         </UnoFeatures>
         <LangVersion>preview</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-      <PackageReference Include="AutoGen" />
-      <PackageReference Include="AutoGen.LMStudio" />
+      <PackageReference Include="OpenAI" />
       <PackageReference Include="PuppeteerSharp" />
+      <PackageReference Include="Python.Included" />
       <PackageReference Include="UglyToad.PdfPig" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Include="Styles\RecipeTemplates.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />

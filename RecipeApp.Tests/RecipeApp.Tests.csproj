@@ -7,13 +7,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AutoGen" />
-        <PackageReference Include="AutoGen.LMStudio" />
         <PackageReference Include="FluentAssertions"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk"/>
         <PackageReference Include="NUnit"/>
         <PackageReference Include="NUnit3TestAdapter"/>
-        <PackageReference Include="coverlet.collector"/>
+        <PackageReference Include="coverlet.collector">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="OpenAI" />
+        <PackageReference Include="Python.Included" />
     </ItemGroup>
 
     <ItemGroup>

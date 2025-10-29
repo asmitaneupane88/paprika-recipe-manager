@@ -1,11 +1,12 @@
 # Installation Guide
 
-This guide explains how to set up the devepment enviroment for the Paprika Recipe Manager, a .NET-based application using the Uno platform for cross-platform UI, on Windows. This setup supports the core features of Sprint 1, including recipe mangement and MealDB API integration.
+This guide explains how to set up the development environment for the PseudoChef,
+a .NET-based application using the Uno platform for cross-platform UI, on Windows.
 
 ## Prerequisites
 - **System Requirements**:
-    - Windows 10 or 11 (64-bit)
-    - 8GB RAM (16GB recommended)
+    - Windows 10 or 11 (64-bit), MacOS, or Linux
+    - 4GB of RAM (8GB recommended)
     - 10GB free disk space
 - **Software**:
     - [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
@@ -50,11 +51,11 @@ This guide explains how to set up the devepment enviroment for the Paprika Recip
     ```
 4. **Clone and Set Up the Project**
 - **Clone the repository**:
-
-   ```bash
-   git clone https://github.com/asmitaneupane88/paprika-recipe-manager.git
-   cd paprika-recipe-manager
-   ```
+  - Use either the UI of the IDE or the terminal to clone the repository.
+     ```bash
+     git clone https://github.com/asmitaneupane88/paprika-recipe-manager.git
+     cd paprika-recipe-manager
+     ```
 - **Restore Dependencies**
 
    ```bash
@@ -68,12 +69,13 @@ This guide explains how to set up the devepment enviroment for the Paprika Recip
 
 ## Troubleshooting
 ### Build Errors:
-- Ensure .NET 9 SDK is install `(dotnet --version)`.
+- Ensure .NET 9 SDK is installed `(dotnet --version)`.
+- Ensure that C# 14 is installed and supported by the IDE.
 - Clear NuGet cache `dotnet nuget locals all --clear`.
 - Rebuild: `dotnet clean && dotnet build`.
 ### Uno Platform Issues:
 - Run `uno-check` to diagnose missing depedencies.
 - Reinstall the Uno Platform extension if UI components fail to load.
 ### IDE issues:
-- Update IDE to the latest version.
+- Update the IDE to the latest version.
 - Clear IDE cache and restart.

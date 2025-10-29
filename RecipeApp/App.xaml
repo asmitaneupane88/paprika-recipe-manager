@@ -8,6 +8,7 @@
       <ResourceDictionary.MergedDictionaries>
         <!-- Load WinUI resources -->
         <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+        <ResourceDictionary Source="ms-appx:///Styles/RecipeTemplates.xaml" />
         <utum:MaterialToolkitTheme
           ColorOverrideSource="ms-appx:///Styles/ColorPaletteOverride.xaml">
           <!-- NOTE: You can override the default Roboto font by providing your font assets here. -->

@@ -1,0 +1,55 @@
+﻿<local:NavigatorPage
+    x:Class="RecipeApp.Controls.Pages.WebBrowserPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RecipeApp.Controls.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Button Grid.Column="0" Grid.Row="0" Click="ButtonBack_OnClick" IsEnabled="{x:Bind WebViewControl.CanGoBack, Mode=OneWay}">
+            <SymbolIcon Symbol="Back"/>
+        </Button>
+        <Button Grid.Column="1" Grid.Row="0" Click="ButtonForward_OnClick" IsEnabled="{x:Bind WebViewControl.CanGoForward, Mode=OneWay}">
+            <SymbolIcon Symbol="Forward"/>
+        </Button>
+        <TextBox Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" Text="{x:Bind SearchBarText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+        <Button Grid.Column="3" Grid.Row="0" Click="ButtonGo_OnClick">
+            <SymbolIcon Symbol="Go"/>
+        </Button>
+
+        <WebView2 Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" x:Name="WebViewControl"/>
+
+        <Grid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="4" HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{x:Bind DownloadStatus, Mode=OneWay}" VerticalAlignment="Center" Visibility="{x:Bind ProgressBarVis, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
+            <ProgressBar Grid.Column="1" IsIndeterminate="True" Visibility="{x:Bind ProgressBarVis, Mode=OneWay}" Margin="10" HorizontalAlignment="Stretch"/>
+
+            <Button Grid.Column="2" Click="ButtonDownload_OnClick" Visibility="{x:Bind DownloadVis, Mode=OneWay}" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                    <TextBlock Text="Download Recipe" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <SymbolIcon Symbol="Download" IsHitTestVisible="False"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</local:NavigatorPage>
+

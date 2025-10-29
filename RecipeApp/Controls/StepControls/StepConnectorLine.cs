@@ -57,9 +57,15 @@ public class StepConnectorLine
         if (endPoint is null && endControl is null)
             throw new ArgumentException("Either endPoint or endControl must be provided.");
         
-        _endControl?.LayoutUpdated -= OnLayoutUpdated;
+        if (_endControl != null)
+        {
+            _endControl.LayoutUpdated -= OnLayoutUpdated;
+        }
         _endControl = endControl;
-        _endControl?.LayoutUpdated += OnLayoutUpdated;
+        if (_endControl != null)
+        {
+            _endControl.LayoutUpdated += OnLayoutUpdated;
+        }
         _endPoint = endPoint;
         UpdateCurve();
     }
@@ -115,7 +121,10 @@ public class StepConnectorLine
     public void Dispose()
     {
         _startControl.LayoutUpdated -= OnLayoutUpdated;
-        _endControl?.LayoutUpdated -= OnLayoutUpdated;
+        if (_endControl != null)
+        {
+            _endControl.LayoutUpdated -= OnLayoutUpdated;
+        }
         _stepCanvas.Children.Remove(_path);
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System.ClientModel;
-using AutoGen.Core;
-using AutoGen.OpenAI;
-using AutoGen.OpenAI.Extension;
 using OpenAI;
 using OpenAI.Chat;
 using RecipeApp.Models.RecipeSteps;
@@ -10,8 +7,7 @@ namespace RecipeApp.Services;
 
 
 /// <summary>
-/// good documentation here for the NuGet package used:
-/// https://microsoft.github.io/autogen-for-net/articles/Consume-LLM-server-from-LM-Studio.html
+/// Used to make calls to an OpenAI API easier.
 /// </summary>
 public class AiHelper
 {
@@ -38,6 +34,10 @@ public class AiHelper
         return _client;
     }
 
+    /// <summary>
+    /// tries to get a list of models from the endpoint
+    /// </summary>
+    /// <returns></returns>
     public static async Task<List<string>> GetModels()
     {
         _client ??= await InitClient();
@@ -46,6 +46,11 @@ public class AiHelper
         return modelsResponse?.Value?.Select(m => m.Id).ToList() ?? new List<string>();
     }
 
+    /// <summary>
+    /// sets the current model to use
+    /// </summary>
+    /// <param name="modelId"></param>
+    /// <returns></returns>
     public static async Task<bool> SetModel(string modelId)
     {
         _currentModel = modelId;
@@ -54,11 +59,22 @@ public class AiHelper
         return true;
     }
 
+    /// <summary>
+    /// converts a mealDb recipe to json and passes it to the StringToSavedRecipe function.
+    /// </summary>
+    /// <param name="mealDbRecipe"></param>
+    /// <returns></returns>
     public static async Task<SavedRecipe?> MealDbToSavedRecipe(MealDbRecipe mealDbRecipe)
     {
         return await StringToSavedRecipe(JsonSerializer.Serialize(mealDbRecipe));
     }
 
+    /// <summary>
+    /// calls the endpoint with a predefined JSON schema to convert the given string into something that almost looks like a recipe.
+    /// </summary>
+    /// <param name="content"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public static async Task<SavedRecipe?> StringToSavedRecipe(string content)
     {
         _client ??= await InitClient();
@@ -148,10 +164,14 @@ public class AiHelper
 
         var jsonString = response.Value.Content[0].Text;
         
-        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(jsonString, new JsonSerializerOptions
-        {
-            Converters = { new UnitTypeJsonConverter() }
-        })?.recipe;
+        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(
+            jsonString,
+            new JsonSerializerOptions
+            {
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
+                PropertyNameCaseInsensitive = true
+            }
+        )?.recipe;
         
         if (recipe is null) return null;
 
@@ -183,13 +203,13 @@ public class AiHelper
                     MinutesToComplete = step.MinutesToComplete,
                     Title = step.Title,
                     Instructions = step.Instruction ?? string.Empty,
-                    IngredientsToUse = step.Ingredients.ToObservableCollection()
+                    IngredientsToUse = step.Ingredients?.ToObservableCollection() ?? [],
                 },
                 "Timer" => new TimerStep()
                 {
                     MinutesToComplete = step.MinutesToComplete,
                     Title = step.Title,
-                    IngredientsToUse = step.Ingredients.ToObservableCollection()
+                    IngredientsToUse = step.Ingredients?.ToObservableCollection() ?? [],
                 },
                 _ => throw new Exception("Unknown step type")
             };
@@ -208,6 +228,21 @@ public class AiHelper
             }
                     
             currentStep = newStep;
+        }
+
+        var finishStep = new FinishStep();
+        
+        switch (currentStep)
+        {
+            case TimerStep timeS:
+                timeS.NextStep = new OutNode("Next", finishStep);
+                break;
+            case TextStep textS:
+                textS.OutNodes = [new OutNode("Next", finishStep)];
+                break;
+            case StartStep startS:
+                startS.Paths = [new OutNode("Start", finishStep)];
+                break;
         }
         
         return savedRecipe;

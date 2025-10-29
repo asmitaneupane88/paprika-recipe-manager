@@ -6,37 +6,22 @@ This is the documentation for the PseudoChef. This application is based off of t
 
 - Search recipes from MealDB (API)
 - Save favorite recipes
-- View detailed recipe information
-- Edit recipe details
-- Manage your recipe collection
+- Recipe Step Viewer
+- Meal Planner
+- Web Browser
 
 ## Project Structure
 
 - `RecipeApp/` - Main application project
   - `Interfaces/` - Interfaces and abstract classes
-    - `IRecipe.cs` - Base recipe interface
-    - `IRecipeService.cs` - Recipe service interface
-    - `IAutosavingClass.cs` - Autosaving functionality interface
+   for all interaction recipe step controls; handles mouse/node events and visual interaction with `InNode` / `OutNode` connections in the recipe step editor.
   - `Models/` - Data models
-    - `Recipe.cs` - Core recipe model with all recipe properties
-    - `SavedRecipe.cs` - Local storage recipe model
-    - `RecipeIngredient.cs` - Ingredient data structure
-    - `MealDbRecipe.cs` - API recipe model
-    - `Navigator.cs` - Navigation state management
-    - `Route.cs` - Route definitions
-    - `RecipeSteps/` - Recipe step implementations
-      - `TextStep.cs` - Text-based recipe step
-      - `TimerStep.cs` - Timer-based recipe step
-  - `ViewModels/` - MVVM view models
-    - `RecipeDetailsViewModel.cs` - Recipe details logic
-    - `SearchViewModel.cs` - Recipe search functionality
+    - `RecipeSteps`/ -Contains all models representing individual recipe steps and their connection nodes, forming the logical and visual backbone of the recipe workflow editor.
+  - `ViewModels/` - Contains the MVVM view models that manage the state, logic, and commands for recipe-related pages such as search and recipe details.
+
   - `Controls/` - UI controls and pages
     - `Pages/` - Application pages
-      - `RecipeDetails.xaml` - Recipe details view
-      - `EditRecipe.xaml` - Recipe editing interface
-      - `SearchPage.xaml` - Recipe search interface
-    - `Shell.xaml` - Main application shell
-  - `Services/` - Business logic and services
-    - `ApiControl.cs` - MealDB API integration
-    - `RecipeConverter.cs` - Recipe format conversion
-    - `FileHelper.cs` - File operations
+    - `StepControls/` - XAML-based user controls that visually represent recipe step widgets and connection lines in the flow editor.
+    - `Services/` - Business logic and services
+  - `Converters`/ - Value converters used in data binding to transform model data for UI display, such as visibility toggles and time formatting.
+  - `Enums`/ - Defines unit categories

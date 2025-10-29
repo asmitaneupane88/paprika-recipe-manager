@@ -22,5 +22,13 @@ public partial class TimerStep : IStep
         }
     }
     
-    public OutNode NextStep { get; set; } = new OutNode("",null);
+    public OutNode NextStep
+    {
+        get;
+        set
+        {
+            value.Title = "Next"; // I do not feel like remaking old data
+            field = value;
+        }
+    } = new("Next", null);
 }
