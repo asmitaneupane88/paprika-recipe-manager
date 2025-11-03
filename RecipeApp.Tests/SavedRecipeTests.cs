@@ -1,6 +1,9 @@
 using FluentAssertions;
 using RecipeApp.Models;
 using RecipeApp.Models.RecipeSteps;
+using System.Collections.ObjectModel;
+using RecipeApp.Interfaces;
+using RecipeApp.Enums;
 
 namespace RecipeApp.Tests;
 
@@ -140,5 +143,207 @@ public class SavedRecipeTests
         
         info[1].MaxCookTime.Should().Be(15);
         info[1].MinCookTime.Should().Be(8);
+    }
+
+    [Test]
+    public void SavedRecipe_Ingredients_ExtractsFromGraph()
+    // AI Generated
+    {
+        // Arrange
+        var recipe = new SavedRecipe { Title = "Test Recipe" };
+        var rootStep = new StartStep();
+        var textStep1 = new TextStep 
+        { 
+            Title = "Step 1",
+            IngredientsToUse =
+            [   
+                new RecipeIngredient { Name = "Flour", Quantity = 2, Unit = UnitType.CUP },
+                new RecipeIngredient { Name = "Sugar", Quantity = 1, Unit = UnitType.CUP }
+            ]
+        };
+        var textStep2 = new TextStep 
+        { 
+            Title = "Step 2",
+            IngredientsToUse =
+            [
+                new RecipeIngredient { Name = "Eggs", Quantity = 3, Unit = UnitType.ITEM },
+                new RecipeIngredient { Name = "Flour", Quantity = 1, Unit = UnitType.CUP } // Should combine with step 1
+            ],
+        };
+        var finishStep = new FinishStep();
+        
+        rootStep.Paths = [new OutNode("Start", textStep1)];
+        textStep1.OutNodes = [new OutNode("Next", textStep2)];
+        textStep2.OutNodes = [new OutNode("Next", finishStep)];
+        
+        recipe.RootStepNode = rootStep;
+        
+        // Act
+        var ingredients = recipe.Ingredients;
+        
+        // Assert
+        ingredients.Should().NotBeNull();
+        ingredients.Count.Should().BeGreaterThan(0);
+        
+        // Check that ingredients are accumulated (Flour should be combined: 2 + 1 = 3 cups)
+        var flour = ingredients.FirstOrDefault(i => i.Name == "Flour");
+        flour.Should().NotBeNull();
+        flour!.Quantity.Should().Be(3); // Combined from both steps
+        flour.Unit.Should().Be(UnitType.CUP);
+        
+        ingredients.Should().Contain(i => i.Name == "Sugar" && i.Quantity == 1);
+        ingredients.Should().Contain(i => i.Name == "Eggs" && i.Quantity == 3);
+    }
+
+    [Test]
+    public void SavedRecipe_Ingredients_ReturnsEmptyWhenNoRootStep()
+    // AI Generated
+    {
+        // Arrange
+        var recipe = new SavedRecipe { Title = "Test Recipe", RootStepNode = null };
+        
+        // Act
+        var ingredients = recipe.Ingredients;
+        
+        // Assert
+        ingredients.Should().NotBeNull();
+        ingredients.Count.Should().Be(0);
+    }
+
+    [Test]
+    public void SavedRecipe_GetNodeProperties_ReturnsAllNodes()
+    // AI Generated
+    {
+        // Arrange
+        var recipe = new SavedRecipe { Title = "Test Recipe" };
+        var rootStep = new StartStep { X = 0, Y = 0 };
+        var textStep = new TextStep { Title = "Test Step", X = 100, Y = 100, MinutesToComplete = 5 };
+        var timerStep = new TimerStep { Title = "Timer", X = 200, Y = 200, MinutesToComplete = 10 };
+        var finishStep = new FinishStep { X = 300, Y = 300 };
+        
+        rootStep.Paths = [new OutNode("Start", textStep)];
+        textStep.OutNodes = [new OutNode("Next", timerStep)];
+        timerStep.NextStep = new OutNode("Next", finishStep);
+        
+        recipe.RootStepNode = rootStep;
+        
+        // Act
+        var nodeProperties = recipe.GetNodeProperties();
+        
+        // Assert
+        nodeProperties.Should().NotBeNull();
+        nodeProperties.Count.Should().Be(4); // StartStep, TextStep, TimerStep, FinishStep
+        
+        // Check that all nodes are present
+        nodeProperties.Keys.Should().Contain(rootStep);
+        nodeProperties.Keys.Should().Contain(textStep);
+        nodeProperties.Keys.Should().Contain(timerStep);
+        nodeProperties.Keys.Should().Contain(finishStep);
+        
+        // Check TextStep properties
+        var textProps = nodeProperties[textStep];
+        textProps.Should().ContainKey("Title");
+        textProps["Title"].Should().Be("Test Step");
+        textProps.Should().ContainKey("MinutesToComplete");
+        textProps["MinutesToComplete"].Should().Be(5.0);
+        textProps.Should().ContainKey("LocX");
+        textProps["LocX"].Should().Be(100.0);
+        textProps.Should().ContainKey("StepType");
+        textProps["StepType"].Should().Be("TextStep");
+    }
+
+    [Test]
+    public void SavedRecipe_GetNodeProperties_ReturnsEmptyWhenNoRootStep()
+    // AI Generated
+    {
+        // Arrange
+        var recipe = new SavedRecipe { Title = "Test Recipe", RootStepNode = null };
+        
+        // Act
+        var nodeProperties = recipe.GetNodeProperties();
+        
+        // Assert
+        nodeProperties.Should().NotBeNull();
+        nodeProperties.Count.Should().Be(0);
+    }
+
+    [Test]
+    public void Recipe_IRecipeIngredients_ConvertsIngredientToRecipeIngredient()
+    // AI Generated
+    {
+        // Arrange
+        var recipe = new Recipe
+        {
+            Title = "Test Recipe",
+            PrepTimeMinutes = 10,
+            CookTimeMinutes = 20,
+            Servings = 4,
+            Difficulty = "Easy",
+            Ingredients = 
+            [
+                new Ingredient { Name = "Flour", Amount = "2", Unit = "CUP", Notes = "Sifted" },
+                new Ingredient { Name = "Sugar", Amount = "1.5", Unit = "TBSP" },
+                new Ingredient { Name = "Eggs", Amount = "3", Unit = "", Notes = "Large" },
+                new Ingredient { Name = "Milk", Amount = "1", Unit = "cup" } // lowercase test
+            ],
+            Directions = []
+        };
+        
+        // Act
+        var recipeIngredients = ((IRecipe)recipe).Ingredients;
+        
+        // Assert
+        recipeIngredients.Should().NotBeNull();
+        recipeIngredients.Count.Should().Be(4);
+        
+        // Check conversions
+        var flour = recipeIngredients.First(i => i.Name == "Flour");
+        flour.Quantity.Should().Be(2);
+        flour.Unit.Should().Be(UnitType.CUP);
+        flour.ModifierNote.Should().Be("Sifted");
+        
+        var sugar = recipeIngredients.First(i => i.Name == "Sugar");
+        sugar.Quantity.Should().Be(1.5);
+        sugar.Unit.Should().Be(UnitType.TBSP);
+        
+        var eggs = recipeIngredients.First(i => i.Name == "Eggs");
+        eggs.Quantity.Should().Be(3);
+        eggs.Unit.Should().Be(UnitType.ITEM); // Empty unit defaults to ITEM
+        eggs.ModifierNote.Should().Be("Large");
+        
+        var milk = recipeIngredients.First(i => i.Name == "Milk");
+        milk.Unit.Should().Be(UnitType.CUP); // Case-insensitive conversion
+    }
+
+    [Test]
+    public void Recipe_IRecipeIngredients_HandlesInvalidAmount()
+    // AI Generated
+    {
+        // Arrange
+        var recipe = new Recipe
+        {
+            Title = "Test Recipe",
+            PrepTimeMinutes = 10,
+            CookTimeMinutes = 20,
+            Servings = 4,
+            Difficulty = "Easy",
+            Ingredients = 
+            [
+                new Ingredient { Name = "Salt", Amount = "pinch", Unit = "TSP" }, // Invalid number
+                new Ingredient { Name = "Pepper", Amount = null, Unit = "TSP" } // Null amount
+            ],
+            Directions = []
+        };
+        
+        // Act
+        var recipeIngredients = ((IRecipe)recipe).Ingredients;
+        
+        // Assert
+        recipeIngredients.Should().NotBeNull();
+        recipeIngredients.Count.Should().Be(2);
+        
+        // Invalid amounts should default to 1
+        recipeIngredients.First(i => i.Name == "Salt").Quantity.Should().Be(1);
+        recipeIngredients.First(i => i.Name == "Pepper").Quantity.Should().Be(1);
     }
 }
