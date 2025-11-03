@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
+using RecipeApp.Enums;
 namespace RecipeApp.Models;
 
 public class Recipe : INotifyPropertyChanged, IRecipe
@@ -23,6 +23,50 @@ public class Recipe : INotifyPropertyChanged, IRecipe
     public string? MealDbId { get; init; } // Only for MealDB recipes
     public string? Description { get; init; }
 
+    // converts Ingredient -> RecipeIngredient
+    ObservableCollection<RecipeIngredient> IRecipe.Ingredients
+    {
+        get
+        {
+            var result = new ObservableCollection<RecipeIngredient>();
+            foreach (var ingredient in Ingredients)
+            {
+                double quantity = 1;
+                if (!string.IsNullOrWhiteSpace(ingredient.Amount) &&
+                     double.TryParse(ingredient.Amount, out var parsed))
+                {
+                    quantity = parsed;
+                }
+
+                result.Add(new RecipeIngredient {
+                    Name = ingredient.Name ?? string.Empty,
+                    Quantity = quantity,
+                    Unit = ParseUnitType(ingredient.Unit),
+                    ModifierNote = ingredient.Notes ?? string.Empty
+                });
+            }
+            return result;
+        }
+    }
+
+    private static UnitType ParseUnitType(string? unit)
+    {
+        if (string.IsNullOrWhiteSpace(unit)) return UnitType.ITEM;
+    
+        return unit.ToUpperInvariant().Trim() switch
+        {
+            "TSP" or "TEASPOON" or "TEASPOONS" => UnitType.TSP,
+            "TBSP" or "TABLESPOON" or "TABLESPOONS" => UnitType.TBSP,
+            "CUP" or "CUPS" => UnitType.CUP,
+            "PINT" or "PINTS" => UnitType.PINT,
+            "QUART" or "QUARTS" => UnitType.QUART,
+            "GALLON" or "GALLONS" => UnitType.GALLON,
+            "OZ" or "OUNCE" or "OUNCES" => UnitType.OZ,
+            "LB" or "LBS" or "POUND" or "POUNDS" => UnitType.LB,
+            "KG" or "KILOGRAM" or "KILOGRAMS" => UnitType.KG,
+            _ => UnitType.ITEM
+        };
+}
     public event PropertyChangedEventHandler? PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
