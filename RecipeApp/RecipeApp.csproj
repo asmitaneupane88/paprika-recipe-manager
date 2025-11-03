@@ -1,6 +1,6 @@
 <Project Sdk="Uno.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net9.0-desktop;net9.0</TargetFrameworks>
+        <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-desktop;net9.0</TargetFrameworks>
 
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
@@ -69,6 +69,16 @@
         <DependentUpon>TextWidget.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
+      <Compile Include="Platforms\Android\Main.Android.cs" />
+      <Compile Include="Platforms\Android\MainActivity.Android.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="Platforms\Android\AndroidManifest.xml" />
+      <Content Include="Platforms\Android\Assets\AboutAssets.txt" />
+      <Content Include="Platforms\Android\environment.conf" />
+      <Content Include="Platforms\Android\Resources\AboutResources.txt" />
+      <Content Include="Platforms\Android\Resources\values\Strings.xml" />
+      <Content Include="Platforms\Android\Resources\values\Styles.xml" />
     </ItemGroup>
 
 </Project>
