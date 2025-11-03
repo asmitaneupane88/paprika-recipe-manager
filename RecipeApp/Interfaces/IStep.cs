@@ -80,7 +80,7 @@ public abstract partial class IStep : ObservableObject
 
                 foreach (var pathPair in startStep.Paths)
                     if (pathPair.Next is not null)
-                        returnInfo.Add(pathPair.Next.GetNestedPathInfo(visitedSteps).First() with { OutNode = pathPair, PrepTime = startStep.MinutesToComplete});
+                        returnInfo.Add(pathPair.Next.GetNestedPathInfo(visitedSteps.ToList()).First() with { OutNode = pathPair, PrepTime = startStep.MinutesToComplete});
                     else
                         returnInfo.Add(new PathInfo(pathPair, false,[], []));
             
@@ -96,7 +96,7 @@ public abstract partial class IStep : ObservableObject
                     outNodes = outNodes.Where(n => n.Next is not null).ToObservableCollection();
                 
                 var outPaths = outNodes
-                    .Select(n => (n.Next?.GetNestedPathInfo(visitedSteps).FirstOrDefault() ?? new PathInfo(n, false, [], [])) with { OutNode = n }) //TODO clean up this line
+                    .SelectMany(n => n.Next?.GetNestedPathInfo(visitedSteps)?.Select(p => p with { OutNode = n }) ?? [])
                     .ToList();
 
                 if (outPaths.Count == 0) return [ new PathInfo(null, false, [], []) ];
@@ -106,14 +106,19 @@ public abstract partial class IStep : ObservableObject
                     // got to look for the highest min cook time here
                     var minPath = outPaths.OrderByDescending(p => p.MinCookTime).First();
                     var maxPath = outPaths.OrderByDescending(p => p.MaxCookTime).First();
-                
-                    var newMinIngredients = CombineIngredients(minPath.MinIngredients, IngredientsToUse);
-                    var newMaxIngredients = CombineIngredients(maxPath.MaxIngredients, IngredientsToUse);
+
+                    var maxIngredients = IngredientsToUse.ToObservableCollection();
+                    foreach (var path in outPaths)
+                        maxIngredients = CombineIngredients(maxIngredients, path.MaxIngredients);
+                    
+                    var minIngredients = IngredientsToUse.ToObservableCollection();
+                    foreach (var path in outPaths)
+                        minIngredients = CombineIngredients(minIngredients, path.MinIngredients);
 
                     var newMinCookTime = minPath.MinCookTime + MinutesToComplete;
                     var newMaxCookTime = maxPath.MaxCookTime + MinutesToComplete;       
                 
-                    return [new PathInfo(null, outPaths.All(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
+                    return [new PathInfo(null, outPaths.All(p => p.IsValid), minIngredients, maxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
                 }
                 else
                 {
