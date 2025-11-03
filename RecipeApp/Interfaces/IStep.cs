@@ -91,10 +91,14 @@ public abstract partial class IStep : ObservableObject
             default:
             {
                 var outNodes = GetOutNodes();
+                
+                if (this is SplitStep)
+                    outNodes = outNodes.Where(n => n.Next is not null).ToObservableCollection();
+                
                 var outPaths = outNodes
-                    .Select(n => (n.Next?.GetNestedPathInfo(visitedSteps).First() ?? new PathInfo(n, false, [], [])) with { OutNode = n }) //TODO clean up this line
+                    .Select(n => (n.Next?.GetNestedPathInfo(visitedSteps).FirstOrDefault() ?? new PathInfo(n, false, [], [])) with { OutNode = n }) //TODO clean up this line
                     .ToList();
-            
+
                 if (outPaths.Count == 0) return [ new PathInfo(null, false, [], []) ];
 
                 if (this is SplitStep or MergeStep)
@@ -109,7 +113,7 @@ public abstract partial class IStep : ObservableObject
                     var newMinCookTime = minPath.MinCookTime + MinutesToComplete;
                     var newMaxCookTime = maxPath.MaxCookTime + MinutesToComplete;       
                 
-                    return [new PathInfo(null, outPaths.Any(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
+                    return [new PathInfo(null, outPaths.All(p => p.IsValid), newMinIngredients, newMaxIngredients, minPath.PrepTime, newMinCookTime, newMaxCookTime, minPath.CleanupTime)];
                 }
                 else
                 {
