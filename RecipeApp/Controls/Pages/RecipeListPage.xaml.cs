@@ -122,7 +122,7 @@ private const int AllCategorySortOrder = -20252025;
         if (sender is ListView { SelectedItem: RecipeCard rc } lv)
         {
             lv.SelectedItem = null;
-            var details = new RecipeDetailsPage(Navigator, savedRecipe: rc.SavedRecipe);
+            var details = new RecipeDetailsV2(Navigator, rc.SavedRecipe);
             Navigator.Navigate(details, $"Recipe: {rc.SavedRecipe.Title}");
         }
     }
