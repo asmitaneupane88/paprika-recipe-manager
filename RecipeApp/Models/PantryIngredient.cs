@@ -2,7 +2,7 @@
 
 namespace RecipeApp.Models;
 
-public partial class GroceryIngredient: IAutosavingClass<GroceryIngredient>
+public partial class PantryIngredient: IAutosavingClass<PantryIngredient>
 {
     [ObservableProperty] public partial string Name { get; set; }
     

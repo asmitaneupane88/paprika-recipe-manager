@@ -15,8 +15,13 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
 
     private async Task ShowIngredients()
     {
-        PantryIngredients = (await RecipeIngredient.GetAll())
-            .Select(i => new IngredientCard() { Ingredient = i, IsSelected = false})
+        PantryIngredients = (await PantryIngredient.GetAll())
+            .Select(i => new IngredientCard
+            {
+                PIngredient = i,
+                IsSelected = false,
+                Ingredient = null
+            })
             .ToObservableCollection();
     }
     
@@ -42,17 +47,22 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
 
     private async void ButtonAddIngredient_OnClick(object sender, RoutedEventArgs e)
     {
-        var newIngredient = new RecipeIngredient();
+        var newIngredient = new PantryIngredient();
         
-        PantryIngredients.Add(new IngredientCard() { Ingredient = newIngredient, IsSelected = false });
-        await RecipeIngredient.Add(newIngredient);
+        PantryIngredients.Add(new IngredientCard
+        {
+            PIngredient = newIngredient,
+            IsSelected = false,
+            Ingredient = null
+        });
+        await PantryIngredient.Add(newIngredient);
     }
 
     private async void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
         var selected = GetSelectedIngredientCards();
         
-        await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
+        await Task.WhenAll(selected.Select(c => PantryIngredient.Remove(c.PIngredient)));
         selected.ForEach(i => PantryIngredients.Remove(i));
         RefreshSelected();
     }

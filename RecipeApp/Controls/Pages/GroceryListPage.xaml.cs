@@ -16,7 +16,12 @@ public sealed partial class GroceryListPage : NavigatorPage
     private async Task ShowIngredients()
     {
         AllIngredients = (await RecipeIngredient.GetAll())
-            .Select(i => new IngredientCard() { Ingredient = i, IsSelected = false})
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
             .ToObservableCollection();
     }
     
@@ -44,7 +49,12 @@ public sealed partial class GroceryListPage : NavigatorPage
     {
         var newIngredient = new RecipeIngredient();
         
-        AllIngredients.Add(new IngredientCard() { Ingredient = newIngredient, IsSelected = false });
+        AllIngredients.Add(new IngredientCard
+        {
+            Ingredient = newIngredient,
+            IsSelected = false,
+            PIngredient = null
+        });
         await RecipeIngredient.Add(newIngredient);
     }
 

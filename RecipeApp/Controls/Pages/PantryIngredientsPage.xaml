@@ -74,17 +74,17 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0" Text="{Binding Ingredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="1" Text="{Binding Ingredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                            <TextBox Grid.Column="0" Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="1" Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
 
                             <NumberBox Grid.Column="2"
                                        PlaceholderText="Qty"
-                                       Value="{Binding Ingredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       Value="{Binding PIngredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                        Minimum="0" Width="150"/>
 
                             <ComboBox Grid.Column="3"
-                                      ItemsSource="{Binding Ingredient.UnitOptions}"
-                                      SelectedItem="{Binding Ingredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      ItemsSource="{Binding PIngredient.UnitOptions}"
+                                      SelectedItem="{Binding PIngredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="100"/>
 
                             <!--Got to use "Binding" here over x:Bind-->
