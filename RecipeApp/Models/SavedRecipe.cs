@@ -16,6 +16,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
     [ObservableProperty] public partial string? Category { get; set; }
 
+    [ObservableProperty] public partial bool AdvancedSteps { get; set; } = false;
+    
     public bool IsFromPdf { get; set; }
 
     public int Rating
@@ -28,9 +30,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string? HtmlPath { get; set; }
     [JsonIgnore] public bool HasPdf => !String.IsNullOrEmpty(PdfPath);
     [JsonIgnore] public bool HasHtml => !String.IsNullOrEmpty(HtmlPath);
-
-
-
 
     [ObservableProperty] public partial StartStep? RootStepNode { get; set; }
 
