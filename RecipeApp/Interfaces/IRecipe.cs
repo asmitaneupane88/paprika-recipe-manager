@@ -7,4 +7,5 @@ public interface IRecipe
     string? ImageUrl { get; }
     int Rating { get; }
     string? Description { get; }
+    ObservableCollection<RecipeIngredient> Ingredients { get; }
 }
