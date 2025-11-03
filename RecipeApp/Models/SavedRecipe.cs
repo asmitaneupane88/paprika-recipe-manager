@@ -29,10 +29,76 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [JsonIgnore] public bool HasPdf => !String.IsNullOrEmpty(PdfPath);
     [JsonIgnore] public bool HasHtml => !String.IsNullOrEmpty(HtmlPath);
 
-
-
-
     [ObservableProperty] public partial StartStep? RootStepNode { get; set; }
+
+    public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
+    {
+        // store the result
+        var result = new Dictionary<IStep, Dictionary<string, object>>();
+
+        // if there are no steps
+        if (RootStepNode == null) 
+        {
+            return result;
+        }
+
+        // Using Breadth-first search to map nodes -> properties
+        var allSteps = new HashSet<IStep>();
+        var queue = new Queue<IStep>();
+        queue.Enqueue(RootStepNode);
+
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            if (!allSteps.Add(current)) continue; // Skip if the node has already been visited
+
+            // Create properties dictionary for this step
+            var properties = new Dictionary<string, object>
+            {
+                ["Title"] = current.GetTitle(),
+                ["Description"] = current.GetDescription(),
+                ["MinutesToComplete"] = current.MinutesToComplete,
+                ["Ingredients"] = current.IngredientsToUse,
+                ["LocX"] = current.X,
+                ["LocY"] = current.Y,
+                ["StepType"] = current.GetType().Name,
+                ["IngredientsToUse"] = current.IngredientsToUse,
+            };
+
+            // Add properties to the dictionary
+            result[current] = properties;
+
+            // Enqueue connected steps
+            foreach (var outNode in current.GetOutNodes() ?? [])
+            {
+                var nextStep = outNode.Next;
+                if (nextStep is not null)
+                    queue.Enqueue(nextStep);
+            }
+        }
+        return result;
+
+
+    }
+
+    [JsonIgnore] public ObservableCollection<RecipeIngredient> Ingredients
+    {
+        get
+        {
+            if (RootStepNode == null) return [];
+
+        var pathInfo = RootStepNode.GetNestedPathInfo();
+        if (pathInfo.Count == 0) return [];
+
+        // Return MaxIngredients from the first path (contains all ingredients)
+        return pathInfo[0].MaxIngredients ?? [];
+        }
+
+    }
+
+
+
+
 
     public const string HtmlHeader =
         "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
