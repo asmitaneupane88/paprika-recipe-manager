@@ -52,7 +52,8 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
             {
                 textbox,
                 pickButton
-            }
+            },
+            Orientation = Orientation.Horizontal,
         };
         
         var popup = new ContentDialog()
