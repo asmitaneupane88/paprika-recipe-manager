@@ -102,7 +102,7 @@ public sealed partial class RecipeDetailsPage : NavigatorPage, INotifyPropertyCh
     {
         if (_savedRecipe != null)
         {
-            Navigator.Navigate(new EditRecipe(Navigator, _savedRecipe), $"Edit {_savedRecipe.Title}");
+            Navigator.Navigate(new RecipeDetailsV2(Navigator, _savedRecipe), $"Edit {_savedRecipe.Title}");
         }
     }
 }
