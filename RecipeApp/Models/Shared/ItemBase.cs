@@ -1,15 +1,19 @@
 using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ReciepApp.Models.Shared
+namespace RecipeApp.Models.Shared
 {
-    public class ItemBase
+    /// <summary>
+    /// Base class for grocery and pantry items, providing shared properties.
+    /// </summary>
+    public partial class ItemBase : ObservableObject
     {
-        public string Name { get; set; } = "";
-        public string Category {get; set; } = "";
-        public double Quantity { get; set; } = 0;
-        public string Unit { get; set; } = "";
-        public string?ImageUrl {get; set; }
-        public DateTime? ExpirationDate { get; set; }
+        [ObservableProperty] private string name = string.Empty;
+        [ObservableProperty] private string category = string.Empty;
+        [ObservableProperty] private double quantity = 0;
+        [ObservableProperty] private string unit = string.Empty;
+        [ObservableProperty] private string? imageUrl;
+        [ObservableProperty] private DateTime? expirationDate;
     }
 }
 
