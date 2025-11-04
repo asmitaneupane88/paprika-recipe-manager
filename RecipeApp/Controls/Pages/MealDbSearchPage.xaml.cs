@@ -14,10 +14,9 @@ namespace RecipeApp.Controls.Pages
 
         private void Recipe_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is FrameworkElement element && element.DataContext is MealDbRecipe mealDbRecipe)
+            if (sender is FrameworkElement { DataContext: MealDbRecipe mealDbRecipe })
             {
-                var recipe = mealDbRecipe.ToSavedRecipe();
-                Navigator.Navigate(new RecipeDetailsPage(Navigator, recipe), recipe.Title);
+                Navigator.Navigate(new MealDBDetailsPage(Navigator, mealDbRecipe), $"MealDB Recipe: {mealDbRecipe.strMeal}");
             }
         }
     }

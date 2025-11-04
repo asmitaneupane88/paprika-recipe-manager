@@ -27,17 +27,17 @@
                   Margin="0,16,0,0">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:MealDbRecipe">
-                    <Button Click="Recipe_Click" 
+                    <Button Click="Recipe_Click"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
                             Style="{ThemeResource ButtonRevealStyle}"
                             Padding="0"
                             Background="Transparent">
                         <StackPanel Orientation="Horizontal" Spacing="12" Padding="8">
-                            <Image Source="{x:Bind ImageUrl}" Width="100" Height="100"/>
+                            <Image Source="{x:Bind strMealThumb}" Width="100" Height="100"/>
                             <StackPanel>
-                                <TextBlock Text="{x:Bind Name}" FontWeight="Bold" FontSize="18"/>
-                                <TextBlock Text="{x:Bind Category}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" 
+                                <TextBlock Text="{x:Bind strMeal}" FontWeight="Bold" FontSize="18"/>
+                                <TextBlock Text="{x:Bind strCategory}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                                          Style="{ThemeResource CaptionTextBlockStyle}"/>
                                 <TextBlock Text="{x:Bind Ingredients}"
                                          Style="{ThemeResource CaptionTextBlockStyle}"
