@@ -26,7 +26,7 @@ namespace RecipeApp.Tests
             Console.WriteLine($"Found {recipes.Count} recipes for  '{query}':");
             foreach (var recipe in  recipes)
             {
-                Console.WriteLine($" - {recipe.Name} ({recipe.Ingredients})");
+                Console.WriteLine($" - {recipe.strMeal} ({recipe.Ingredients})");
             }
         }
 
