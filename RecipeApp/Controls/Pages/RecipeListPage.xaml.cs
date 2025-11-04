@@ -162,7 +162,7 @@ private const int AllCategorySortOrder = -20252025;
 
             await SavedRecipe.Add(newRecipe);
 
-            Navigator.Navigate(new EditRecipe(Navigator, newRecipe), title:$"Edit {newRecipe.Title}");
+            Navigator.Navigate(new RecipeDetailsV2(Navigator, newRecipe), title:$"Edit {newRecipe.Title}");
         }
     }
 
