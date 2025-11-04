@@ -5,7 +5,7 @@ namespace RecipeApp.Models;
 /// <summary>
 /// Handles the representation of a saved recipe along with loading and saving of the saved recipes.
 /// </summary>
-public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
+public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
 {
     [JsonIgnore] public int BindableMaxRating => MaxRating;
 
