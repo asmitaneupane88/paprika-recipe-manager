@@ -57,7 +57,6 @@ public sealed partial class UCClickToEditText : UserControl
         EditText.Visibility = Visibility.Visible;
         
         // got to do this so multiline text does not get truncated to a single line???
-        // forces a binding update after it becomes visible.
         EditText.Text = EditableText;
         
         EditText.Focus(FocusState.Pointer);
