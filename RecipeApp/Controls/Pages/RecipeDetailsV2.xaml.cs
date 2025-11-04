@@ -46,15 +46,22 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
                 textbox.Text = file.Path;
         };
 
-        var stack = new StackPanel
+        var stack = new Grid
         {
             Children =
             {
                 textbox,
                 pickButton
             },
-            Orientation = Orientation.Horizontal,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) },
+                new ColumnDefinition { Width = GridLength.Auto },
+            }
         };
+        
+        Grid.SetColumn(textbox, 0);
+        Grid.SetColumn(pickButton, 1);
         
         var popup = new ContentDialog()
         {

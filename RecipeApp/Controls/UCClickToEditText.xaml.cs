@@ -55,6 +55,10 @@ public sealed partial class UCClickToEditText : UserControl
         DisplayText.Visibility = Visibility.Collapsed;
         EditImageHover = Visibility.Collapsed;
         EditText.Visibility = Visibility.Visible;
+        
+        // got to do this so multiline text does not get truncated to a single line???
+        EditText.Text = EditableText;
+        
         EditText.Focus(FocusState.Pointer);
     }
 

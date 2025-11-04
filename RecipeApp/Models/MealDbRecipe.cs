@@ -56,31 +56,6 @@ namespace RecipeApp.Models
         public string? strMeasure18 { get; set; }
         public string? strMeasure19 { get; set; }
         public string? strMeasure20 { get; set; }
-
-        // For backward compatibility with existing code
-        public string Name 
-        { 
-            get => strMeal ?? string.Empty;
-            set => strMeal = value;
-        }
-        
-        public string Category
-        {
-            get => strCategory ?? string.Empty;
-            set => strCategory = value;
-        }
-        
-        public string Instructions
-        {
-            get => strInstructions ?? string.Empty;
-            set => strInstructions = value;
-        }
-        
-        public string ImageUrl
-        {
-            get => strMealThumb ?? string.Empty;
-            set => strMealThumb = value;
-        }
         
         public string Ingredients
         {

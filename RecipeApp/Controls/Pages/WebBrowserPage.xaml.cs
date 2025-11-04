@@ -251,7 +251,7 @@ public sealed partial class WebBrowserPage : NavigatorPage
             
             await SavedRecipe.Add(aiResponse);
             DownloadStatus = "Recipe Saved!";
-            Navigator.Navigate(new EditRecipe(Navigator, aiResponse), $"Edit Recipe: {aiResponse.Title}");
+            Navigator.Navigate(new RecipeDetailsV2(Navigator, aiResponse), $"Edit Recipe: {aiResponse.Title}");
         }
         catch (Exception exception)
         {
