@@ -69,8 +69,6 @@
         <DependentUpon>TextWidget.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
-      <Compile Include="Platforms\Android\Main.Android.cs" />
-      <Compile Include="Platforms\Android\MainActivity.Android.cs" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="Platforms\Android\AndroidManifest.xml" />
