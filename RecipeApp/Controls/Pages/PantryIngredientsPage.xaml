@@ -56,11 +56,16 @@
             <TextBlock Grid.Column="3" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
         </Grid>
 
+        <!-- Pantry list -->
         <ListView
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
+            x:Name="PantryListView"
+            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}"
+            SelectionMode="None"
+            Margin="10,0,10,10"
+            IsItemClickEnabled="False">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:IngredientCard">

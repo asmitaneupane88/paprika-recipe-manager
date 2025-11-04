@@ -22,20 +22,24 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button Grid.Column="0" Click="ButtonAddIngredient_OnClick" HorizontalAlignment="Left">
-            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                <TextBlock Text="Add Ingredient" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                <SymbolIcon Symbol="Add" IsHitTestVisible="False"/>
-            </StackPanel>
-        </Button>
+        <!-- Header buttons -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
+            <Button Click="ButtonAddGrocery_OnClick">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <SymbolIcon Symbol="Add"/>
+                    <TextBlock Text="Add Grocery"/>
+                </StackPanel>
+            </Button>
 
-        <Button Grid.Row="0" Grid.Column="2" Click="ButtonRemoveIngredient_OnClick" HorizontalAlignment="Right" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
-            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
-            </StackPanel>
-        </Button>
+            <Button Grid.Row="0" Grid.Column="2" Click="ButtonRemoveIngredient_OnClick" HorizontalAlignment="Right" IsEnabled="{x:Bind AnySelected, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                    <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
 
+        <!-- Header row -->
         <Grid Grid.Row="1"
               Grid.Column="0"
               Grid.ColumnSpan="3"
@@ -53,18 +57,23 @@
             <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
             <TextBlock Grid.Column="1" Text="Modifier Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
             <TextBlock Grid.Column="2" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="150"/>
-            <TextBlock Grid.Column="3" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
+            <TextBlock Grid.Column="3" Text="IsPurchased" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
         </Grid>
 
+        <!-- Grocery list -->
         <ListView
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            ItemsSource="{x:Bind AllIngredients, Mode=OneWay}">
+            x:Name="GroceryListView"
+            ItemsSource="{x:Bind allGroceries, Mode=OneWay}"
+            SelectionMode="None"
+            Margin="10,0,10,10">
 
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:IngredientCard">
-                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" Margin="10" Padding="10" CornerRadius="8" Tag="{x:Bind}">
+                <DataTemplate x:DataType="models:GroceryItem">
+                    <Border BorderBrush="{ThemeResource OutlineColor}"
+                            BorderThickness="1" Margin="10" Padding="10" CornerRadius="8" Tag="{x:Bind}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -74,25 +83,25 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0" Text="{Binding Ingredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="1" Text="{Binding Ingredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                            <TextBox Grid.Column="0" Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="1" Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
 
-                            <NumberBox Grid.Column="2"
-                                       PlaceholderText="Qty"
-                                       Value="{Binding Ingredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                       Minimum="0" Width="150"/>
+                            <!-- ~1~ Item name @1@ -->
+                            <!-- <TextBox Grid.Column="0" -->
+                            <!--          Text="{Binding Ingredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" -->
+                            <!--          PlaceholderText="Grocery item"/> -->
 
-                            <ComboBox Grid.Column="3"
-                                      ItemsSource="{Binding Ingredient.UnitOptions}"
-                                      SelectedItem="{Binding Ingredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      Width="100"/>
+                            <!-- Quantity -->
+                            <NumberBox Grid.Column="1"
+                                       Value="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       Minimum="0"
+                                       PlaceholderText="Qty"/>
+                            <!-- -->
+                            <!-- ~1~ Purchased checkbox triggers auto-move @1@ -->
 
-                            <!--Got to use "Binding" here over x:Bind-->
-                            <CheckBox
-                                Grid.Column="4"
-                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                Checked="OnRecipeCardChecked"
-                                Unchecked="OnRecipeCardChecked"/>
+                            <CheckBox Grid.Column="2"
+                                      Content="Purchased"
+                                      IsChecked="{Binding IsPurchased, Mode=TwoWay}"/>
                         </Grid>
                     </Border>
                 </DataTemplate>

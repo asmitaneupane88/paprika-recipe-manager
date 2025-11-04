@@ -1,5 +1,5 @@
 using System;
-using ReciepApp.Models.Shared;
+using RecipeApp.Models.Shared;
 
 namespace RecipeApp.Models
 {
