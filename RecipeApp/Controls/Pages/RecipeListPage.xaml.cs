@@ -218,6 +218,8 @@ private const int AllCategorySortOrder = -20252025;
                 var aiRecipe = await AiHelper.StringToSavedRecipe(htmlText);
                 if (aiRecipe != null)
                 {
+                    aiRecipe.PdfPath = savedFilePath;
+                    aiRecipe.HtmlPath = htmlPath; 
                     await SavedRecipe.Add(aiRecipe);
                     AllRecipes.Add(new RecipeCard { SavedRecipe = aiRecipe, IsSelected = false });
                 }

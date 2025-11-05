@@ -128,20 +128,16 @@
                                                FontSize="18"
                                                MaxLines="1"
                                                VerticalAlignment="Center"/>
-                                    <Button
-                                        ClickMode="Press"
+                                    <FontIcon
                                         Grid.Column="0"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        Padding="0"
-                                        ToolTipService.ToolTip="Open PDF file"
-                                        Visibility="{x:Bind SavedRecipe.HasPdf, Converter={StaticResource BoolToVisibilityConverter}}"
-                                        Click="OnPdfIconClick">
+                                        Glyph="&#xE8A7;"
+                                        Foreground="DarkRed"
+                                        FontSize="18"
+                                        VerticalAlignment="Center"
+                                        Margin="4,0,0,0"
+                                        ToolTipService.ToolTip="PDF recipe"
+                                        Visibility="{x:Bind SavedRecipe.HasPdf, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
-                                         <FontIcon Glyph="&#xE8A7;"
-                                                   Foreground="DarkRed"
-                                                    FontSize="18"/>
-                                    </Button>
                                 </StackPanel>
 
                                     <RatingControl Grid.Column="1"
