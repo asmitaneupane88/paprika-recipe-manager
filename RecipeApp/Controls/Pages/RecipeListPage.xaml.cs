@@ -204,6 +204,21 @@ private const int AllCategorySortOrder = -20252025;
             var htmlText = await FileHelper.ConvertPdfToTextAsync(savedFilePath);
             var htmlPath = Path.Combine(localFolderPath, $"{Path.GetFileNameWithoutExtension(savedFilePath)}.html");
             await File.WriteAllTextAsync(htmlPath, htmlText);
+            
+            var existing = AllRecipes.FirstOrDefault(r =>
+                string.Equals(r.SavedRecipe.PdfPath, savedFilePath, StringComparison.OrdinalIgnoreCase));
+
+            if (existing != null)
+            {
+                await new ContentDialog
+                {
+                    Title = "Duplicate PDF Detected",
+                    Content = $"A recipe for {Path.GetFileName(savedFilePath)} already exists: {existing.SavedRecipe.Title}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+                return;
+            }
 
             var selectedRecipe = GetSelectedRecipes().FirstOrDefault();
             if (selectedRecipe != null)
