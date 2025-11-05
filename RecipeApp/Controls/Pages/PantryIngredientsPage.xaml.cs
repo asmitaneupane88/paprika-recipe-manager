@@ -1,8 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using Microsoft.UI.Xaml;
-using RecipeApp.Models;
-using RecipeApp.Services;
+
 
 namespace RecipeApp.Controls.Pages;
 
@@ -16,7 +12,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
 
         _ = ShowIngredients();
     }
-    
+
     private async Task ShowIngredients()
     {
         PantryIngredients = (await RecipeIngredient.GetAll())
@@ -28,6 +24,8 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     {
         RefreshSelected();
     }
+    
+    [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
     
     private void RefreshSelected()
     {
