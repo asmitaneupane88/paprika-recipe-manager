@@ -1,56 +1,69 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using RecipeApp.Models;
-using RecipeApp.Services;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿
 
 namespace RecipeApp.Controls.Pages;
 
 
 public sealed partial class GroceryListPage : NavigatorPage
 {
-    [ObservableProperty]
-    private ObservableCollection<GroceryItem> allGroceries = new();
-
-    [ObservableProperty]
-    private bool anySelected = false;
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
     public GroceryListPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
 
-        _ = LoadGroceriesAsync();
+        _ = ShowIngredients();
+    }
+
+    private async Task ShowIngredients()
+    {
+        AllIngredients = (await RecipeIngredient.GetAll())
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
+            .ToObservableCollection();
     }
     
-    private async Task LoadGroceriesAsync()
+    private void OnRecipeCardChecked(object sender, RoutedEventArgs e)
     {
-        var groceries = await GroceryService.GetAll();
-        AllGroceries.Clear();
-        foreach (var item in groceries)
+        RefreshSelected();
+    }
+    
+    [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
+    
+    private void RefreshSelected()
+    {
+        CardsSelected = GetSelectedIngredientCards()
+            .Any(c => c.IsSelected);
+    }
+    
+    private List<IngredientCard> GetSelectedIngredientCards()
+    {
+        return AllIngredients
+            .Where(c => c.IsSelected)
+            .ToList();
+    }
+
+    private async void ButtonAddIngredient_OnClick(object sender, RoutedEventArgs e)
+    {
+        var newIngredient = new RecipeIngredient();
+        
+        AllIngredients.Add(new IngredientCard
         {
-            AllGroceries.Add(item);
-        }
+            Ingredient = newIngredient,
+            IsSelected = false,
+            PIngredient = null
+        });
+        await RecipeIngredient.Add(newIngredient);
     }
-    
-    private async void ButtonAddGrocery_OnClick(object sender, RoutedEventArgs e)
-    {
-        var newItem = new GroceryItem { Name = "New Item", Quantity = 1 };
-        AllGroceries.Add(newItem);
-        await GroceryService.Add(newItem);
-    }
-    private void RefreshSelection()
-    {
-        AnySelected = AllGroceries.Any(g => g.IsPurchased);
-    }
-    
+
     private async void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
-        var toRemove = AllGroceries.Where(g => g.IsPurchased).ToList();
-        await Task.WhenAll(toRemove.Select(GroceryService.Remove));
-        foreach (var item in toRemove)
-            AllGroceries.Remove(item);
-        RefreshSelection();
+        var selected = GetSelectedIngredientCards();
+        
+        await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
+        selected.ForEach(i => AllIngredients.Remove(i));
+        RefreshSelected();
     }
 }

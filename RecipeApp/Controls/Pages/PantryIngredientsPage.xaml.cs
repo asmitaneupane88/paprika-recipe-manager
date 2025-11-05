@@ -1,7 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Microsoft.UI.Xaml.Controls;
-using RecipeApp.Models;
-using RecipeApp.Services;
+﻿
 
 namespace RecipeApp.Controls.Pages;
 
@@ -9,19 +6,11 @@ namespace RecipeApp.Controls.Pages;
 public sealed partial class PantryIngredientsPage : NavigatorPage
 {
     [ObservableProperty] private partial ObservableCollection<IngredientCard> PantryIngredients { get; set; } = [];
-    
-    [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
     public PantryIngredientsPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
 
         _ = ShowIngredients();
-    }
-    
-    protected override void OnNavigatedTo(Microsoft.UI.Xaml.Navigation.NavigationEventArgs e)
-    {
-        base.OnNavigatedTo(e);
-        _ = ShowIngredients();   // reload pantry every time the page opens
     }
 
     private async Task ShowIngredients()
@@ -41,7 +30,9 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
         RefreshSelected();
     }
     
-   private void RefreshSelected()
+    [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
+    
+    private void RefreshSelected()
     {
         CardsSelected = GetSelectedIngredientCards()
             .Any(c => c.IsSelected);

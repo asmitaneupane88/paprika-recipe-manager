@@ -386,7 +386,7 @@ public sealed partial class StepEditor : NavigatorPage
                 textStep.OutNodes.Remove(node);
             else return;
 
-            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { Key: { }, } lineToRemove)
+            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { } lineToRemove)
             {
                 if (lineToRemove.Value.Item3 is not null)
                     lineToRemove.Value.Item3.Source = null;
