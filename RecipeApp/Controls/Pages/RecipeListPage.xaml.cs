@@ -135,7 +135,7 @@ public sealed partial class RecipeListPage : NavigatorPage
         if (sender is ListView { SelectedItem: RecipeCard rc } lv)
         {
             lv.SelectedItem = null;
-            var details = new RecipeDetailsV2(Navigator, rc.SavedRecipe);
+            var details = new RecipeDetailsPage(Navigator, savedRecipe: rc.SavedRecipe);
             Navigator.Navigate(details, $"Recipe: {rc.SavedRecipe.Title}");
         }
     }
@@ -230,7 +230,10 @@ public sealed partial class RecipeListPage : NavigatorPage
             {
                 var aiRecipe = await AiHelper.StringToSavedRecipe(htmlText);
                 if (aiRecipe != null)
+                {
                     await SavedRecipe.Add(aiRecipe);
+                    AllRecipes.Add(new RecipeCard { SavedRecipe = aiRecipe, IsSelected = false });
+                }
 
                 var aiDialog = new ContentDialog
                 {
