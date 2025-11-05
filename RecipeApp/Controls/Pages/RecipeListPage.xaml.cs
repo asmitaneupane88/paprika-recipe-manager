@@ -246,8 +246,12 @@ public sealed partial class RecipeListPage : NavigatorPage
                 var aiRecipe = await AiHelper.StringToSavedRecipe(htmlText);
                 if (aiRecipe != null)
                 {
+<<<<<<< HEAD
                     aiRecipe.PdfPath = savedFilePath;
                     aiRecipe.HtmlPath = htmlPath; 
+=======
+                {
+>>>>>>> bb09f7f (Update AllRecipes collection after adding new PDF recipe so UI refreshes instantly)
                     await SavedRecipe.Add(aiRecipe);
                     AllRecipes.Add(new RecipeCard { SavedRecipe = aiRecipe, IsSelected = false });
                 }
