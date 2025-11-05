@@ -231,9 +231,11 @@ public sealed partial class RecipeListPage : NavigatorPage
                 var aiRecipe = await AiHelper.StringToSavedRecipe(htmlText);
                 if (aiRecipe != null)
                 {
+                {
                     await SavedRecipe.Add(aiRecipe);
                     AllRecipes.Add(new RecipeCard { SavedRecipe = aiRecipe, IsSelected = false });
                 }
+                    
 
                 var aiDialog = new ContentDialog
                 {
