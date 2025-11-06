@@ -84,6 +84,7 @@ public class SavedRecipeListTests
         
         // Assert
         result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(new List<object>());
     }
 
     [Test]

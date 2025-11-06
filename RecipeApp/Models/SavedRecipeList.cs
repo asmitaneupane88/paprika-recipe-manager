@@ -82,9 +82,23 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     /// </example>
     public static object GetNestedListRepresentation(IStep rootStep)
     {
-       // Still working on this
-       return rootStep;
+        var result = new List<object>();
+
+        // Fail early 
+        if (rootStep == null || rootStep.GetOutNodes().Count == 0)
+            return result;
+
+        // Still working on this
+        return result;
     }
+
+    // public static object RecurseGraph(IStep currentStep)
+    // {
+    //     if (currentStep is SplitStep)
+    //     {
+            
+    //     }
+    // }
     
     public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
     {
@@ -92,7 +106,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
         var result = new Dictionary<IStep, Dictionary<string, object>>();
 
         // if there are no steps
-        if (RootStepNode == null) 
+        if (RootStepNode == null)
         {
             return result;
         }
