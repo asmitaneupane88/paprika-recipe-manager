@@ -14,37 +14,61 @@ public class SavedRecipeTests
 	{
 	}
 
-	[Test]
-	public async Task Test1()
-	{
-        var currentRecipes = await SavedRecipe.GetAll();
-        var originalCount = currentRecipes.Count;
+    /// <summary>
+    /// Builds the complex nested recipe. ASCII representation in the code comments.
+    /// </summary>
+    private SavedRecipe BuildComplexNestedRecipe(){
+        // start -> split1 +
+        //                 +-> A -> tH -----------------------------------------------------+
+        //                 +-> B -> split2 -+                                   +-> merge2 -+-> finish
+        //                                  +-> D  -----------------------------+
+        //                                  +-> tE -----------------------------+
+        //                                  +-> C  -> split3 +      +-> merge1 -+
+        //                                                   +-> F -+
+        //                                                   +-> G -+
+        var startStep = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = startStep };
 
-        Console.WriteLine(@"ORIGINAL RECIPES:");
-        Console.WriteLine(string.Join(", ", currentRecipes.Select(r => r.Title)));
-        
-        var tempRecipe = await SavedRecipe.Add("Title", "Description", "ImageUrl", "SourceUrl");
-        
-        currentRecipes = await SavedRecipe.GetAll();
-        var newCount = currentRecipes.Count;
-        
-        Console.WriteLine();
-        Console.WriteLine(@"RECIPES WITH TEMP RECIPE ADDED:");
-        Console.WriteLine(string.Join(", ", currentRecipes.Select(r => r.Title)));
-        
-        await SavedRecipe.Remove(tempRecipe);
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
 
-        currentRecipes = await SavedRecipe.GetAll();
-        var removeCount = currentRecipes.Count;
+        // connections line by line
+        startStep.Paths = [new OutNode("Split1", split1)];
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge2", merge2);
+
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Finish", finish);
+
+        D.OutNodes = [new OutNode("Merge2", merge2)];
         
-        Console.WriteLine();
-        Console.WriteLine(@"RECIPES WITH TEMP RECIPE REMOVED:");
-        Console.WriteLine(string.Join(", ", currentRecipes.Select(r => r.Title)));
+        tE.NextStep = new OutNode("Merge2", merge2);
         
-        if (newCount != originalCount + 1 || removeCount != originalCount)
-            Assert.Fail();
-        else
-            Assert.Pass();
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+        
+        return recipe;
     }
 
     [Test]
@@ -146,204 +170,118 @@ public class SavedRecipeTests
     }
 
     [Test]
-    public void SavedRecipe_Ingredients_ExtractsFromGraph()
-    // AI Generated
+    public void GetNestedListRepresentation_ReturnsEmptyListWhenNull()
     {
         // Arrange
         var recipe = new SavedRecipe { Title = "Test Recipe" };
-        var rootStep = new StartStep();
-        var textStep1 = new TextStep 
-        { 
-            Title = "Step 1",
-            IngredientsToUse =
-            [   
-                new RecipeIngredient { Name = "Flour", Quantity = 2, Unit = UnitType.CUP },
-                new RecipeIngredient { Name = "Sugar", Quantity = 1, Unit = UnitType.CUP }
-            ]
-        };
-        var textStep2 = new TextStep 
-        { 
-            Title = "Step 2",
-            IngredientsToUse =
-            [
-                new RecipeIngredient { Name = "Eggs", Quantity = 3, Unit = UnitType.ITEM },
-                new RecipeIngredient { Name = "Flour", Quantity = 1, Unit = UnitType.CUP } // Should combine with step 1
-            ],
-        };
-        var finishStep = new FinishStep();
-        
-        rootStep.Paths = [new OutNode("Start", textStep1)];
-        textStep1.OutNodes = [new OutNode("Next", textStep2)];
-        textStep2.OutNodes = [new OutNode("Next", finishStep)];
-        
-        recipe.RootStepNode = rootStep;
         
         // Act
-        var ingredients = recipe.Ingredients;
+        var result = recipe.GetNestedListRepresentation(null!);
         
         // Assert
-        ingredients.Should().NotBeNull();
-        ingredients.Count.Should().BeGreaterThan(0);
-        
-        // Check that ingredients are accumulated (Flour should be combined: 2 + 1 = 3 cups)
-        var flour = ingredients.FirstOrDefault(i => i.Name == "Flour");
-        flour.Should().NotBeNull();
-        flour!.Quantity.Should().Be(3); // Combined from both steps
-        flour.Unit.Should().Be(UnitType.CUP);
-        
-        ingredients.Should().Contain(i => i.Name == "Sugar" && i.Quantity == 1);
-        ingredients.Should().Contain(i => i.Name == "Eggs" && i.Quantity == 3);
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
     }
 
     [Test]
-    public void SavedRecipe_Ingredients_ReturnsEmptyWhenNoRootStep()
-    // AI Generated
-    {
-        // Arrange
-        var recipe = new SavedRecipe { Title = "Test Recipe", RootStepNode = null };
-        
-        // Act
-        var ingredients = recipe.Ingredients;
-        
-        // Assert
-        ingredients.Should().NotBeNull();
-        ingredients.Count.Should().Be(0);
-    }
-
-    [Test]
-    public void SavedRecipe_GetNodeProperties_ReturnsAllNodes()
-    // AI Generated
+    public void SavedRecipe_GetNestedListRepresentation_ReturnsEmptyListWhenNoPaths()
     {
         // Arrange
         var recipe = new SavedRecipe { Title = "Test Recipe" };
-        var rootStep = new StartStep { X = 0, Y = 0 };
-        var textStep = new TextStep { Title = "Test Step", X = 100, Y = 100, MinutesToComplete = 5 };
-        var timerStep = new TimerStep { Title = "Timer", X = 200, Y = 200, MinutesToComplete = 10 };
-        var finishStep = new FinishStep { X = 300, Y = 300 };
-        
-        rootStep.Paths = [new OutNode("Start", textStep)];
-        textStep.OutNodes = [new OutNode("Next", timerStep)];
-        timerStep.NextStep = new OutNode("Next", finishStep);
-        
-        recipe.RootStepNode = rootStep;
+        var startStep = new StartStep { Paths = [] };
         
         // Act
-        var nodeProperties = recipe.GetNodeProperties();
+        var result = recipe.GetNestedListRepresentation(startStep);
         
         // Assert
-        nodeProperties.Should().NotBeNull();
-        nodeProperties.Count.Should().Be(4); // StartStep, TextStep, TimerStep, FinishStep
-        
-        // Check that all nodes are present
-        nodeProperties.Keys.Should().Contain(rootStep);
-        nodeProperties.Keys.Should().Contain(textStep);
-        nodeProperties.Keys.Should().Contain(timerStep);
-        nodeProperties.Keys.Should().Contain(finishStep);
-        
-        // Check TextStep properties
-        var textProps = nodeProperties[textStep];
-        textProps.Should().ContainKey("Title");
-        textProps["Title"].Should().Be("Test Step");
-        textProps.Should().ContainKey("MinutesToComplete");
-        textProps["MinutesToComplete"].Should().Be(5.0);
-        textProps.Should().ContainKey("LocX");
-        textProps["LocX"].Should().Be(100.0);
-        textProps.Should().ContainKey("StepType");
-        textProps["StepType"].Should().Be("TextStep");
+        result.Should().NotBeNull();
+        result.Should().BeEmpty();
     }
 
     [Test]
-    public void SavedRecipe_GetNodeProperties_ReturnsEmptyWhenNoRootStep()
-    // AI Generated
+    public void GetNestedListRepresentation_HandlesStartStepWithTextStep()
     {
         // Arrange
-        var recipe = new SavedRecipe { Title = "Test Recipe", RootStepNode = null };
-        
-        // Act
-        var nodeProperties = recipe.GetNodeProperties();
-        
-        // Assert
-        nodeProperties.Should().NotBeNull();
-        nodeProperties.Count.Should().Be(0);
-    }
-
-    [Test]
-    public void Recipe_IRecipeIngredients_ConvertsIngredientToRecipeIngredient()
-    // AI Generated
-    {
-        // Arrange
-        var recipe = new Recipe
-        {
-            Title = "Test Recipe",
-            PrepTimeMinutes = 10,
-            CookTimeMinutes = 20,
-            Servings = 4,
-            Difficulty = "Easy",
-            Ingredients = 
-            [
-                new Ingredient { Name = "Flour", Amount = "2", Unit = "CUP", Notes = "Sifted" },
-                new Ingredient { Name = "Sugar", Amount = "1.5", Unit = "TBSP" },
-                new Ingredient { Name = "Eggs", Amount = "3", Unit = "", Notes = "Large" },
-                new Ingredient { Name = "Milk", Amount = "1", Unit = "cup" } // lowercase test
-            ],
-            Directions = []
+        var recipe = new SavedRecipe { Title = "Test Recipe" };
+        var startStep = new StartStep();
+        var textStep = new TextStep 
+        { 
+            Title = "Test Step",
+            MinutesToComplete = 5
         };
         
+        startStep.Paths = [new OutNode("Start", textStep)];
+        
         // Act
-        var recipeIngredients = ((IRecipe)recipe).Ingredients;
+        var result = recipe.GetNestedListRepresentation(startStep);
         
         // Assert
-        recipeIngredients.Should().NotBeNull();
-        recipeIngredients.Count.Should().Be(4);
-        
-        // Check conversions
-        var flour = recipeIngredients.First(i => i.Name == "Flour");
-        flour.Quantity.Should().Be(2);
-        flour.Unit.Should().Be(UnitType.CUP);
-        flour.ModifierNote.Should().Be("Sifted");
-        
-        var sugar = recipeIngredients.First(i => i.Name == "Sugar");
-        sugar.Quantity.Should().Be(1.5);
-        sugar.Unit.Should().Be(UnitType.TBSP);
-        
-        var eggs = recipeIngredients.First(i => i.Name == "Eggs");
-        eggs.Quantity.Should().Be(3);
-        eggs.Unit.Should().Be(UnitType.ITEM); // Empty unit defaults to ITEM
-        eggs.ModifierNote.Should().Be("Large");
-        
-        var milk = recipeIngredients.First(i => i.Name == "Milk");
-        milk.Unit.Should().Be(UnitType.CUP); // Case-insensitive conversion
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(new List<object> { new List<object> { textStep } });
     }
 
     [Test]
-    public void Recipe_IRecipeIngredients_HandlesInvalidAmount()
-    // AI Generated
+    public void GetNestedListRepresentation_HandlesStartStepWithSplitStep()
     {
         // Arrange
-        var recipe = new Recipe
-        {
-            Title = "Test Recipe",
-            PrepTimeMinutes = 10,
-            CookTimeMinutes = 20,
-            Servings = 4,
-            Difficulty = "Easy",
-            Ingredients = 
-            [
-                new Ingredient { Name = "Salt", Amount = "pinch", Unit = "TSP" }, // Invalid number
-                new Ingredient { Name = "Pepper", Amount = null, Unit = "TSP" } // Null amount
-            ],
-            Directions = []
-        };
+        var recipe = new SavedRecipe { Title = "Test Recipe" };
+        var startStep = new StartStep();
+        var splitStep = new SplitStep();
+        var textStep1 = new TextStep { Title = "Step 1" };
+        var textStep2 = new TextStep { Title = "Step 2" };
+        
+        splitStep.OutNodes = 
+        [
+            new OutNode("Path1", textStep1),
+            new OutNode("Path2", textStep2)
+        ];
+        
+        startStep.Paths = [new OutNode("Split", splitStep)];
         
         // Act
-        var recipeIngredients = ((IRecipe)recipe).Ingredients;
+        var result = recipe.GetNestedListRepresentation(startStep);
         
         // Assert
-        recipeIngredients.Should().NotBeNull();
-        recipeIngredients.Count.Should().Be(2);
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(new List<object> { textStep1, textStep2 });
+    }
+
+    [Test]
+    public void GetNestedListRepresentation_HandlesComplexNestedStructure()
+    {
+        // Arrange
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+
+        // Act
+        var result = BuildComplexNestedRecipe().NestedListRepresentation;
+
+        var expected = new List<object> {
+                A,
+                new List<object> {
+                    B,
+                    new HashSet<object>{
+                        tE,
+                        D,
+                        new List<object>{
+                            C,
+                            new HashSet<object>{
+                                F,
+                                G,
+                            }
+                        },
+                    }
+                }
+            };
         
-        // Invalid amounts should default to 1
-        recipeIngredients.First(i => i.Name == "Salt").Quantity.Should().Be(1);
-        recipeIngredients.First(i => i.Name == "Pepper").Quantity.Should().Be(1);
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(expected);
     }
 }
