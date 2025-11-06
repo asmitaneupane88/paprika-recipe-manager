@@ -2,7 +2,7 @@
 
 namespace RecipeApp.Models;
 
-public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
+public partial class PantryIngredient: IAutosavingClass<PantryIngredient>
 {
     [ObservableProperty] public partial string Name { get; set; }
     
@@ -12,9 +12,6 @@ public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
     
     [JsonConverter(typeof(UnitTypeJsonConverter))]
     [ObservableProperty] public partial UnitType Unit { get; set; }
-    
-    [JsonIgnore]
-    public ObservableCollection<UnitType> RecipeUnitOptions { get; } = new(Enum.GetValues<UnitType>());
     
     
     private static readonly List<UnitType> UnitOptions =
@@ -28,10 +25,25 @@ public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
     ];
     
     [JsonIgnore]
-    public ObservableCollection<UnitType> GroceryUnitOptions { get; } = new(Enum.GetValues<UnitType>().Where(ut => UnitOptions.Contains(ut)));
+    public ObservableCollection<UnitType> PantryUnitOptions { get; } = new(Enum.GetValues<UnitType>().Where(ut => UnitOptions.Contains(ut)));
+    
     /// <summary>
     /// For use in scaling up recipes like a multiplier
     /// </summary>
     [ObservableProperty] public partial double ScaleFactor { get; set; }
 }
 
+// had Claude 4.5 Sonnet quickly generate this converter to fix an issue
+public partial class UnitTypeJsonConverter : JsonConverter<UnitType>
+{
+    public override UnitType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var value = reader.GetString();
+        return Enum.TryParse<UnitType>(value, true, out var result) ? result : UnitType.Box;
+    }
+
+    public override void Write(Utf8JsonWriter writer, UnitType value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToString());
+    }
+}

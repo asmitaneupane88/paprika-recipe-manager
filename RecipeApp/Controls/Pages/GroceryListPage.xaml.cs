@@ -3,10 +3,10 @@
 namespace RecipeApp.Controls.Pages;
 
 
-public sealed partial class PantryIngredientsPage : NavigatorPage
+public sealed partial class GroceryListPage : NavigatorPage
 {
-    [ObservableProperty] private partial ObservableCollection<IngredientCard> PantryIngredients { get; set; } = [];
-    public PantryIngredientsPage(Navigator? nav) : base(nav)
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
+    public GroceryListPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
 
@@ -15,12 +15,12 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
 
     private async Task ShowIngredients()
     {
-        PantryIngredients = (await PantryIngredient.GetAll())
+        AllIngredients = (await RecipeIngredient.GetAll())
             .Select(i => new IngredientCard
             {
-                PIngredient = i,
+                Ingredient = i,
                 IsSelected = false,
-                Ingredient = null
+                PIngredient = null
             })
             .ToObservableCollection();
     }
@@ -40,30 +40,30 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     
     private List<IngredientCard> GetSelectedIngredientCards()
     {
-        return PantryIngredients
+        return AllIngredients
             .Where(c => c.IsSelected)
             .ToList();
     }
 
     private async void ButtonAddIngredient_OnClick(object sender, RoutedEventArgs e)
     {
-        var newIngredient = new PantryIngredient();
+        var newIngredient = new RecipeIngredient();
         
-        PantryIngredients.Add(new IngredientCard
+        AllIngredients.Add(new IngredientCard
         {
-            PIngredient = newIngredient,
+            Ingredient = newIngredient,
             IsSelected = false,
-            Ingredient = null
+            PIngredient = null
         });
-        await PantryIngredient.Add(newIngredient);
+        await RecipeIngredient.Add(newIngredient);
     }
 
     private async void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
         var selected = GetSelectedIngredientCards();
         
-        await Task.WhenAll(selected.Select(c => PantryIngredient.Remove(c.PIngredient)));
-        selected.ForEach(i => PantryIngredients.Remove(i));
+        await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
+        selected.ForEach(i => AllIngredients.Remove(i));
         RefreshSelected();
     }
 }
