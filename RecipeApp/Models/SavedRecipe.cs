@@ -39,6 +39,48 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
 
     /// <summary>
+    /// Derives a list of edges from the graph. A.I. generated.
+    /// </summary>
+    private static List<Tuple<IStep, IStep>> DeriveGraphEdges(IStep root){
+        var edges = new List<Tuple<IStep, IStep>>();
+        if (root == null)
+            return edges;
+            
+        var visitedNodes = new HashSet<IStep>();
+        
+        Traverse(root, visitedNodes, edges);
+        return edges;
+    }
+    
+    /// <summary>
+    /// Recursively traverses the graph and builds a list of edges. A.I. generated.
+    /// </summary>
+    private static void Traverse(IStep currentStep, HashSet<IStep> visitedNodes, List<Tuple<IStep, IStep>> edges)
+    {
+        // Avoid infinite loops by checking if we've already visited this node
+        if (visitedNodes.Contains(currentStep))
+            return;
+        
+        visitedNodes.Add(currentStep);
+        
+        // Get all out nodes from the current step
+        var outNodes = currentStep.GetOutNodes();
+        
+        // For each out node, create an edge if it has a next step
+        foreach (var outNode in outNodes)
+        {
+            if (outNode.Next != null)
+            {
+                // Create an edge from current step to the next step
+                edges.Add(new Tuple<IStep, IStep>(currentStep, outNode.Next));
+                
+                // Recursively traverse the next step
+                Traverse(outNode.Next, visitedNodes, edges);
+            }
+        }
+    }
+
+    /// <summary>
     /// Recursively builds a deep nested list representation of the recipe steps. Parallel steps are represented as a HashSet of objects. Method assumes that the graph is acyclic.
     /// </summary>
     /// <returns>
@@ -63,47 +105,12 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     ///     }
     /// };
     /// </example>
-    public static object GetNestedListRepresentation(IStep currentStep)
+    public static object GetNestedListRepresentation(IStep rootStep)
     {
-        // Fail early if the current step is a start step and has no paths.
-        if (currentStep is StartStep && currentStep.GetOutNodes().Count == 0){
-            return new List<object>();
-        }
-
-        // Check if the next step has multiple out nodes.
-        var multipleNextSteps = currentStep.GetOutNodes().Count > 1;
-
-        return new List<object>();
-
-        // If this is a TextStep or a TimerStep....
-        // if (currentStep is TextStep || currentStep is TimerStep){
-        //     // There SHOULD only be one out node.
-        //     if (currentStep.GetOutNodes().Count != 1){
-        //         throw new Exception("TextStep or TimerStep should have exactly one out node.");
-        //     }
-            
-        //     // peak ahead to check if the next step is a split step
-        //     if (currentStep.GetOutNodes()[0].Next is SplitStep){
-        //         // check for a null reference
-        //         var nextStep = currentStep.GetOutNodes()[0].Next ?? throw new Exception("SplitStep should have a next step.");
-
-        //         // return a list with the current step as the first element.
-        //         return new List<object> {currentStep, GetNestedListRepresentation(nextStep)};
-        //     }
-        //     // Otherwise, just return the step
-        //     return currentStep;
-        // }
-
-        // // If this is a SplitStep...
-        // if (currentStep is SplitStep){
-        //     // return the children steps as a HashSet
-        //     return new HashSet<object>(currentStep.GetOutNodes().Select(n => GetNestedListRepresentation(n.Next ?? new StartStep())));
-        // }
-
-        // // otherwise, forward the call to the next step
-        // return GetNestedListRepresentation(currentStep.GetOutNodes()[0].Next ?? new StartStep());
+       // Still working on this
+       return rootStep;
     }
-
+    
     public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
     {
         // store the result
