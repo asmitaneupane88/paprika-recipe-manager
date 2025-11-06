@@ -1,4 +1,5 @@
 using FluentAssertions;
+using RecipeApp.Interfaces;
 using RecipeApp.Models;
 using RecipeApp.Models.RecipeSteps;
 
@@ -16,8 +17,8 @@ public class SavedRecipeListTests
     /// </summary>
     private SavedRecipe BuildComplexNestedRecipe(){
         // start -> X -> split1 +
-        //                 +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
-        //                 +-> B -> split2 -+                                   +-> merge2 -+
+        //                      +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
         //                                  +-> D  -----------------------------+
         //                                  +-> tE -----------------------------+
         //                                  +-> C  -> split3 +      +-> merge1 -+
@@ -101,6 +102,35 @@ public class SavedRecipeListTests
         result.Should().NotBeNull();
     }
 
+    [Test]
+    public void DeriveGraphEdgesReturnsCorrectEdges()
+    {
+        // Arrange
+        var recipe = BuildComplexNestedRecipe();
+        var edges = SavedRecipe.DeriveGraphEdges(recipe.RootStepNode!);
+        var expectedEdges = new List<Tuple<IStep, IStep>>();
+
+        // X -> split 1
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var split1 = new SplitStep();
+        expectedEdges.Add(new Tuple<IStep, IStep>(X, split1));
+
+        // split 1 -> A, B
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        expectedEdges.Add(new Tuple<IStep, IStep>(split1, A));
+        expectedEdges.Add(new Tuple<IStep, IStep>(split1, B));
+
+        // Assert
+        edges.Should().NotBeNull();
+
+        // X -> split 1
+        edges.Should().Contain(new Tuple<IStep, IStep>(X, split1));
+
+        // split 1 -> A, B
+        edges.Should().Contain(new Tuple<IStep, IStep>(split1, A));
+        edges.Should().Contain(new Tuple<IStep, IStep>(split1, B));
+    }
     [Test]
     public void HandlesStartStepWithTextStep()
     {

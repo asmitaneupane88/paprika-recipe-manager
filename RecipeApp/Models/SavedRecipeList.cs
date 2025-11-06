@@ -16,7 +16,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     /// <summary>
     /// Derives a list of edges from the graph. A.I. generated.
     /// </summary>
-    private static List<Tuple<IStep, IStep>> DeriveGraphEdges(IStep root){
+    public static List<Tuple<IStep, IStep>> DeriveGraphEdges(IStep root){
         var edges = new List<Tuple<IStep, IStep>>();
         if (root == null)
             return edges;
@@ -35,12 +35,12 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
         // Avoid infinite loops by checking if we've already visited this node
         if (visitedNodes.Contains(currentStep))
             return;
-        
+
         visitedNodes.Add(currentStep);
-        
+
         // Get all out nodes from the current step
         var outNodes = currentStep.GetOutNodes();
-        
+
         // For each out node, create an edge if it has a next step
         foreach (var outNode in outNodes)
         {
@@ -48,7 +48,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
             {
                 // Create an edge from current step to the next step
                 edges.Add(new Tuple<IStep, IStep>(currentStep, outNode.Next));
-                
+
                 // Recursively traverse the next step
                 Traverse(outNode.Next, visitedNodes, edges);
             }
