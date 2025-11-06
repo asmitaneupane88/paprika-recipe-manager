@@ -83,7 +83,7 @@
                                        Minimum="0" Width="100"/>
 
                             <ComboBox Grid.Column="2"
-                                      ItemsSource="{Binding PIngredient.UnitOptions}"
+                                      ItemsSource="{Binding PIngredient.PantryUnitOptions}"
                                       SelectedItem="{Binding PIngredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="100"/>
 

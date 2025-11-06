@@ -25,7 +25,7 @@ namespace RecipeApp.Services
                         Name = ingredient.Trim(),
                         ModifierNote = measure?.Trim() ?? string.Empty,
                         Quantity = 1,
-                        Unit = Enums.UnitType.ITEM
+                        Unit = Enums.UnitType.Box
                     });
                 }
             }
