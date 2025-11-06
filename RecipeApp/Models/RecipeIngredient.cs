@@ -14,8 +14,21 @@ public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
     [ObservableProperty] public partial UnitType Unit { get; set; }
     
     [JsonIgnore]
-    public ObservableCollection<UnitType> UnitOptions { get; } = new(Enum.GetValues<UnitType>());
+    public ObservableCollection<UnitType> RecipeUnitOptions { get; } = new(Enum.GetValues<UnitType>());
     
+    
+    private static readonly List<UnitType> UnitOptions =
+    [
+        UnitType.Box,
+        UnitType.LB,
+        UnitType.Gallon,
+        UnitType.Quart,
+        UnitType.Pint
+        //TODO
+    ];
+    
+    [JsonIgnore]
+    public ObservableCollection<UnitType> GroceryUnitOptions { get; } = new(Enum.GetValues<UnitType>().Where(ut => UnitOptions.Contains(ut)));
     /// <summary>
     /// For use in scaling up recipes like a multiplier
     /// </summary>

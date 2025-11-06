@@ -51,7 +51,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="2" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Column="3" Text="Modifier Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
+            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
             <TextBlock Grid.Column="0" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
             <TextBlock Grid.Column="1" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
         </Grid>
@@ -83,7 +83,7 @@
                                        Minimum="0" Width="75"/>
 
                             <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding Ingredient.UnitOptions}"
+                                      ItemsSource="{Binding Ingredient.GroceryUnitOptions}"
                                       SelectedItem="{Binding Ingredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="100"/>
 
