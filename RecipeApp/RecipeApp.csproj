@@ -44,6 +44,7 @@
       <Page Include="Styles\RecipeTemplates.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
+      <Page Remove="Controls\Pages\RecipeDetailsV2.xaml" />
     </ItemGroup>
     <ItemGroup>
       <PackageVersion Update="PuppeteerSharp" Version="20.2.4" />
@@ -73,6 +74,7 @@
         <DependentUpon>GroceryListPage.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
+      <Compile Remove="Controls\Pages\RecipeDetailsV2.xaml.cs" />
     </ItemGroup>
 
 </Project>

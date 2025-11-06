@@ -51,25 +51,20 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Column="1" Text="Modifier Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
-            <TextBlock Grid.Column="2" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="150"/>
-            <TextBlock Grid.Column="3" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
+            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
+            <TextBlock Grid.Column="1" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
+            <TextBlock Grid.Column="2" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
         </Grid>
 
-        <!-- Pantry list -->
         <ListView
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
-            x:Name="PantryListView"
-            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}"
-            SelectionMode="None"
-            Margin="10,0,10,10"
-            IsItemClickEnabled="False">
+            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:IngredientCard">
-                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="1" Margin="10" Padding="10" CornerRadius="8" Tag="{x:Bind}">
+                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="0" Margin="2" Padding="2" CornerRadius="8" Tag="{x:Bind}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -80,15 +75,15 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBox Grid.Column="0" Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="1" Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                            <TextBox Grid.Column="3" Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
 
-                            <NumberBox Grid.Column="2"
+                            <NumberBox Grid.Column="1"
                                        PlaceholderText="Qty"
                                        Value="{Binding PIngredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                       Minimum="0" Width="150"/>
+                                       Minimum="0" Width="100"/>
 
-                            <ComboBox Grid.Column="3"
-                                      ItemsSource="{Binding PIngredient.UnitOptions}"
+                            <ComboBox Grid.Column="2"
+                                      ItemsSource="{Binding PIngredient.PantryUnitOptions}"
                                       SelectedItem="{Binding PIngredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="100"/>
 
