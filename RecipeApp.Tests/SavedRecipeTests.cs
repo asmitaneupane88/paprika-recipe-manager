@@ -269,7 +269,7 @@ public class SavedRecipeTests
         var expected = new List<object> {
             X,
             new HashSet<object>{
-                A,
+                new List<object> { A, tH },
                 new List<object> {
                     B,
                     new HashSet<object>{
