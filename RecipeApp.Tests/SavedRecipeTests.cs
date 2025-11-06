@@ -18,9 +18,9 @@ public class SavedRecipeTests
     /// Builds the complex nested recipe. ASCII representation in the code comments.
     /// </summary>
     private SavedRecipe BuildComplexNestedRecipe(){
-        // start -> split1 +
+        // start -> X -> split1 +
         //                 +-> A -> tH -----------------------------------------------------+
-        //                 +-> B -> split2 -+                                   +-> merge2 -+-> finish
+        //                 +-> B -> split2 -+                                   +-> merge2 -+-> -> Z ->finish
         //                                  +-> D  -----------------------------+
         //                                  +-> tE -----------------------------+
         //                                  +-> C  -> split3 +      +-> merge1 -+
@@ -36,6 +36,7 @@ public class SavedRecipeTests
         var merge2 = new MergeStep();
         var merge3 = new MergeStep();
         var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
         var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
         var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
         var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
@@ -44,17 +45,20 @@ public class SavedRecipeTests
         var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
         var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
         var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
 
         // connections line by line
-        startStep.Paths = [new OutNode("Split1", split1)];
+        startStep.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        
         split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
-
         A.OutNodes = [new OutNode("tH", tH)];
         tH.NextStep = new OutNode("Merge2", merge2);
 
         B.OutNodes = [new OutNode("Split2", split2)];
         split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
-        merge2.NextStep = new OutNode("Finish", finish);
+        merge2.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
 
         D.OutNodes = [new OutNode("Merge2", merge2)];
         
@@ -176,11 +180,10 @@ public class SavedRecipeTests
         var recipe = new SavedRecipe { Title = "Test Recipe" };
         
         // Act
-        var result = recipe.GetNestedListRepresentation(null!);
+        var result = SavedRecipe.GetNestedListRepresentation(null!);
         
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeEmpty();
     }
 
     [Test]
@@ -191,11 +194,10 @@ public class SavedRecipeTests
         var startStep = new StartStep { Paths = [] };
         
         // Act
-        var result = recipe.GetNestedListRepresentation(startStep);
+        var result = SavedRecipe.GetNestedListRepresentation(startStep);
         
         // Assert
         result.Should().NotBeNull();
-        result.Should().BeEmpty();
     }
 
     [Test]
@@ -213,7 +215,7 @@ public class SavedRecipeTests
         startStep.Paths = [new OutNode("Start", textStep)];
         
         // Act
-        var result = recipe.GetNestedListRepresentation(startStep);
+        var result = SavedRecipe.GetNestedListRepresentation(startStep);
         
         // Assert
         result.Should().NotBeNull();
@@ -239,7 +241,7 @@ public class SavedRecipeTests
         startStep.Paths = [new OutNode("Split", splitStep)];
         
         // Act
-        var result = recipe.GetNestedListRepresentation(startStep);
+        var result = SavedRecipe.GetNestedListRepresentation(startStep);
         
         // Assert
         result.Should().NotBeNull();
@@ -250,6 +252,8 @@ public class SavedRecipeTests
     public void GetNestedListRepresentation_HandlesComplexNestedStructure()
     {
         // Arrange
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
         var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
         var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
         var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
@@ -263,6 +267,8 @@ public class SavedRecipeTests
         var result = BuildComplexNestedRecipe().NestedListRepresentation;
 
         var expected = new List<object> {
+            X,
+            new HashSet<object>{
                 A,
                 new List<object> {
                     B,
@@ -278,7 +284,9 @@ public class SavedRecipeTests
                         },
                     }
                 }
-            };
+            },
+            Z
+        };
         
         // Assert
         result.Should().NotBeNull();

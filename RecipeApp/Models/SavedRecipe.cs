@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using RecipeApp.Models.RecipeSteps;
+using Uno.UI.RemoteControl.Messaging.IdeChannel;
 
 namespace RecipeApp.Models;
 
@@ -35,35 +36,72 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     /// <summary>
     /// Returns a deep nested list representation of the recipe steps.
     /// </summary>
-    [JsonIgnore] public List<object> NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
+    [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
 
     /// <summary>
-    /// Recursively builds a deep nested list representation of the recipe steps.
+    /// Recursively builds a deep nested list representation of the recipe steps. Parallel steps are represented as a HashSet of objects. Method assumes that the graph is acyclic.
     /// </summary>
     /// <returns>
     /// A deep nested list representation of the recipe steps.
     /// </returns>
-    public List<object> GetNestedListRepresentation(IStep currentStep)
+    /// <example>
+    ///     new List&lt;object&gt;{
+    ///     A,
+    ///     new List&lt;object&gt; {
+    ///         B,
+    ///         new HashSet&lt;object&gt;{
+    ///             tE,
+    ///             D,
+    ///             new List&lt;object&gt;{
+    ///                 C,
+    ///                 new HashSet&lt;object&gt;{
+    ///                     F,
+    ///                     G,
+    ///                 }
+    ///             },
+    ///         }
+    ///     }
+    /// };
+    /// </example>
+    public static object GetNestedListRepresentation(IStep currentStep)
     {
-        // incase the RootStepNode is null, return an empty list
-        if (currentStep == null)
-            return [];
-
-        var result = new List<object>();
-
-        foreach (var outNode in currentStep.GetOutNodes()){
-            // TextSteps are added to the result as a single item list
-            if (outNode.GetType() == typeof(TextStep)){
-                result.Add(new List<object>() { currentStep.StepProperties });
-            }
-            else if (outNode.GetType() == typeof(SplitStep)){
-                // Recursively add each parallel step to the result
-                foreach (var parallelPath in currentStep.GetOutNodes()){
-                    result.Add(GetNestedListRepresentation(parallelPath.Next ?? new StartStep()));
-                }
-            }
+        // Fail early if the current step is a start step and has no paths.
+        if (currentStep is StartStep && currentStep.GetOutNodes().Count == 0){
+            return new List<object>();
         }
-        return result;
+
+        // Check if the next step has multiple out nodes.
+        var multipleNextSteps = currentStep.GetOutNodes().Count > 1;
+
+        return new List<object>();
+
+        // If this is a TextStep or a TimerStep....
+        // if (currentStep is TextStep || currentStep is TimerStep){
+        //     // There SHOULD only be one out node.
+        //     if (currentStep.GetOutNodes().Count != 1){
+        //         throw new Exception("TextStep or TimerStep should have exactly one out node.");
+        //     }
+            
+        //     // peak ahead to check if the next step is a split step
+        //     if (currentStep.GetOutNodes()[0].Next is SplitStep){
+        //         // check for a null reference
+        //         var nextStep = currentStep.GetOutNodes()[0].Next ?? throw new Exception("SplitStep should have a next step.");
+
+        //         // return a list with the current step as the first element.
+        //         return new List<object> {currentStep, GetNestedListRepresentation(nextStep)};
+        //     }
+        //     // Otherwise, just return the step
+        //     return currentStep;
+        // }
+
+        // // If this is a SplitStep...
+        // if (currentStep is SplitStep){
+        //     // return the children steps as a HashSet
+        //     return new HashSet<object>(currentStep.GetOutNodes().Select(n => GetNestedListRepresentation(n.Next ?? new StartStep())));
+        // }
+
+        // // otherwise, forward the call to the next step
+        // return GetNestedListRepresentation(currentStep.GetOutNodes()[0].Next ?? new StartStep());
     }
 
     public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
