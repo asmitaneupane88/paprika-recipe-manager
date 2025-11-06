@@ -14,7 +14,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     [ObservableProperty] public partial string ImageUrl { get; set; } = string.Empty;
     [ObservableProperty] public partial string? SourceUrl { get; set; }
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
-    [ObservableProperty] public partial string? Category { get; set; }
+    [ObservableProperty] public partial ObservableCollection<string> Tags { get; set; } = [];
 
     [ObservableProperty] public partial bool AdvancedSteps { get; set; } = false;
     
@@ -104,7 +104,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
             existing.HtmlPath = recipe.HtmlPath;
             existing.Description = recipe.Description;
             existing.ImageUrl = recipe.ImageUrl;
-            existing.Category = recipe.Category;
+            existing.Tags = recipe.Tags;
         }
 
         await SaveAll(all);
@@ -123,7 +123,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         var json = JsonSerializer.Serialize(recipes, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(savePath, json);
     }
-
 }
 
 

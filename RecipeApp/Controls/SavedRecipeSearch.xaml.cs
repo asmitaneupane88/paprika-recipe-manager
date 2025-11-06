@@ -35,8 +35,8 @@ public sealed partial class SavedRecipeSearch : UserControl
         set { SetProperty(ref field, value); _ = UpdateShownRecipes(); }
     } = "";
     
-    private SavedCategory SelectedCategory { get; set { SetProperty(ref field, value); _ = UpdateShownRecipes(); } }
-    [ObservableProperty] private partial ObservableCollection<SavedCategory> Categories { get; set; } = [];
+    private SavedTag SelectedCategory { get; set { SetProperty(ref field, value); _ = UpdateShownRecipes(); } }
+    [ObservableProperty] private partial ObservableCollection<SavedTag> Categories { get; set; } = [];
     
     public SavedRecipeSearch()
     {
@@ -59,9 +59,9 @@ public sealed partial class SavedRecipeSearch : UserControl
 
     private async Task UpdateShownCategories()
     {
-        Categories = (await SavedCategory.GetAll()).ToObservableCollection();
+        Categories = (await SavedTag.GetAll()).ToObservableCollection();
         
-        var allCategory = new SavedCategory
+        var allCategory = new SavedTag
         {
             Name = "All Categories",
             SortOrder = AllCategorySortOrder
@@ -75,10 +75,10 @@ public sealed partial class SavedRecipeSearch : UserControl
     {
         FilteredRecipes = AllRecipes
             .Where(r => r.SavedRecipe.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
-            .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
-                        || (r.SavedRecipe.Category is not null 
-                        && r.SavedRecipe.Category.Trim()
-                            .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
+            // .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
+            //             || (r.SavedRecipe.Category is not null 
+            //             && r.SavedRecipe.Category.Trim()
+            //                 .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
             .ToObservableCollection();
     }
 

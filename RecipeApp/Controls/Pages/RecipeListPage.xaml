@@ -17,6 +17,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -41,15 +42,36 @@
             Grid.Column="1"
             Margin="10"
             Width="200"
-            SelectedItem="{x:Bind SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            ItemsSource="{x:Bind Categories, Mode=OneWay}"
+            SelectedItem="{x:Bind SelectedTag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            ItemsSource="{x:Bind FilteredTags, Mode=OneWay}"
             DisplayMemberPath="Name"/>
 
+        <ScrollView Grid.Row="0" Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <ItemsRepeater ItemsSource="{x:Bind SelectedTags}">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Horizontal"/>
+                </ItemsRepeater.Layout>
+
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="models:SavedTag">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                    BorderBrush="{ThemeResource OutlineColor}" Background="{ThemeResource SurfaceVariantColor}"
+                                    BorderThickness="1" Padding="5" CornerRadius="16" Margin="5"
+                                    Tag="{x:Bind}" PointerPressed="TagCard_OnPointerPressed">
+                            <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" Margin="5"/>
+                            <SymbolIcon Symbol="Cancel"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+        </ScrollView>
+
         <StackPanel
-            Grid.Column="2"
-            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            Grid.Row="1"
             Orientation="Horizontal"
-            HorizontalAlignment="Right">
+            HorizontalAlignment="Left">
 
             <Button Margin="10"
                     IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
@@ -83,7 +105,7 @@
         </StackPanel>
 
         <ListView
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
             ItemsSource="{x:Bind FilteredRecipes, Mode=OneWay}"
