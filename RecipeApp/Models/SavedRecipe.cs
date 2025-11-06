@@ -166,10 +166,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
 
     }
 
-
-
-
-
     public const string HtmlHeader =
         "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
 
