@@ -51,20 +51,21 @@ public class Recipe : INotifyPropertyChanged, IRecipe
 
     private static UnitType ParseUnitType(string? unit)
     {
-        if (string.IsNullOrWhiteSpace(unit)) return UnitType.ITEM;
+        if (string.IsNullOrWhiteSpace(unit)) return UnitType.Box;
     
         return unit.ToUpperInvariant().Trim() switch
         {
-            "TSP" or "TEASPOON" or "TEASPOONS" => UnitType.TSP,
-            "TBSP" or "TABLESPOON" or "TABLESPOONS" => UnitType.TBSP,
-            "CUP" or "CUPS" => UnitType.CUP,
-            "PINT" or "PINTS" => UnitType.PINT,
-            "QUART" or "QUARTS" => UnitType.QUART,
-            "GALLON" or "GALLONS" => UnitType.GALLON,
+            "TSP" or "TEASPOON" or "TEASPOONS" => UnitType.Tsp,
+            "TBSP" or "TABLESPOON" or "TABLESPOONS" => UnitType.Tbsp,
+            "CUP" or "CUPS" => UnitType.Cup,
+            "PINT" or "PINTS" => UnitType.Pint,
+            "QUART" or "QUARTS" => UnitType.Quart,
+            "GALLON" or "GALLONS" => UnitType.Gallon,
             "OZ" or "OUNCE" or "OUNCES" => UnitType.OZ,
             "LB" or "LBS" or "POUND" or "POUNDS" => UnitType.LB,
             "KG" or "KILOGRAM" or "KILOGRAMS" => UnitType.KG,
-            _ => UnitType.ITEM
+            "BOX" or "BOXES" => UnitType.Box,
+            _ => UnitType.Box
         };
 }
     public event PropertyChangedEventHandler? PropertyChanged;
