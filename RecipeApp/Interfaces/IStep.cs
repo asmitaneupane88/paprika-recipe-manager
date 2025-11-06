@@ -20,6 +20,41 @@ public abstract partial class IStep : ObservableObject
     /// <returns></returns>
     public abstract ObservableCollection<OutNode> GetOutNodes();
 
+    /// <summary>
+    /// sets the out nodes of the step.
+    /// finish step cannot have out nodes.
+    /// timer and merge step must have zero or one out node.
+    /// </summary>
+    /// <param name="outNodes"></param>
+    /// <exception cref="Exception"></exception>
+    public void SetOutNodes(params ObservableCollection<OutNode> outNodes)
+    {
+        switch (this)
+        {
+            case StartStep start:
+                start.Paths = outNodes;
+                break;
+            case TextStep text:
+                text.OutNodes = outNodes;
+                break;
+            case TimerStep time:
+                if (outNodes.Count > 1) 
+                    throw new Exception("Timer cannot have more than one out node");
+                time.NextStep = outNodes.FirstOrDefault() ?? new OutNode("Next", null);
+                break;
+            case SplitStep split:
+                split.OutNodes = outNodes;
+                break;
+            case MergeStep merge:
+                if (outNodes.Count > 1) 
+                    throw new Exception("Merge cannot have more than one out node");
+                merge.NextStep = outNodes.FirstOrDefault() ?? new OutNode("Next", null);
+                break;
+            case FinishStep finish:
+                throw new Exception("Finish step cannot have out nodes");
+                break;
+        }
+    }
     
     [JsonIgnore] public string BindableTitle => GetTitle();
     [JsonIgnore] public string? BindableDescription => GetDescription();
