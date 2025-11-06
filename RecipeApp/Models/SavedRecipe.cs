@@ -32,6 +32,40 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
 
     [ObservableProperty] public partial StartStep? RootStepNode { get; set; }
 
+    /// <summary>
+    /// Returns a deep nested list representation of the recipe steps.
+    /// </summary>
+    [JsonIgnore] public List<object> NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
+
+    /// <summary>
+    /// Recursively builds a deep nested list representation of the recipe steps.
+    /// </summary>
+    /// <returns>
+    /// A deep nested list representation of the recipe steps.
+    /// </returns>
+    public List<object> GetNestedListRepresentation(IStep currentStep)
+    {
+        // incase the RootStepNode is null, return an empty list
+        if (currentStep == null)
+            return [];
+
+        var result = new List<object>();
+
+        foreach (var outNode in currentStep.GetOutNodes()){
+            // TextSteps are added to the result as a single item list
+            if (outNode.GetType() == typeof(TextStep)){
+                result.Add(new List<object>() { currentStep.StepProperties });
+            }
+            else if (outNode.GetType() == typeof(SplitStep)){
+                // Recursively add each parallel step to the result
+                foreach (var parallelPath in currentStep.GetOutNodes()){
+                    result.Add(GetNestedListRepresentation(parallelPath.Next ?? new StartStep()));
+                }
+            }
+        }
+        return result;
+    }
+
     public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
     {
         // store the result
