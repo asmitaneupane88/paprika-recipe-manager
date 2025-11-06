@@ -26,6 +26,11 @@ public abstract partial class IStep : ObservableObject
     [JsonIgnore] public ObservableCollection<OutNode> BindableGetOutNodes => GetOutNodes();
 
     /// <summary>
+    /// A dictionary of this step's properties.
+    /// </summary>
+    [JsonIgnore] public Dictionary<string, object> StepProperties => GetStepProperties();
+
+    /// <summary>
     /// The X coordinate of where the step is on the edit canvas
     /// </summary>
     [ObservableProperty] public partial double X { get; set; } = 0;
@@ -137,6 +142,25 @@ public abstract partial class IStep : ObservableObject
         }
     }
     
+    /// <summary>
+    /// Packages the step's properties into a dictionary.
+    /// </summary>
+    /// <returns>
+    /// A dictionary of this step's properties
+    /// </returns>
+    private Dictionary<string, object> GetStepProperties(){
+        return new Dictionary<string, object>
+        {
+            ["Title"] = GetTitle(),
+            ["Description"] = GetDescription(),
+            ["MinutesToComplete"] = MinutesToComplete,
+            ["Ingredients"] = IngredientsToUse,
+            ["LocX"] = X,
+            ["LocY"] = Y,
+            ["StepType"] = GetType().Name,
+            ["IngredientsToUse"] = IngredientsToUse,
+        };
+    }
     private ObservableCollection<RecipeIngredient> CombineIngredients(ObservableCollection<RecipeIngredient> x, ObservableCollection<RecipeIngredient> y)
     {
         foreach (var ingredient in y??[])

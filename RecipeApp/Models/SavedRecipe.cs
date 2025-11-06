@@ -1,4 +1,5 @@
-﻿using RecipeApp.Models.RecipeSteps;
+﻿using System.ComponentModel.DataAnnotations;
+using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Models;
 
@@ -53,17 +54,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
             if (!allSteps.Add(current)) continue; // Skip if the node has already been visited
 
             // Create properties dictionary for this step
-            var properties = new Dictionary<string, object>
-            {
-                ["Title"] = current.GetTitle(),
-                ["Description"] = current.GetDescription(),
-                ["MinutesToComplete"] = current.MinutesToComplete,
-                ["Ingredients"] = current.IngredientsToUse,
-                ["LocX"] = current.X,
-                ["LocY"] = current.Y,
-                ["StepType"] = current.GetType().Name,
-                ["IngredientsToUse"] = current.IngredientsToUse,
-            };
+            var properties = current.StepProperties;
 
             // Add properties to the dictionary
             result[current] = properties;
