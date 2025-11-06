@@ -28,25 +28,40 @@ public sealed partial class RecipeListPage : NavigatorPage
     {
         this.InitializeComponent();
     }
-
-private const int AllCategorySortOrder = -20252025;
-
+    
     private readonly string PdfSavePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "SavedPdfs");
     
     [ObservableProperty] private partial ObservableCollection<RecipeCard> AllRecipes { get; set; } = [];
     [ObservableProperty] private partial ObservableCollection<RecipeCard> FilteredRecipes { get; set; } = [];
     
+    [ObservableProperty] private partial ObservableCollection<SavedTag> SelectedTags { get; set; } = [];
+
+    
     private string SearchText
     {
         get;
-        set { SetProperty(ref field, value); _ = UpdateShownRecipes(); }
+        set { SetProperty(ref field, value); UpdateShownRecipes(); }
     } = "";
-    
-    private SavedCategory SelectedCategory { get; set { SetProperty(ref field, value); _ = UpdateShownRecipes(); } }
-    [ObservableProperty] private partial ObservableCollection<SavedCategory> Categories { get; set; } = [];
+
+    private SavedTag? SelectedTag
+    {
+        get;
+        set
+        {
+            if (value is not null)
+                SelectedTags.Add(value);
+            
+            SetProperty(ref field, null);
+            
+            UpdateShownTags();
+            UpdateShownRecipes();
+        }
+    }
+
+    [ObservableProperty] private partial ObservableCollection<SavedTag> FilteredTags { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<SavedTag> AllTags { get; set; } = [];
+
     [ObservableProperty] private partial bool CardsSelected { get; set; } = false;
-    [ObservableProperty] private partial Visibility ListVisibility { get; set; } = Visibility.Visible;
-    [ObservableProperty] private partial Visibility GridVisibility { get; set; } = Visibility.Collapsed;
     
     public RecipeListPage(Navigator? nav = null) : base(nav)
     {
@@ -69,26 +84,24 @@ private const int AllCategorySortOrder = -20252025;
 
     private async Task UpdateShownCategories()
     {
-        Categories = (await SavedCategory.GetAll()).ToObservableCollection();
-        
-        var allCategory = new SavedCategory
-        {
-            Name = "All Categories",
-            SortOrder = AllCategorySortOrder
-        };
-        
-        Categories.Insert(0, allCategory);
-        SelectedCategory = allCategory;
+        AllTags = (await SavedTag.GetAll()).ToObservableCollection();
+        UpdateShownTags();
+    }
+
+    private void UpdateShownTags()
+    {
+        FilteredTags = AllTags
+            .Where(t => !SelectedTags.Contains(t))
+            .ToObservableCollection();
     }
     
-    private async Task UpdateShownRecipes()
+    private void UpdateShownRecipes()
     {
         FilteredRecipes = AllRecipes
             .Where(r => r.SavedRecipe.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
-            .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
-                        || (r.SavedRecipe.Category is not null 
-                            && r.SavedRecipe.Category.Trim()
-                                .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
+            .Where(r => SelectedTags.All(tag => r.SavedRecipe.Tags
+                .Any(recipeTag => recipeTag.Trim()
+                    .Equals(tag.Name.Trim(), StringComparison.CurrentCultureIgnoreCase))))
             .ToObservableCollection();
     }
     
@@ -173,7 +186,7 @@ private const int AllCategorySortOrder = -20252025;
         await SavedRecipe.Remove(recipesToRemove.Select(r => r.SavedRecipe).ToArray());
         recipesToRemove.ForEach(r => AllRecipes.Remove(r));
         
-        await UpdateShownRecipes();
+        UpdateShownRecipes();
     }
     
     private async void OnButtonUploadPdfClick(object sender, RoutedEventArgs e)=>
@@ -246,7 +259,7 @@ private const int AllCategorySortOrder = -20252025;
                 CloseButtonText = "OK",
                 XamlRoot = this.XamlRoot
             }.ShowAsync();
-            await UpdateShownRecipes();
+            UpdateShownRecipes();
         }
         catch (Exception ex)
         {
@@ -324,10 +337,19 @@ private const int AllCategorySortOrder = -20252025;
     /// <inheritdoc />
     public override async Task Restore()
     {
-        await UpdateShownRecipes();
+        await InitializeRecipes();
         await base.Restore();
     }
 
-    
+
+    private void TagCard_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is UIElement { DataContext: SavedTag tag })
+        {
+            SelectedTags.Remove(tag);
+            UpdateShownRecipes();
+            UpdateShownTags();
+        }
+    }
 }
 
