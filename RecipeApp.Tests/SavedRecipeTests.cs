@@ -19,8 +19,8 @@ public class SavedRecipeTests
     /// </summary>
     private SavedRecipe BuildComplexNestedRecipe(){
         // start -> X -> split1 +
-        //                 +-> A -> tH -----------------------------------------------------+
-        //                 +-> B -> split2 -+                                   +-> merge2 -+-> -> Z ->finish
+        //                 +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                 +-> B -> split2 -+                                   +-> merge2 -+
         //                                  +-> D  -----------------------------+
         //                                  +-> tE -----------------------------+
         //                                  +-> C  -> split3 +      +-> merge1 -+
@@ -53,12 +53,13 @@ public class SavedRecipeTests
         
         split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
         A.OutNodes = [new OutNode("tH", tH)];
-        tH.NextStep = new OutNode("Merge2", merge2);
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
 
         B.OutNodes = [new OutNode("Split2", split2)];
         split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
-        merge2.NextStep = new OutNode("Step Z", Z);
-        Z.OutNodes = [new OutNode("Finish", finish)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
 
         D.OutNodes = [new OutNode("Merge2", merge2)];
         
