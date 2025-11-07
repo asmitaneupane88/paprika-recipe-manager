@@ -29,12 +29,27 @@
             </StackPanel>
         </Button>
 
-        <Button Grid.Row="0" Grid.Column="2" Click="ButtonRemoveIngredient_OnClick" HorizontalAlignment="Right" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
-            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
-            </StackPanel>
-        </Button>
+        <StackPanel Grid.Row="0" Grid.Column="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+
+            <Button Click="ButtonRestock_OnClick"
+                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
+                    Margin="0,0,8,0">
+                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                    <TextBlock Text="Add to Grocery List" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <SymbolIcon Symbol="Refresh" IsHitTestVisible="False"/>
+                </StackPanel>
+            </Button>
+
+            <Button Click="ButtonRemoveIngredient_OnClick"
+                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                    <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
 
         <Grid Grid.Row="1"
               Grid.Column="0"
