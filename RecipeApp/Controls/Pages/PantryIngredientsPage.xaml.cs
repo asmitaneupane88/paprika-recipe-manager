@@ -66,4 +66,31 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
         selected.ForEach(i => PantryIngredients.Remove(i));
         RefreshSelected();
     }
+    private async void ButtonRestock_OnClick(object sender, RoutedEventArgs e)
+    {
+        var selected = GetSelectedIngredientCards();
+        if (selected.Count == 0) return;
+
+        foreach (var card in selected.ToList())
+        {
+            var pantry = card.PIngredient;
+
+           var groceryItem = new RecipeIngredient
+            {
+                Name = pantry.Name,
+                Quantity = pantry.Quantity,
+                Unit = pantry.Unit,
+                ModifierNote = pantry.ModifierNote,
+                ScaleFactor = pantry.ScaleFactor
+            };
+
+         
+            await RecipeIngredient.Add(groceryItem);
+
+            await PantryIngredient.Remove(pantry);
+            PantryIngredients.Remove(card);
+        }
+
+        RefreshSelected();
+    }
 }
