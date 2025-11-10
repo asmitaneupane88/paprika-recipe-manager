@@ -46,24 +46,27 @@
             ItemsSource="{x:Bind FilteredTags, Mode=OneWay}"
             DisplayMemberPath="Name"/>
 
-        <ScrollView Grid.Row="0" Grid.Column="2" VerticalScrollBarVisibility="Auto">
-            <ItemsRepeater ItemsSource="{x:Bind SelectedTags}">
-                <ItemsRepeater.Layout>
-                    <StackLayout Orientation="Horizontal"/>
-                </ItemsRepeater.Layout>
+        <ScrollView Grid.Row="0" Grid.Column="2">
+            <StackPanel Orientation="Horizontal">
+                <ItemsRepeater ItemsSource="{x:Bind SelectedTags}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="5"/>
+                    </ItemsRepeater.Layout>
 
-                <ItemsRepeater.ItemTemplate>
-                    <DataTemplate x:DataType="models:SavedTag">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                                    BorderBrush="{ThemeResource OutlineColor}" Background="{ThemeResource SurfaceVariantColor}"
-                                    BorderThickness="1" Padding="5" CornerRadius="16" Margin="5"
-                                    Tag="{x:Bind}" PointerPressed="TagCard_OnPointerPressed">
-                            <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" Margin="5"/>
-                            <SymbolIcon Symbol="Cancel"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ItemsRepeater.ItemTemplate>
-            </ItemsRepeater>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="models:SavedTag">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                        BorderBrush="{ThemeResource OutlineColor}"
+                                        Background="{ThemeResource SurfaceVariantColor}"
+                                        BorderThickness="1" Padding="5" CornerRadius="16" Margin="5"
+                                        Tag="{x:Bind}" PointerPressed="TagCard_OnPointerPressed">
+                                <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" Margin="5"/>
+                                <SymbolIcon Symbol="Cancel"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </StackPanel>
         </ScrollView>
 
         <StackPanel
