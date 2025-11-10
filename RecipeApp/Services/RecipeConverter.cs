@@ -65,7 +65,8 @@ namespace RecipeApp.Services
                 Title = mealDbRecipe.strMeal ?? "Untitled Recipe",
                 Description = mealDbRecipe.strInstructions ?? string.Empty,
                 ImageUrl = mealDbRecipe.strMealThumb ?? string.Empty,
-                // Category = mealDbRecipe.strCategory ?? string.Empty, TODO fix
+                Tags = mealDbRecipe.strTags?.Split(',').ToObservableCollection() ?? 
+                       (mealDbRecipe.strCategory is { } category ? [ category ] : []),
                 Rating = 0,
                 UserNote = string.Empty,
                 IsFromPdf = false,
