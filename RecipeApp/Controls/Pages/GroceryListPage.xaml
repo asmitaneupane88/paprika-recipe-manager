@@ -28,28 +28,25 @@
                 <SymbolIcon Symbol="Add" IsHitTestVisible="False"/>
             </StackPanel>
         </Button>
+        <Button Grid.Column="0" Click="ButtonAddIngredient_OnClick" HorizontalAlignment="Left">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                <TextBlock Text="Add Ingredient" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                <SymbolIcon Symbol="Add" IsHitTestVisible="False"/>
+            </StackPanel>
+        </Button>
 
-        <StackPanel Grid.Row="0" Grid.Column="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-            <Button Click="ButtonPurchased_OnClick"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Margin="0,0,8,0">
-                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                    <TextBlock Text="Purchased" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                    <SymbolIcon Symbol="Shop" IsHitTestVisible="False"/>
-                </StackPanel>
-            </Button>
-
-            <Button Click="ButtonRemoveIngredient_OnClick"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                    <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                    <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
-                </StackPanel>
-            </Button>
-
-        </StackPanel>
+        <Button Grid.Row="0" Grid.Column="2" Click="ButtonRemoveIngredient_OnClick" HorizontalAlignment="Right" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
+            </StackPanel>
+        </Button>
+        <Button Grid.Row="0" Grid.Column="2" Click="ButtonRemoveIngredient_OnClick" HorizontalAlignment="Right" IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
+            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
+            </StackPanel>
+        </Button>
 
         <Grid Grid.Row="1"
               Grid.Column="0"
@@ -66,7 +63,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Column="2" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
+            <TextBlock Grid.Column="3" Text="Modifier Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
             <TextBlock Grid.Column="0" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
             <TextBlock Grid.Column="1" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
         </Grid>
@@ -75,6 +72,7 @@
             Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
+            ItemsSource="{x:Bind AllIngredients, Mode=OneWay}">
             ItemsSource="{x:Bind AllIngredients, Mode=OneWay}">
 
             <ListView.ItemTemplate>
@@ -98,7 +96,7 @@
                                        Minimum="0" Width="75"/>
 
                             <ComboBox Grid.Column="1"
-                                      ItemsSource="{Binding Ingredient.GroceryUnitOptions}"
+                                      ItemsSource="{Binding Ingredient.UnitOptions}"
                                       SelectedItem="{Binding Ingredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="100"/>
 

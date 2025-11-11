@@ -101,49 +101,22 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4"/>
-            <TextBlock Grid.Column="1" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="80" Margin="10,4"/>
-            <TextBlock Grid.Column="2" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="80" Margin="10,4"/>
-            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="150" Margin="10,4"/>
-            <TextBlock Grid.Column="4" Text="Category" FontWeight="Bold" HorizontalAlignment="Center" Width="120" Margin="10,4"/>
+            <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
+            <TextBlock Grid.Column="1" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
+            <TextBlock Grid.Column="2" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
         </Grid>
 
-
         <ListView
-            x:Name="ListViewPantry"
-            Grid.Row="3"
-            ItemsSource="{Binding Source={StaticResource GroupedPantrySource}}"
-            SelectionMode="None"
-            Margin="10,0,10,10">
-
-            <ListView.GroupStyle>
-                <GroupStyle>
-                    <GroupStyle.HeaderTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Key}"
-                                       FontWeight="Bold"
-                                       FontSize="18"
-                                       Margin="8,12,0,6"
-                                       Foreground="{ThemeResource SystemAccentColor}" />
-                        </DataTemplate>
-                    </GroupStyle.HeaderTemplate>
-                </GroupStyle>
-            </ListView.GroupStyle>
-
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                </Style>
-            </ListView.ItemContainerStyle>
+            Grid.Row="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="3"
+            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
+            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:IngredientCard">
-                    <Border BorderBrush="{ThemeResource OutlineColor}"
-                            BorderThickness="0"
-                            Margin="2"
-                            Padding="2"
-                            CornerRadius="8"
-                            Tag="{x:Bind}">
+                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="0" Margin="2" Padding="2" CornerRadius="8" Tag="{x:Bind}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="2*"/>
@@ -154,20 +127,17 @@
                                 <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0"
-                                     Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="0" Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="3" Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
 
+                            <NumberBox Grid.Column="1"
                             <NumberBox Grid.Column="1"
                                        PlaceholderText="Qty"
                                        Value="{Binding PIngredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                       Minimum="0"
-                                       Width="70"
-                                       Margin="5,0"/>
+                                       Minimum="0" Width="100"/>
 
                             <ComboBox Grid.Column="2"
-                                      Style="{StaticResource ModernComboBoxStyle}"
-                                      ItemsSource="{Binding PIngredient.PantryUnitOptions}"
+                                      ItemsSource="{Binding PIngredient.UnitOptions}"
                                       SelectedItem="{Binding PIngredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Width="90"/>
 

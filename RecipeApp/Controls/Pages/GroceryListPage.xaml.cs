@@ -1,5 +1,5 @@
-﻿using RecipeApp.Models;
-using RecipeApp.Services;
+
+
 
 namespace RecipeApp.Controls.Pages;
 
@@ -7,12 +7,16 @@ namespace RecipeApp.Controls.Pages;
 public sealed partial class GroceryListPage : NavigatorPage
 {
     [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
     public GroceryListPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
 
         _ = ShowIngredients();
+        _ = ShowIngredients();
     }
+
+    private async Task ShowIngredients()
 
     private async Task ShowIngredients()
     {
@@ -59,6 +63,7 @@ public sealed partial class GroceryListPage : NavigatorPage
         await RecipeIngredient.Add(newIngredient);
     }
 
+
     private async void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
         var selected = GetSelectedIngredientCards();
@@ -66,32 +71,10 @@ public sealed partial class GroceryListPage : NavigatorPage
         await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
         selected.ForEach(i => AllIngredients.Remove(i));
         RefreshSelected();
-    }
-    
-    private async void ButtonPurchased_OnClick(object sender, RoutedEventArgs e)
-    {
         var selected = GetSelectedIngredientCards();
-
-        if (selected.Count == 0)
-            return;
-
-        foreach (var card in selected.ToList())
-        {
-            var ingredient = card.Ingredient;
-
-            var pantryItem = new PantryIngredient
-            {
-                Name = ingredient.Name ?? "New Item",
-                Quantity = ingredient.Quantity,
-                Unit = ingredient.Unit,
-                ModifierNote = ingredient.ModifierNote
-            };
-
-            await PantryIngredient.Add(pantryItem);
-            await RecipeIngredient.Remove(ingredient);
-            AllIngredients.Remove(card);
-        }
-
+        
+        await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
+        selected.ForEach(i => AllIngredients.Remove(i));
         RefreshSelected();
     }
 }
