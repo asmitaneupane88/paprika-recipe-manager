@@ -13,24 +13,45 @@ public partial class PantryIngredient: IAutosavingClass<PantryIngredient>
     [JsonConverter(typeof(UnitTypeJsonConverter))]
     [ObservableProperty] public partial UnitType Unit { get; set; }
     
+    [ObservableProperty] public partial string Category { get; set; } = "Uncategorized";
     
-    private static readonly List<UnitType> UnitOptions =
-    [
+    [JsonIgnore]
+    public ObservableCollection<string> CategoryOptions { get; } =
+        new()
+        {
+            "Vegetables",
+            "Fruits",
+            "Dairy",
+            "Meat",
+            "Seafood",
+            "Baking",
+            "Beverages",
+            "Snacks",
+            "Chicken",
+            "Pasta",
+            "Others"
+        };
+    
+    
+    private static readonly List<UnitType> UnitOptions = new()
+    {
         UnitType.Box,
         UnitType.LB,
         UnitType.Gallon,
         UnitType.Quart,
         UnitType.Pint
-        //TODO
-    ];
+        // TODO: extend as needed
+    };
     
     [JsonIgnore]
-    public ObservableCollection<UnitType> PantryUnitOptions { get; } = new(Enum.GetValues<UnitType>().Where(ut => UnitOptions.Contains(ut)));
-    
+    public ObservableCollection<UnitType> PantryUnitOptions { get; } =
+        new(Enum.GetValues<UnitType>().Where(UnitOptions.Contains));
+
     /// <summary>
     /// For use in scaling up recipes like a multiplier
     /// </summary>
-    [ObservableProperty] public partial double ScaleFactor { get; set; }
+    [ObservableProperty]
+    public partial double ScaleFactor { get; set; } = 1.0;
 }
 
 // had Claude 4.5 Sonnet quickly generate this converter to fix an issue

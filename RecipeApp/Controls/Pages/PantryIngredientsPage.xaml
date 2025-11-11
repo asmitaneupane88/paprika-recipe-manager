@@ -10,104 +10,185 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <CollectionViewSource x:Key="GroupedPantrySource"
+                              Source="{x:Bind GroupedPantry}"
+                              IsSourceGrouped="True" />
+        <Style x:Key="ModernComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="36"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="{ThemeResource SystemAccentColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{ThemeResource TextFillColorPrimaryBrush}"/>
+        </Style>
+    </Page.Resources>
+
+
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>   <!-- Buttons -->
+            <RowDefinition Height="Auto"/>   <!-- Filter -->
+            <RowDefinition Height="Auto"/>   <!-- Headers -->
+            <RowDefinition Height="*"/>      <!-- List -->
         </Grid.RowDefinitions>
 
-        <Button Grid.Column="0" Click="ButtonAddIngredient_OnClick" HorizontalAlignment="Left">
-            <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                <TextBlock Text="Add Ingredient" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                <SymbolIcon Symbol="Add" IsHitTestVisible="False"/>
-            </StackPanel>
-        </Button>
-
-        <StackPanel Grid.Row="0" Grid.Column="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right">
-
-            <Button Click="ButtonRestock_OnClick"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Margin="0,0,8,0">
-                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                    <TextBlock Text="Add to Grocery List" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                    <SymbolIcon Symbol="Refresh" IsHitTestVisible="False"/>
-                </StackPanel>
-            </Button>
-
-            <Button Click="ButtonRemoveIngredient_OnClick"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
-                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
-                    <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                    <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-
-        <Grid Grid.Row="1"
-              Grid.Column="0"
-              Grid.ColumnSpan="3"
-              CornerRadius="8"
-              Background="{ThemeResource SurfaceVariantColor}"
-              Margin="10">
+        <Grid Grid.Row="0" Margin="10,0,10,10">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="200"/>
-            <TextBlock Grid.Column="1" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
-            <TextBlock Grid.Column="2" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="100"/>
+            <Button Grid.Column="0" Click="ButtonAddIngredient_OnClick" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10,4">
+                    <TextBlock Text="Add Ingredient" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                    <SymbolIcon Symbol="Add" IsHitTestVisible="False"/>
+                </StackPanel>
+            </Button>
+
+            <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+
+                <Button Click="ButtonRestock_OnClick"
+                        IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                        <TextBlock Text="Add to Grocery List" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                        <SymbolIcon Symbol="Refresh" IsHitTestVisible="False"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Click="ButtonRemoveIngredient_OnClick"
+                        IsEnabled="{x:Bind CardsSelected, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsHitTestVisible="False" Margin="10">
+                        <TextBlock Text="Remove Ingredients" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                        <SymbolIcon Symbol="Delete" IsHitTestVisible="False"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
+        <StackPanel Grid.Row="1"
+                    Margin="20,0,0,10"
+                    HorizontalAlignment="Left">
+            <TextBlock Text="Filter by Category:"
+                       VerticalAlignment="Center"
+                       FontWeight="Bold"
+                       Margin="0,0,10,0"/>
+            <ComboBox x:Name="CategoryFilterBox"
+                      Width="260"
+                      Style="{StaticResource ModernComboBoxStyle}"
+                      PlaceholderText="All Categories"
+                      ItemsSource="{x:Bind CategoryOptions}"
+                      SelectionChanged="CategoryFilterBox_SelectionChanged"/>
+        </StackPanel>
+
+        <Grid Grid.Row="2"
+              Margin="10,0,10,5"
+              CornerRadius="8"
+              Background="{ThemeResource SurfaceVariantColor}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="Ingredient" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,4"/>
+            <TextBlock Grid.Column="1" Text="Quantity" FontWeight="Bold" HorizontalAlignment="Center" Width="80" Margin="10,4"/>
+            <TextBlock Grid.Column="2" Text="Unit" FontWeight="Bold" HorizontalAlignment="Center" Width="80" Margin="10,4"/>
+            <TextBlock Grid.Column="3" Text="Note" FontWeight="Bold" HorizontalAlignment="Center" Width="150" Margin="10,4"/>
+            <TextBlock Grid.Column="4" Text="Category" FontWeight="Bold" HorizontalAlignment="Center" Width="120" Margin="10,4"/>
+        </Grid>
+
+
         <ListView
-            Grid.Row="2"
-            Grid.Column="0"
-            Grid.ColumnSpan="3"
-            ItemsSource="{x:Bind PantryIngredients, Mode=OneWay}">
+            x:Name="ListViewPantry"
+            Grid.Row="3"
+            ItemsSource="{Binding Source={StaticResource GroupedPantrySource}}"
+            SelectionMode="None"
+            Margin="10,0,10,10">
+
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Key}"
+                                       FontWeight="Bold"
+                                       FontSize="18"
+                                       Margin="8,12,0,6"
+                                       Foreground="{ThemeResource SystemAccentColor}" />
+                        </DataTemplate>
+                    </GroupStyle.HeaderTemplate>
+                </GroupStyle>
+            </ListView.GroupStyle>
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </ListView.ItemContainerStyle>
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:IngredientCard">
-                    <Border BorderBrush="{ThemeResource OutlineColor}" BorderThickness="0" Margin="2" Padding="2" CornerRadius="8" Tag="{x:Bind}">
+                    <Border BorderBrush="{ThemeResource OutlineColor}"
+                            BorderThickness="0"
+                            Margin="2"
+                            Padding="2"
+                            CornerRadius="8"
+                            Tag="{x:Bind}">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="40"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBox Grid.Column="0" Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"/>
-                            <TextBox Grid.Column="3" Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="200"/>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding PIngredient.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     HorizontalAlignment="Stretch"/>
 
                             <NumberBox Grid.Column="1"
                                        PlaceholderText="Qty"
                                        Value="{Binding PIngredient.Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                       Minimum="0" Width="100"/>
+                                       Minimum="0"
+                                       Width="70"
+                                       Margin="5,0"/>
 
                             <ComboBox Grid.Column="2"
+                                      Style="{StaticResource ModernComboBoxStyle}"
                                       ItemsSource="{Binding PIngredient.PantryUnitOptions}"
                                       SelectedItem="{Binding PIngredient.Unit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      Width="100"/>
+                                      Width="90"/>
 
-                            <!--Got to use "Binding" here over x:Bind-->
-                            <CheckBox
-                                Grid.Column="4"
-                                IsChecked="{Binding IsSelected, Mode=TwoWay}"
-                                Checked="OnRecipeCardChecked"
-                                Unchecked="OnRecipeCardChecked"/>
+                            <TextBox Grid.Column="3"
+                                     Text="{Binding PIngredient.ModifierNote, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="150"/>
+
+
+                            <ComboBox Grid.Column="4"
+                                      Style="{StaticResource ModernComboBoxStyle}"
+                                      ItemsSource="{Binding PIngredient.CategoryOptions}"
+                                      SelectedItem="{Binding PIngredient.Category, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Width="140"
+                                      PlaceholderText="Select Category"/>
+
+
+                            <CheckBox Grid.Column="5"
+                                      IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                      Checked="OnRecipeCardChecked"
+                                      Unchecked="OnRecipeCardChecked"
+                                      VerticalAlignment="Center"/>
                         </Grid>
                     </Border>
                 </DataTemplate>
