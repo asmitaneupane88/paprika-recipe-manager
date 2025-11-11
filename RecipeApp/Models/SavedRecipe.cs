@@ -1,11 +1,12 @@
-﻿using RecipeApp.Models.RecipeSteps;
+﻿using System.Collections.Specialized;
+using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Models;
 
 /// <summary>
 /// Handles the representation of a saved recipe along with loading and saving of the saved recipes.
 /// </summary>
-public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
+public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
 {
     [JsonIgnore] public int BindableMaxRating => MaxRating;
 
@@ -14,8 +15,26 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
     [ObservableProperty] public partial string ImageUrl { get; set; } = string.Empty;
     [ObservableProperty] public partial string? SourceUrl { get; set; }
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
-    [ObservableProperty] public partial string? Category { get; set; }
-
+    public ObservableCollection<string> Tags 
+    { 
+        get;
+        set
+        {
+            if (field is not null)
+                field.CollectionChanged -= TagsCollectionChanged;
+        
+            SetProperty(ref field, value);
+        
+            if (field is not null)
+                field?.CollectionChanged += TagsCollectionChanged;
+        }
+    }
+    
+    private void TagsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(Tags));
+    }
+    
     [ObservableProperty] public partial bool AdvancedSteps { get; set; } = false;
     
     public bool IsFromPdf { get; set; }
@@ -104,7 +123,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
             existing.HtmlPath = recipe.HtmlPath;
             existing.Description = recipe.Description;
             existing.ImageUrl = recipe.ImageUrl;
-            existing.Category = recipe.Category;
+            existing.Tags = recipe.Tags;
         }
 
         await SaveAll(all);
@@ -123,7 +142,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>, IRecipe
         var json = JsonSerializer.Serialize(recipes, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(savePath, json);
     }
-
 }
 
 

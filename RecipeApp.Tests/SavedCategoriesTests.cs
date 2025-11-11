@@ -12,7 +12,7 @@ public class SavedCategoriesTests
     [Test]
     public async Task AddCategoriesTest()
     {
-        List<SavedCategory> categoriesToAdd =
+        List<SavedTag> categoriesToAdd =
         [
             new()
             {
@@ -24,10 +24,10 @@ public class SavedCategoriesTests
             }
         ];
 
-        if ((await SavedCategory.GetAll()).Count == 0)
+        if ((await SavedTag.GetAll()).Count == 0)
         {
             foreach (var category in categoriesToAdd)
-                await SavedCategory.Add(category);
+                await SavedTag.Add(category);
         }
         
         Assert.Pass();
@@ -37,13 +37,13 @@ public class SavedCategoriesTests
     public async Task AssignCategories()
     {
         var recipes = (await SavedRecipe.GetAll()).ToArray();
-        var categories = (await SavedCategory.GetAll()).ToArray();
+        var categories = (await SavedTag.GetAll()).ToArray();
         
         if (categories.Length < 2) return;
         
         for (var i = 0; i < recipes.Length; i++)
         {
-            recipes[i].Category = i % 2 == 0 ? categories[0].Name : categories[1].Name;
+            recipes[i].Tags.Add(i % 2 == 0 ? categories[0].Name : categories[1].Name);
         }
     }
 }

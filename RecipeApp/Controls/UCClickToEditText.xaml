@@ -14,6 +14,7 @@
                    Text="{x:Bind EditableText, Mode=OneWay}"
                    FontSize="{x:Bind FontSize, Mode=OneWay}"
                    FontWeight="{x:Bind FontWeight, Mode=OneWay}"
+                   TextWrapping="Wrap"
                    PointerPressed="OnTextClicked"
                    PointerEntered="DisplayText_OnPointerEntered"
                    PointerExited="DisplayText_OnPointerExited"
@@ -24,6 +25,7 @@
                  FontWeight="{x:Bind FontWeight, Mode=OneWay}"
                  LostFocus="OnEditLostFocus"
                  AcceptsReturn="{x:Bind AcceptsReturn}"
+                 TextWrapping="Wrap"
                  Visibility="Collapsed"
                  Padding="0" Margin="0"/>
         <SymbolIcon VerticalAlignment="Center" HorizontalAlignment="Center" Symbol="Edit" Visibility="{x:Bind EditImageHover, Mode=OneWay}" IsHitTestVisible="False" Margin="0"/>

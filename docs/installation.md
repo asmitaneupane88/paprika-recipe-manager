@@ -67,6 +67,21 @@ a .NET-based application using the Uno platform for cross-platform UI, on Window
    dotnet build
    ```
 
+## Android Development:
+To debug on Android,
+you will need to have an Android device (or an emulated device via Android Studio, which is not reliable in Rider)
+and Rider with the Rider Android Support plugin installed.
+
+1. Make sure you swap your build mode over to the Android target.
+![img.png](img.png)
+2. Select "Pair Device Using Wi-Fi" (skip to step 6 if you use usb debugging to pair the device)
+![img_1.png](img_1.png)
+3. Enable Developer Mode on your device.
+4. Enable Wireless Debugging.
+5. Use either the QR or the code to connect the devices. (if this gives you trouble, try using usb debugging)
+6. Run the project with that connected device.
+7. This may take some time to build and install onto the device (maybe 3 minutes or so).
+
 ## Troubleshooting
 ### Build Errors:
 - Ensure .NET 9 SDK is installed `(dotnet --version)`.

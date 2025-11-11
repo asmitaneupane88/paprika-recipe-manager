@@ -1,6 +1,6 @@
 <Project Sdk="Uno.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net9.0-desktop;net9.0</TargetFrameworks>
+        <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-desktop;net9.0</TargetFrameworks>
 
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
@@ -74,7 +74,18 @@
         <DependentUpon>GroceryListPage.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
-      <Compile Remove="Controls\Pages\RecipeDetailsV2.xaml.cs" />
+        <Compile Update="Controls\Pages\RecipeDetailsV2.xaml.cs">
+            <DependentUpon>RecipeDetailsV2.xaml</DependentUpon>
+            <IsDefaultItem>true</IsDefaultItem>
+        </Compile>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="Platforms\Android\AndroidManifest.xml" />
+      <Content Include="Platforms\Android\Assets\AboutAssets.txt" />
+      <Content Include="Platforms\Android\environment.conf" />
+      <Content Include="Platforms\Android\Resources\AboutResources.txt" />
+      <Content Include="Platforms\Android\Resources\values\Strings.xml" />
+      <Content Include="Platforms\Android\Resources\values\Styles.xml" />
     </ItemGroup>
 
 </Project>

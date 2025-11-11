@@ -8,14 +8,6 @@
   items:
     - name: Recipe Management
       items:
-        - name: Overview
-          href: recipe-management.md
-        - name: Recipe Model
-          href: recipe-model.md
-        - name: Recipe Views
-          href: recipe-views.md
-        - name: Recipe ViewModels
-          href: recipe-viewmodels.md
         - name: Meal Planner
           href: meal-planner.md
 
