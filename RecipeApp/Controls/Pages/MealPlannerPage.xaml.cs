@@ -75,8 +75,8 @@ public sealed partial class MealPlannerPage : NavigatorPage
                     grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
                     grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                    // Get meal plan for this slot
-                    var mealPlan = allMealPlans.FirstOrDefault(mp => mp.Date.Date == date.Date && mp.MealType == mealType);
+                    // Get all meal plans for this slot (allowing multiple recipes per meal type)
+                    var mealPlansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
 
                     // Add meal content
                     var contentPanel = new StackPanel
@@ -85,25 +85,35 @@ public sealed partial class MealPlannerPage : NavigatorPage
                         VerticalAlignment = VerticalAlignment.Center
                     };
 
-                    var mealText = new TextBlock
+                    if (mealPlansForSlot.Any())
                     {
-                        TextWrapping = TextWrapping.Wrap,
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    };
-
-                    if (mealPlan != null)
-                    {
-                        mealText.Text = mealPlan.Recipe.Title;
-                        mealText.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+                        // Show each planned recipe on its own line
+                        foreach (var mp in mealPlansForSlot)
+                        {
+                            var mealText = new TextBlock
+                            {
+                                Text = mp.Recipe.Title,
+                                TextWrapping = TextWrapping.Wrap,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                                Margin = new Thickness(0, 2, 0, 2)
+                            };
+                            contentPanel.Children.Add(mealText);
+                        }
                     }
                     else
                     {
-                        mealText.Text = "No meal planned";
-                        mealText.Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"];
-                        mealText.Opacity = 0.6;
+                        var mealText = new TextBlock
+                        {
+                            Text = "No meal planned",
+                            TextWrapping = TextWrapping.Wrap,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
+                            Opacity = 0.6
+                        };
+                        contentPanel.Children.Add(mealText);
                     }
 
-                    contentPanel.Children.Add(mealText);
                     Grid.SetRow(contentPanel, 0);
                     grid.Children.Add(contentPanel);
 
@@ -296,40 +306,9 @@ public sealed partial class MealPlannerPage : NavigatorPage
             if (savedRecipe != null)
             {
                 await MealPlan.AddMealPlan(date, savedRecipe, mealType);
-                
-                // Update just this specific cell
-                var border = _mealSlotsGrid?.Children
-                    .Cast<Border>()
-                    .FirstOrDefault(b => Grid.GetRow(b) == row && Grid.GetColumn(b) == col);
 
-                if (border?.Child is Grid cellGrid)
-                {
-                    // Clear existing content in the first row (keeping the add button in the second row)
-                    var itemsToRemove = cellGrid.Children.Where(c => Grid.GetRow(c) == 0).ToList();
-                    foreach (var item in itemsToRemove)
-                    {
-                        cellGrid.Children.Remove(item);
-                    }
-
-                    // Create a stack panel to hold the recipe info and meal type
-                    var stackPanel = new StackPanel
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-
-                    var recipeInfo = new TextBlock
-                    {
-                        Text = savedRecipe.Title,
-                        TextWrapping = TextWrapping.Wrap,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
-                    };
-                    stackPanel.Children.Add(recipeInfo);
-
-                    Grid.SetRow(stackPanel, 0);
-                    cellGrid.Children.Add(stackPanel);
-                }
+                // Refresh the grid so the newly-added recipe appears (keeps logic simple)
+                LoadAndInitializeMealPlans();
             }
         }
     }

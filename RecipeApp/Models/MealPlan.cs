@@ -20,15 +20,8 @@ public class MealPlan : IAutosavingClass<MealPlan>
     public static async Task AddMealPlan(DateTime date, SavedRecipe recipe, MealType mealType)
     {
         var allMealPlans = await GetAll();
-        
-        // Remove any existing meal plan for this date and meal type
-        var existingMealPlan = allMealPlans.FirstOrDefault(mp => mp.Date.Date == date.Date && mp.MealType == mealType);
-        if (existingMealPlan != null)
-        {
-            await Remove(existingMealPlan);
-        }
-
-        await Add(new MealPlan 
+        // Add a meal plan entry. We allow multiple entries per date+mealType so a meal slot can contain multiple recipes.
+        await Add(new MealPlan
         {
             Date = date,
             MealType = mealType,
