@@ -27,8 +27,6 @@ public partial class PantryIngredient: IAutosavingClass<PantryIngredient>
             "Baking",
             "Beverages",
             "Snacks",
-            "Chicken",
-            "Pasta",
             "Others"
         };
     
