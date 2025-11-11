@@ -37,12 +37,12 @@
             Width="300"/>
 
         <!-- note that placeholder text does not render correctly -->
-        <ComboBox
+        <ComboBox x:Name="TagCombo"
             Grid.Row="0"
             Grid.Column="1"
             Margin="10"
             Width="200"
-            SelectedItem="{x:Bind SelectedTag, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            SelectionChanged="OnTagComboSelectionChanged"
             ItemsSource="{x:Bind FilteredTags, Mode=OneWay}"
             DisplayMemberPath="Name"/>
 
