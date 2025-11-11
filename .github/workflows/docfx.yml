@@ -27,7 +27,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: .Net Workload Restore
-      - run: dotnet workload restore
+        run: dotnet workload restore
       
       - name: Setup DocFX
         run: dotnet tool update -g docfx
