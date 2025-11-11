@@ -135,7 +135,7 @@ public sealed partial class RecipeListPage : NavigatorPage
         if (sender is ListView { SelectedItem: RecipeCard rc } lv)
         {
             lv.SelectedItem = null;
-            var details = new RecipeDetailsV2(Navigator, rc.SavedRecipe);
+            var details = new RecipeDetailsPage(Navigator, savedRecipe: rc.SavedRecipe);
             Navigator.Navigate(details, $"Recipe: {rc.SavedRecipe.Title}");
         }
     }
@@ -217,6 +217,21 @@ public sealed partial class RecipeListPage : NavigatorPage
             var htmlText = await FileHelper.ConvertPdfToTextAsync(savedFilePath);
             var htmlPath = Path.Combine(localFolderPath, $"{Path.GetFileNameWithoutExtension(savedFilePath)}.html");
             await File.WriteAllTextAsync(htmlPath, htmlText);
+            
+            var existing = AllRecipes.FirstOrDefault(r =>
+                string.Equals(r.SavedRecipe.PdfPath, savedFilePath, StringComparison.OrdinalIgnoreCase));
+
+            if (existing != null)
+            {
+                await new ContentDialog
+                {
+                    Title = "Duplicate PDF Detected",
+                    Content = $"A recipe for {Path.GetFileName(savedFilePath)} already exists: {existing.SavedRecipe.Title}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+                return;
+            }
 
             var selectedRecipe = GetSelectedRecipes().FirstOrDefault();
             if (selectedRecipe != null)
@@ -230,7 +245,13 @@ public sealed partial class RecipeListPage : NavigatorPage
             {
                 var aiRecipe = await AiHelper.StringToSavedRecipe(htmlText);
                 if (aiRecipe != null)
+                {
+                    aiRecipe.PdfPath = savedFilePath;
+                    aiRecipe.HtmlPath = htmlPath; 
                     await SavedRecipe.Add(aiRecipe);
+                    AllRecipes.Add(new RecipeCard { SavedRecipe = aiRecipe, IsSelected = false });
+                }
+                    
 
                 var aiDialog = new ContentDialog
                 {
