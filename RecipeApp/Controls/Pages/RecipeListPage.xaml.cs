@@ -37,7 +37,6 @@ public sealed partial class RecipeListPage : NavigatorPage
     [ObservableProperty] private partial ObservableCollection<RecipeCard> FilteredRecipes { get; set; } = [];
     
     [ObservableProperty] private partial ObservableCollection<SavedTag> SelectedTags { get; set; } = [];
-
     
     private string SearchText
     {
