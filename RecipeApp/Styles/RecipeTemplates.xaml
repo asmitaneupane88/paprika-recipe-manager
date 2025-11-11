@@ -28,6 +28,12 @@
                 <TextBlock Text="{Binding Category}" 
                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                           Style="{StaticResource CaptionTextBlockStyle}"/>
+        <RatingControl
+            Value="{Binding Rating}"
+            MaxRating="{Binding BindableMaxRating}"
+            IsReadOnly="True"
+            Margin="0,4,0,0"
+            />
             </StackPanel>
         </Grid>
     </DataTemplate>
