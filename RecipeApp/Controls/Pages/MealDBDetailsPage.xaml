@@ -115,16 +115,9 @@
                              Style="{ThemeResource SubtitleTextBlockStyle}"
                              Margin="0,0,0,12"/>
 
-                    <ItemsRepeater ItemsSource="{x:Bind Recipe.strInstructions}">
-                        <ItemsRepeater.ItemTemplate>
-                            <DataTemplate x:DataType="system:String">
-                                <StackPanel Margin="0,8">
-                                    <TextBlock Text="{Binding}"
-                                             TextWrapping="Wrap"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsRepeater.ItemTemplate>
-                    </ItemsRepeater>
+                    <TextBlock Text="{x:Bind Recipe.strInstructions, Mode=OneWay}"
+                               TextWrapping="Wrap"
+                               LineHeight="20"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
