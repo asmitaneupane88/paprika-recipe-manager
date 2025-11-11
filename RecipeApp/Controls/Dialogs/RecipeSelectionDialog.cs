@@ -30,7 +30,8 @@ public class RecipeSelectionDialog
         public SavedRecipe Recipe { get; }
         public RecipeSelectable(SavedRecipe r) => Recipe = r;
         public string? Title => Recipe.Title;
-        public string? Category => Recipe.Category;
+    // SavedRecipe doesn't have a Category property; show the first tag if available as a lightweight category.
+    public string? Category => Recipe.Tags?.FirstOrDefault();
         public string? ImageUrl => Recipe.ImageUrl;
         public int Rating => Recipe.Rating;
         public int BindableMaxRating => Recipe.BindableMaxRating;
