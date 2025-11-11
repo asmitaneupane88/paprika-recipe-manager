@@ -77,6 +77,8 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
                     // Get all meal plans for this slot (allowing multiple recipes per meal type)
                     var mealPlansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
+                    // Get all meal plans for this slot (allowing multiple recipes per meal type)
+                    var mealPlansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
 
                     // Add meal content
                     var contentPanel = new StackPanel
@@ -100,9 +102,35 @@ public sealed partial class MealPlannerPage : NavigatorPage
                             };
                             contentPanel.Children.Add(mealText);
                         }
+                    if (mealPlansForSlot.Any())
+                    {
+                        // Show each planned recipe on its own line
+                        foreach (var mp in mealPlansForSlot)
+                        {
+                            var mealText = new TextBlock
+                            {
+                                Text = mp.Recipe.Title,
+                                TextWrapping = TextWrapping.Wrap,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                                Margin = new Thickness(0, 2, 0, 2)
+                            };
+                            contentPanel.Children.Add(mealText);
+                        }
                     }
                     else
                     {
+                        var mealText = new TextBlock
+                        {
+                            Text = "No meal planned",
+                            TextWrapping = TextWrapping.Wrap,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
+                            Opacity = 0.6
+                        };
+                        contentPanel.Children.Add(mealText);
+                    }
+
                         var mealText = new TextBlock
                         {
                             Text = "No meal planned",
