@@ -9,27 +9,33 @@
                 <ColumnDefinition Width="60"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            
-            <Border CornerRadius="4" 
-                    Width="60" Height="60" 
+
+            <Border CornerRadius="4"
+                    Width="60"
+                    Height="60"
                     Margin="0,0,12,0">
                 <Border.Background>
                     <ImageBrush ImageSource="{Binding ImageUrl}"
-                              Stretch="UniformToFill"/>
+                                Stretch="UniformToFill"/>
                 </Border.Background>
             </Border>
-            
-            <StackPanel Grid.Column="1" 
+
+            <StackPanel Grid.Column="1"
                         VerticalAlignment="Center">
-                <TextBlock Text="{Binding Title}" 
-                          FontWeight="SemiBold"
-                          TextWrapping="Wrap"
-                          Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                <TextBlock Text="{Binding Category}" 
-                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                          Style="{StaticResource CaptionTextBlockStyle}"/>
+                <TextBlock Text="{Binding Title}"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="{Binding Category}"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Style="{StaticResource CaptionTextBlockStyle}"/>
+                <RatingControl
+                    Value="{Binding Rating}"
+                    MaxRating="{Binding BindableMaxRating}"
+                    IsReadOnly="True"
+                    Margin="0,4,0,0"/>
             </StackPanel>
         </Grid>
     </DataTemplate>
-    
+
 </ResourceDictionary>
