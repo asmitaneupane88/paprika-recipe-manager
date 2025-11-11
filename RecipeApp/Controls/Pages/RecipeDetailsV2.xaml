@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:pages="clr-namespace:RecipeApp.Controls.Pages"
     xmlns:controls="clr-namespace:RecipeApp.Controls"
+    xmlns:models="clr-namespace:RecipeApp.Models"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <ScrollViewer VerticalScrollBarVisibility="Visible">
@@ -49,6 +51,49 @@
                                Margin="10,0,10,10"
                                HorizontalAlignment="Left"/>
             </Grid>
+
+            <StackPanel Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Margin="10"
+                        CornerRadius="8"
+                        Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontSize="20" FontWeight="Bold" Text="Tags"/>
+                    <AutoSuggestBox Grid.Column="1"
+                        Width="200"
+                        PlaceholderText="Enter or select an item"
+                        ItemsSource="{x:Bind FilteredTags, Mode=OneWay}"
+                        DisplayMemberPath="Name"
+                        QuerySubmitted="AutoSuggestBox_OnQuerySubmitted"/>
+                </Grid>
+
+                <ScrollView>
+                    <StackPanel Orientation="Horizontal">
+                        <ItemsRepeater ItemsSource="{x:Bind SavedRecipe.Tags, Mode=OneWay}">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Orientation="Horizontal" Spacing="5"/>
+                            </ItemsRepeater.Layout>
+
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate x:DataType="system:String">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                                BorderBrush="{ThemeResource OutlineColor}"
+                                                Background="{ThemeResource SurfaceVariantColor}"
+                                                BorderThickness="1" Padding="5" CornerRadius="16" Margin="5"
+                                                Tag="{x:Bind}" PointerPressed="TagCard_OnPointerPressed">
+                                        <TextBlock Text="{x:Bind}" VerticalAlignment="Center" Margin="5"/>
+                                        <SymbolIcon Symbol="Cancel"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
+                    </StackPanel>
+                </ScrollView>
+            </StackPanel>
 
             <StackPanel Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                         BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"

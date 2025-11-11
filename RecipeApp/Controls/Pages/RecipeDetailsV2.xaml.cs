@@ -7,6 +7,9 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
     [ObservableProperty] public partial SavedRecipe SavedRecipe { get; set; }
     [ObservableProperty] public partial Visibility EditImageHover { get; set; } = Visibility.Collapsed;
     
+    [ObservableProperty] private partial ObservableCollection<SavedTag> FilteredTags { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<SavedTag> AllTags { get; set; } = [];
+    
     public RecipeDetailsV2(Navigator? nav = null, SavedRecipe? savedRecipe = null) : base(nav)
     {
         InitializeComponent();
@@ -15,7 +18,22 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
             _ = Navigator.TryGoBack();
         
         SavedRecipe = savedRecipe!;
-        
+
+        _ = UpdateAllTags();
+    }
+    
+    private async Task UpdateAllTags()
+    {
+        AllTags = (await SavedTag.GetAll())
+            .ToObservableCollection();
+        UpdateShownTags();
+    }
+
+    private void UpdateShownTags()
+    {
+        FilteredTags = AllTags
+            .Where(t => !SavedRecipe.Tags.Contains(t.Name, StringComparer.CurrentCultureIgnoreCase))
+            .ToObservableCollection();
     }
 
     private async void ImageGrid_OnPointerReleased(object sender, PointerRoutedEventArgs e)
@@ -110,6 +128,46 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
     public override async Task Restore()
     {
         await Models.SavedRecipe.SaveAll();
+    }
+
+    private async void AutoSuggestBox_OnQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is SavedTag tag)
+        {
+            SavedRecipe.Tags.Add(tag.Name);
+            UpdateShownTags();
+        }
+        else if (!string.IsNullOrWhiteSpace(args.QueryText) && !SavedRecipe.Tags.Contains(args.QueryText, StringComparer.CurrentCultureIgnoreCase))
+        {
+            var newTag = new SavedTag()
+            {
+                Name = args.QueryText
+            };
+            SavedRecipe.Tags.Add(newTag.Name);
+            
+            await SavedTag.Add(newTag);
+            await UpdateAllTags();
+        }
+        
+        sender.Text = "";
+    }
+    
+    private async void TagCard_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is UIElement { DataContext: string tag })
+        {
+            SavedRecipe.Tags.Remove(tag);
+            
+            if ((await SavedRecipe.GetAll()).Any(sr => sr.Tags.Contains(tag)))
+                UpdateShownTags();
+            else
+            {
+                var tagToRemove = AllTags.FirstOrDefault(t => t.Name == tag);
+                if (tagToRemove != null)
+                    await SavedTag.Remove(tagToRemove);
+                await UpdateAllTags();
+            }
+        }
     }
 }
 

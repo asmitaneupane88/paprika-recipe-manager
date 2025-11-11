@@ -1,4 +1,5 @@
-﻿using RecipeApp.Models.RecipeSteps;
+﻿using System.Collections.Specialized;
+using RecipeApp.Models.RecipeSteps;
 
 namespace RecipeApp.Models;
 
@@ -14,8 +15,26 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     [ObservableProperty] public partial string ImageUrl { get; set; } = string.Empty;
     [ObservableProperty] public partial string? SourceUrl { get; set; }
     [ObservableProperty] public partial string UserNote { get; set; } = string.Empty;
-    [ObservableProperty] public partial ObservableCollection<string> Tags { get; set; } = [];
-
+    public ObservableCollection<string> Tags 
+    { 
+        get;
+        set
+        {
+            if (field is not null)
+                field.CollectionChanged -= TagsCollectionChanged;
+        
+            SetProperty(ref field, value);
+        
+            if (field is not null)
+                field?.CollectionChanged += TagsCollectionChanged;
+        }
+    }
+    
+    private void TagsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(Tags));
+    }
+    
     [ObservableProperty] public partial bool AdvancedSteps { get; set; } = false;
     
     public bool IsFromPdf { get; set; }
