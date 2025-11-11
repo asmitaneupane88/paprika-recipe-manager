@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Markup;
 using RecipeApp.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -25,17 +26,30 @@ public class RecipeSelectionDialog
         _mealType = mealType;
     }
 
-    private class RecipeSelectable
+    private class RecipeSelectable : INotifyPropertyChanged
     {
         public SavedRecipe Recipe { get; }
         public RecipeSelectable(SavedRecipe r) => Recipe = r;
         public string? Title => Recipe.Title;
-    // SavedRecipe doesn't have a Category property; show the first tag if available as a lightweight category.
-    public string? Category => Recipe.Tags?.FirstOrDefault();
+        // SavedRecipe doesn't have a Category property; show the first tag if available as a lightweight category.
+        public string? Category => Recipe.Tags?.FirstOrDefault();
         public string? ImageUrl => Recipe.ImageUrl;
         public int Rating => Recipe.Rating;
         public int BindableMaxRating => Recipe.BindableMaxRating;
-        public bool IsSelected { get; set; }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                if (_isSelected == value) return;
+                _isSelected = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+            }
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 
     /// <summary>
@@ -66,10 +80,11 @@ public class RecipeSelectionDialog
     var wrappers = _recipes.Select(r => new RecipeSelectable(r)).ToList();
 
     // Pre-select any recipes already added to the meal plan for this date+mealType
+    var plansForSlot = new List<MealPlan>();
     try
     {
         var allMealPlans = await MealPlan.GetAll();
-        var plansForSlot = allMealPlans.Where(mp => mp.Date.Date == _date.Date && mp.MealType == _mealType).ToList();
+        plansForSlot = allMealPlans.Where(mp => mp.Date.Date == _date.Date && mp.MealType == _mealType).ToList();
         foreach (var w in wrappers)
         {
             if (plansForSlot.Any(p => string.Equals(p.Recipe?.Title, w.Recipe?.Title, StringComparison.OrdinalIgnoreCase)))
@@ -83,6 +98,35 @@ public class RecipeSelectionDialog
         // ignore any errors loading meal plans; default to none selected
     }
     var recipesList = new System.Collections.ObjectModel.ObservableCollection<RecipeSelectable>(wrappers);
+
+    // When a wrapper's IsSelected is changed by the user, if it becomes false and the recipe was previously in the meal plan,
+    // remove the corresponding MealPlan entries immediately.
+    foreach (var w in wrappers)
+    {
+        w.PropertyChanged += async (s, e) =>
+        {
+            if (e.PropertyName != nameof(RecipeSelectable.IsSelected)) return;
+
+            var rs = (RecipeSelectable)s!;
+            if (!rs.IsSelected)
+            {
+                try
+                {
+                    var toRemove = plansForSlot.Where(p => string.Equals(p.Recipe?.Title, rs.Recipe?.Title, StringComparison.OrdinalIgnoreCase)).ToArray();
+                    if (toRemove.Length > 0)
+                    {
+                        await MealPlan.Remove(toRemove);
+                        // remove from local cache so repeated unchecks don't try again
+                        plansForSlot = plansForSlot.Except(toRemove).ToList();
+                    }
+                }
+                catch
+                {
+                    // ignore removal errors for now
+                }
+            }
+        };
+    }
 
         // Create a ScrollViewer to ensure proper scrolling behavior
         var scrollViewer = new ScrollViewer
