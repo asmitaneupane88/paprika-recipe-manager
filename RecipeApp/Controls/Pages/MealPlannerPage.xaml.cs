@@ -301,13 +301,16 @@ public sealed partial class MealPlannerPage : NavigatorPage
             }
 
             var dialog = new RecipeSelectionDialog(this.XamlRoot, savedRecipes, date, mealType);
-            var savedRecipe = await dialog.ShowAsync();
-            
-            if (savedRecipe != null)
-            {
-                await MealPlan.AddMealPlan(date, savedRecipe, mealType);
+            var selectedRecipes = await dialog.ShowAsync();
 
-                // Refresh the grid so the newly-added recipe appears (keeps logic simple)
+            if (selectedRecipes != null && selectedRecipes.Count > 0)
+            {
+                foreach (var sr in selectedRecipes)
+                {
+                    await MealPlan.AddMealPlan(date, sr, mealType);
+                }
+
+                // Refresh the grid so the newly-added recipes appear
                 LoadAndInitializeMealPlans();
             }
         }
