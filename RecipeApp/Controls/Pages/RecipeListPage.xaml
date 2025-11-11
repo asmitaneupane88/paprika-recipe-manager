@@ -82,12 +82,10 @@
                 <SymbolIcon Symbol="Print"/>
             </Button>
 
-            <!--TODO: remove the visibility=collapsed when implemented-->
             <Button Margin="10"
                     IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Click="OnButtonGroceryListClick"
-                    Visibility="Collapsed">
-                <SymbolIcon Symbol="Shop"/>
+                    Click="OnButtonChatClick">
+                <SymbolIcon Symbol="Message"/>
             </Button>
 
             <Button Margin="10"
