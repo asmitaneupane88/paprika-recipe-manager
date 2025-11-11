@@ -1,3 +1,5 @@
+using Microsoft.UI;
+using Windows.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
@@ -19,6 +21,46 @@ public sealed partial class MealPlannerPage : NavigatorPage
     private DateTime _currentWeekStart;
     private readonly DateTime _minDate;
     private readonly DateTime _maxDate;
+    // Palette of brushes to color each saved recipe in the meal planner.
+    // We pick a set of distinct, fairly muted colors so multiple items are easy to distinguish.
+    private readonly SolidColorBrush[] _recipeBrushes = new[]
+    {
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x4C, 0xAF, 0x50)), // green
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x21, 0x96, 0xF3)), // blue
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xA7, 0x26)), // orange
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x9C, 0x27, 0xB0)), // purple
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xE5, 0x39, 0x35)), // red
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x00, 0x96, 0x88)), // teal
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xC1, 0x07)), // amber
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x8E, 0x24, 0xAA)), // deep purple
+    };
+
+    // Alternate brushes to make items easier to visually separate (even / odd)
+    private readonly SolidColorBrush _alternateBrushEven = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xE8, 0xF0, 0xFF)); // very light blue
+    private readonly SolidColorBrush _alternateBrushOdd = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xF6, 0xE0)); // very light amber
+
+    private SolidColorBrush GetBrushForRecipe(RecipeApp.Models.SavedRecipe recipe)
+    {
+    if (recipe == null) return new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+        var title = recipe.Title ?? string.Empty;
+        // Simple deterministic mapping: sum of chars mod palette size
+        int sum = 0;
+        foreach (var c in title)
+        {
+            sum = (sum + c) % _recipeBrushes.Length;
+        }
+        return _recipeBrushes[sum];
+    }
+
+    private SolidColorBrush GetForegroundForBackground(Windows.UI.Color bg)
+    {
+        // Calculate relative luminance to pick white/black foreground for contrast
+        double r = bg.R / 255.0;
+        double g = bg.G / 255.0;
+        double b = bg.B / 255.0;
+        double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 0.6 ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 0, 0)) : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255));
+    }
 
         public MealPlannerPage(Navigator navigator) : base(navigator)
         {
@@ -78,27 +120,54 @@ public sealed partial class MealPlannerPage : NavigatorPage
                     // Get all meal plans for this slot (allowing multiple recipes per meal type)
                     var mealPlansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
 
-                    // Add meal content
-                    var contentPanel = new StackPanel
+                    // Add meal content. Wrap the stack in a ScrollViewer so a slot with many
+                    // planned recipes becomes scrollable instead of growing the cell height.
+                    var contentStack = new StackPanel
                     {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Orientation = Orientation.Vertical
+                    };
+
+                    var contentScroll = new ScrollViewer
+                    {
+                        Content = contentStack,
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                        MaxHeight = 160 // limit height so scrollbars appear when many items
                     };
 
                     if (mealPlansForSlot.Any())
                     {
-                        // Show each planned recipe on its own line
-                        foreach (var mp in mealPlansForSlot)
+                        // Show each planned recipe on its own line and alternate chip background
+                        // colors (even / odd) to make multiple items easier to distinguish.
+                        for (int i = 0; i < mealPlansForSlot.Count; i++)
                         {
+                            var mp = mealPlansForSlot[i];
+
+                            // Alternate between the two defined brushes
+                            var chipBackground = (i % 2 == 0) ? _alternateBrushEven : _alternateBrushOdd;
+
+                            var chip = new Border
+                            {
+                                Background = chipBackground,
+                                CornerRadius = new CornerRadius(6),
+                                Padding = new Thickness(4, 4, 4, 4),
+                                Margin = new Thickness(0, 2, 0, 2),
+                                HorizontalAlignment = HorizontalAlignment.Stretch
+                            };
+
                             var mealText = new TextBlock
                             {
                                 Text = mp.Recipe.Title,
                                 TextWrapping = TextWrapping.Wrap,
                                 HorizontalAlignment = HorizontalAlignment.Center,
                                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                                Margin = new Thickness(0, 2, 0, 2)
+                                Foreground = GetForegroundForBackground(((SolidColorBrush)chipBackground).Color)
                             };
-                            contentPanel.Children.Add(mealText);
+
+                            chip.Child = mealText;
+                            contentStack.Children.Add(chip);
                         }
                     }
                     else
@@ -111,11 +180,11 @@ public sealed partial class MealPlannerPage : NavigatorPage
                             Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
                             Opacity = 0.6
                         };
-                        contentPanel.Children.Add(mealText);
+                        contentStack.Children.Add(mealText);
                     }
 
-                    Grid.SetRow(contentPanel, 0);
-                    grid.Children.Add(contentPanel);
+                    Grid.SetRow(contentScroll, 0);
+                    grid.Children.Add(contentScroll);
 
                     // Add the plus button
                     var addButton = new Button
@@ -301,13 +370,16 @@ public sealed partial class MealPlannerPage : NavigatorPage
             }
 
             var dialog = new RecipeSelectionDialog(this.XamlRoot, savedRecipes, date, mealType);
-            var savedRecipe = await dialog.ShowAsync();
-            
-            if (savedRecipe != null)
-            {
-                await MealPlan.AddMealPlan(date, savedRecipe, mealType);
+            var selectedRecipes = await dialog.ShowAsync();
 
-                // Refresh the grid so the newly-added recipe appears (keeps logic simple)
+            if (selectedRecipes != null && selectedRecipes.Count > 0)
+            {
+                foreach (var sr in selectedRecipes)
+                {
+                    await MealPlan.AddMealPlan(date, sr, mealType);
+                }
+
+                // Refresh the grid so the newly-added recipes appear
                 LoadAndInitializeMealPlans();
             }
         }
