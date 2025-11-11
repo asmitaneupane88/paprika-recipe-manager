@@ -20,7 +20,7 @@ namespace RecipeApp.Controls;
 [ObservableObject]
 public sealed partial class SavedRecipeSearch : UserControl
 {
-    private const int AllCategorySortOrder = -20252025;
+    private static readonly SavedTag AddTag = new() { Name = "Add Tag" };
     
     [ObservableProperty] private partial ObservableCollection<RecipeCard> AllRecipes { get; set; } = [];
 
@@ -28,22 +28,33 @@ public sealed partial class SavedRecipeSearch : UserControl
     
     [ObservableProperty] public partial ObservableCollection<RecipeCard> SelectedRecipes { get; set; } = [];
 
+    [ObservableProperty] private partial ObservableCollection<SavedTag> SelectedTags { get; set; } = [];
     
     private string SearchText
     {
         get;
-        set { SetProperty(ref field, value); _ = UpdateShownRecipes(); }
+        set { SetProperty(ref field, value); UpdateShownRecipes(); }
     } = "";
     
-    private SavedCategory SelectedCategory { get; set { SetProperty(ref field, value); _ = UpdateShownRecipes(); } }
-    [ObservableProperty] private partial ObservableCollection<SavedCategory> Categories { get; set; } = [];
+    private void OnTagComboSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ComboBox { SelectedItem: SavedTag tag } comboBox && comboBox.SelectedIndex != 0)
+        {
+            SelectedTags.Add(tag);
+            UpdateShownTags();
+            UpdateShownRecipes();
+        }
+    }
+    
+    [ObservableProperty] private partial ObservableCollection<SavedTag> FilteredTags { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<SavedTag> AllTags { get; set; } = [];
     
     public SavedRecipeSearch()
     {
         this.InitializeComponent();
         
        InitializeRecipes()
-            .ContinueWith(_ => UpdateShownCategories()
+            .ContinueWith(_ => UpdateAllTags()
             .ContinueWith(_ => UpdateShownRecipes()));
         
     }
@@ -57,28 +68,30 @@ public sealed partial class SavedRecipeSearch : UserControl
             .ToObservableCollection();
     }
 
-    private async Task UpdateShownCategories()
+    private async Task UpdateAllTags()
     {
-        Categories = (await SavedCategory.GetAll()).ToObservableCollection();
+        AllTags = (await SavedTag.GetAll())
+            .Prepend(AddTag)
+            .ToObservableCollection();
+        UpdateShownTags();
+    }
+
+    private void UpdateShownTags()
+    {
+        FilteredTags = AllTags
+            .Where(t => !SelectedTags.Contains(t))
+            .ToObservableCollection();
         
-        var allCategory = new SavedCategory
-        {
-            Name = "All Categories",
-            SortOrder = AllCategorySortOrder
-        };
-        
-        Categories.Insert(0, allCategory);
-        SelectedCategory = allCategory;
+        TagCombo.SelectedIndex = 0; // keep it on the prepended add tag
     }
     
-    private async Task UpdateShownRecipes()
+    private void UpdateShownRecipes()
     {
         FilteredRecipes = AllRecipes
             .Where(r => r.SavedRecipe.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
-            .Where(r => SelectedCategory.SortOrder == AllCategorySortOrder
-                        || (r.SavedRecipe.Category is not null 
-                        && r.SavedRecipe.Category.Trim()
-                            .Equals(SelectedCategory.Name.Trim(), StringComparison.CurrentCultureIgnoreCase)))
+            .Where(r => SelectedTags.All(tag => r.SavedRecipe.Tags
+                .Any(recipeTag => recipeTag.Trim()
+                    .Equals(tag.Name.Trim(), StringComparison.CurrentCultureIgnoreCase))))
             .ToObservableCollection();
     }
 
@@ -96,6 +109,16 @@ public sealed partial class SavedRecipeSearch : UserControl
     private void RefreshSelected()
     {
         SelectedRecipes = GetSelectedRecipeCards().ToObservableCollection();
+    }
+    
+    private void TagCard_OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is UIElement { DataContext: SavedTag tag })
+        {
+            SelectedTags.Remove(tag);
+            UpdateShownRecipes();
+            UpdateShownTags();
+        }
     }
 }
 

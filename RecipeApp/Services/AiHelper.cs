@@ -182,7 +182,8 @@ public class AiHelper
             ImageUrl = recipe.ImageUrl,
             SourceUrl = recipe.SourceUrl,
             UserNote = recipe?.UserNote ?? string.Empty,
-            Category = recipe?.Category ?? string.Empty,
+            // Category = recipe?.Category ?? string.Empty, TODO fix
+            Tags = [], //TODO: another task will revamp some of this.
             Rating = recipe?.Rating ?? 0,
         };
 

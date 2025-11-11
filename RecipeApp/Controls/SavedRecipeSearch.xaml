@@ -11,36 +11,59 @@
      <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="Auto"/>
-
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBox
-            Grid.Row="0"
-            Grid.Column="0"
-            PlaceholderText="Recipe Title"
-            Margin="10"
-            Text="{x:Bind SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            Width="250"/>
+         <TextBox
+             Grid.Row="0"
+             Grid.Column="0"
+             PlaceholderText="Recipe Title"
+             Margin="10"
+             Text="{x:Bind SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+             Width="200"/>
 
-        <!-- note that placeholder text does not render correctly -->
-        <ComboBox
-            Grid.Row="0"
-            Grid.Column="1"
-            Margin="10"
-            Width="200"
-            SelectedItem="{x:Bind SelectedCategory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            ItemsSource="{x:Bind Categories, Mode=OneWay}"
-            DisplayMemberPath="Name"/>
+         <!-- note that placeholder text does not render correctly -->
+         <ComboBox x:Name="TagCombo"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   Margin="10"
+                   Width="200"
+                   SelectionChanged="OnTagComboSelectionChanged"
+                   ItemsSource="{x:Bind FilteredTags, Mode=OneWay}"
+                   DisplayMemberPath="Name"/>
+
+         <ScrollView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+             <StackPanel Orientation="Horizontal">
+                 <ItemsRepeater ItemsSource="{x:Bind SelectedTags}">
+                     <ItemsRepeater.Layout>
+                         <StackLayout Orientation="Horizontal" Spacing="5"/>
+                     </ItemsRepeater.Layout>
+
+                     <ItemsRepeater.ItemTemplate>
+                         <DataTemplate x:DataType="models:SavedTag">
+                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                                         BorderBrush="{ThemeResource OutlineColor}"
+                                         Background="{ThemeResource SurfaceVariantColor}"
+                                         BorderThickness="1" Padding="5" CornerRadius="16" Margin="5"
+                                         Tag="{x:Bind}" PointerPressed="TagCard_OnPointerPressed">
+                                 <TextBlock Text="{x:Bind Name}" VerticalAlignment="Center" Margin="5"/>
+                                 <SymbolIcon Symbol="Cancel"/>
+                             </StackPanel>
+                         </DataTemplate>
+                     </ItemsRepeater.ItemTemplate>
+                 </ItemsRepeater>
+             </StackPanel>
+         </ScrollView>
 
         <ListView
-            Grid.Row="1"
+            Grid.Row="2"
             Grid.Column="0"
             Grid.ColumnSpan="3"
             ItemsSource="{x:Bind FilteredRecipes, Mode=OneWay}">

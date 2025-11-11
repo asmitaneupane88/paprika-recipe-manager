@@ -31,7 +31,7 @@ namespace RecipeApp.Services
             }
 
             // Split instructions into steps
-            var instructionSteps = mealDbRecipe.Instructions?
+            var instructionSteps = mealDbRecipe.strInstructions?
                 .Split(new[] { '.', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim().TrimEnd('.'))
                 .Where(s => !string.IsNullOrWhiteSpace(s))
@@ -62,10 +62,11 @@ namespace RecipeApp.Services
 
             var savedRecipe = new SavedRecipe
             {
-                Title = mealDbRecipe.Name ?? "Untitled Recipe",
-                Description = mealDbRecipe.Instructions ?? string.Empty,
-                ImageUrl = mealDbRecipe.ImageUrl ?? string.Empty,
-                Category = mealDbRecipe.Category ?? string.Empty,
+                Title = mealDbRecipe.strMeal ?? "Untitled Recipe",
+                Description = mealDbRecipe.strInstructions ?? string.Empty,
+                ImageUrl = mealDbRecipe.strMealThumb ?? string.Empty,
+                Tags = mealDbRecipe.strTags?.Split(',').ToObservableCollection() ?? 
+                       (mealDbRecipe.strCategory is { } category ? [ category ] : []),
                 Rating = 0,
                 UserNote = string.Empty,
                 IsFromPdf = false,
