@@ -9,6 +9,12 @@ This page allows for the creation of a meal plan where the user can select what 
 
 See @RecipeApp.Controls.Pages.MealPlannerPage for more details.
 
+## Recipe Details V2 Page
+This page allows for the user to view the details of a recipe, edit the details of a recipe,
+and use either a simple step editor or an advanced step editor.
+
+For details, view @RecipeApp.Controls.Pages.RecipeDetailsV2.
+
 ## Recipe Step Viewer
 This allows adding selecting SavedRecipes and adding the starting step of each selected recipe to the step viewer.\
 After, the step viewer handles the saving of these steps and navigation through these steps
