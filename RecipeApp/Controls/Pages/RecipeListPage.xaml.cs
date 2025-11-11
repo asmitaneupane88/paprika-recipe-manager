@@ -24,6 +24,8 @@ namespace RecipeApp.Controls.Pages;
 
 public sealed partial class RecipeListPage : NavigatorPage
 {
+    private static readonly SavedTag AddTag = new() { Name = "Add Tag" };
+    
     public RecipeListPage()
     {
         this.InitializeComponent();
@@ -42,17 +44,12 @@ public sealed partial class RecipeListPage : NavigatorPage
         get;
         set { SetProperty(ref field, value); UpdateShownRecipes(); }
     } = "";
-
-    private SavedTag? SelectedTag
+    
+    private void OnTagComboSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        get;
-        set
+        if (sender is ComboBox { SelectedItem: SavedTag tag } comboBox && comboBox.SelectedIndex != 0)
         {
-            if (value is not null)
-                SelectedTags.Add(value);
-            
-            SetProperty(ref field, null);
-            
+            SelectedTags.Add(tag);
             UpdateShownTags();
             UpdateShownRecipes();
         }
@@ -68,23 +65,25 @@ public sealed partial class RecipeListPage : NavigatorPage
         this.InitializeComponent();
         
         InitializeRecipes()
-            .ContinueWith(_ => UpdateShownCategories()
+            .ContinueWith(_ => UpdateAllTags()
                 .ContinueWith(_ => UpdateShownRecipes()));
-        
     }
 
     private async Task InitializeRecipes()
     {
         var recipes = await SavedRecipe.GetAll();
-        
+
         AllRecipes = recipes
             .Select(r => new RecipeCard { SavedRecipe = r, IsSelected = false })
             .ToObservableCollection();
+
     }
 
-    private async Task UpdateShownCategories()
+    private async Task UpdateAllTags()
     {
-        AllTags = (await SavedTag.GetAll()).ToObservableCollection();
+        AllTags = (await SavedTag.GetAll())
+            .Prepend(AddTag)
+            .ToObservableCollection();
         UpdateShownTags();
     }
 
@@ -93,6 +92,8 @@ public sealed partial class RecipeListPage : NavigatorPage
         FilteredTags = AllTags
             .Where(t => !SelectedTags.Contains(t))
             .ToObservableCollection();
+        
+        TagCombo.SelectedIndex = 0; // keep it on the prepended add tag
     }
     
     private void UpdateShownRecipes()
@@ -303,8 +304,7 @@ public sealed partial class RecipeListPage : NavigatorPage
         }
 
     }
-
-
+    
     private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)
     {
         //TODO: create list from selected and open it
@@ -337,7 +337,8 @@ public sealed partial class RecipeListPage : NavigatorPage
     /// <inheritdoc />
     public override async Task Restore()
     {
-        await InitializeRecipes();
+        await Task.WhenAll(InitializeRecipes(), UpdateAllTags());
+        UpdateShownRecipes();
         await base.Restore();
     }
 
