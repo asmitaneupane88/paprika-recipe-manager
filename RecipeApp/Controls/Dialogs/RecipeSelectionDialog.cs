@@ -64,6 +64,24 @@ public class RecipeSelectionDialog
 
     // Wrap recipes in a selectable wrapper so we can bind a CheckBox to IsSelected
     var wrappers = _recipes.Select(r => new RecipeSelectable(r)).ToList();
+
+    // Pre-select any recipes already added to the meal plan for this date+mealType
+    try
+    {
+        var allMealPlans = await MealPlan.GetAll();
+        var plansForSlot = allMealPlans.Where(mp => mp.Date.Date == _date.Date && mp.MealType == _mealType).ToList();
+        foreach (var w in wrappers)
+        {
+            if (plansForSlot.Any(p => string.Equals(p.Recipe?.Title, w.Recipe?.Title, StringComparison.OrdinalIgnoreCase)))
+            {
+                w.IsSelected = true;
+            }
+        }
+    }
+    catch
+    {
+        // ignore any errors loading meal plans; default to none selected
+    }
     var recipesList = new System.Collections.ObjectModel.ObservableCollection<RecipeSelectable>(wrappers);
 
         // Create a ScrollViewer to ensure proper scrolling behavior
