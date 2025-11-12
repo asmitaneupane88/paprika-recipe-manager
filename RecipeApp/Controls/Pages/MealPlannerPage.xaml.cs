@@ -38,6 +38,8 @@ public sealed partial class MealPlannerPage : NavigatorPage
     // Alternate brushes to make items easier to visually separate (even / odd)
     private readonly SolidColorBrush _alternateBrushEven = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xE8, 0xF0, 0xFF)); // very light blue
     private readonly SolidColorBrush _alternateBrushOdd = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xF6, 0xE0)); // very light amber
+    // Brush used for leftover meals (orange)
+    private readonly SolidColorBrush _leftoverBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xA7, 0x26));
 
     private SolidColorBrush GetBrushForRecipe(RecipeApp.Models.SavedRecipe recipe)
     {
@@ -145,8 +147,8 @@ public sealed partial class MealPlannerPage : NavigatorPage
                         {
                             var mp = mealPlansForSlot[i];
 
-                            // Alternate between the two defined brushes
-                            var chipBackground = (i % 2 == 0) ? _alternateBrushEven : _alternateBrushOdd;
+                            // Use the leftover brush when the meal is marked as leftover, otherwise alternate
+                            var chipBackground = mp.IsLeftOver ? _leftoverBrush : ((i % 2 == 0) ? _alternateBrushEven : _alternateBrushOdd);
 
                             var chip = new Border
                             {
@@ -157,7 +159,6 @@ public sealed partial class MealPlannerPage : NavigatorPage
                                 HorizontalAlignment = HorizontalAlignment.Stretch
                             };
 
-                            // Simple chip showing the recipe title. Removal is handled from the selection dialog (uncheck + Update).
                             var mealText = new TextBlock
                             {
                                 Text = mp.Recipe.Title,
@@ -376,9 +377,19 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
             if (selectedRecipes != null && selectedRecipes.Count > 0)
             {
+                // Load existing plans for this slot so we don't create duplicates.
+                var allMealPlans = await MealPlan.GetAll();
+                var plansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
+                var existingTitles = new HashSet<string>(plansForSlot.Select(p => p.Recipe?.Title ?? string.Empty), StringComparer.OrdinalIgnoreCase);
+
                 foreach (var sr in selectedRecipes)
                 {
-                    await MealPlan.AddMealPlan(date, sr, mealType);
+                    var title = sr.Title ?? string.Empty;
+                    if (!existingTitles.Contains(title))
+                    {
+                        await MealPlan.AddMealPlan(date, sr, mealType);
+                        existingTitles.Add(title);
+                    }
                 }
             }
 

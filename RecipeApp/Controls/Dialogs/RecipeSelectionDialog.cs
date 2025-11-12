@@ -49,6 +49,22 @@ public class RecipeSelectionDialog
             }
         }
 
+        private bool _isLeftOver;
+        /// <summary>
+        /// Whether this recipe is marked as leftover for the slot being edited.
+        /// Bound to a small control in the item template.
+        /// </summary>
+        public bool IsLeftOver
+        {
+            get => _isLeftOver;
+            set
+            {
+                if (_isLeftOver == value) return;
+                _isLeftOver = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsLeftOver)));
+            }
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
     }
 
@@ -91,6 +107,11 @@ public class RecipeSelectionDialog
             {
                 w.IsSelected = true;
             }
+
+            if (plansForSlot.Any(p => string.Equals(p.Recipe?.Title, w.Recipe?.Title, StringComparison.OrdinalIgnoreCase) && p.IsLeftOver))
+            {
+                w.IsLeftOver = true;
+            }
         }
     }
     catch
@@ -99,30 +120,58 @@ public class RecipeSelectionDialog
     }
     var recipesList = new System.Collections.ObjectModel.ObservableCollection<RecipeSelectable>(wrappers);
 
-    // When a wrapper's IsSelected is changed by the user, if it becomes false and the recipe was previously in the meal plan,
-    // remove the corresponding MealPlan entries immediately.
+    // When a wrapper's IsSelected or IsLeftOver is changed by the user, react accordingly.
     foreach (var w in wrappers)
     {
         w.PropertyChanged += async (s, e) =>
         {
-            if (e.PropertyName != nameof(RecipeSelectable.IsSelected)) return;
-
             var rs = (RecipeSelectable)s!;
-            if (!rs.IsSelected)
+            if (e.PropertyName == nameof(RecipeSelectable.IsSelected))
+            {
+                if (!rs.IsSelected)
+                {
+                    try
+                    {
+                        var toRemove = plansForSlot.Where(p => string.Equals(p.Recipe?.Title, rs.Recipe?.Title, StringComparison.OrdinalIgnoreCase)).ToArray();
+                        if (toRemove.Length > 0)
+                        {
+                            await MealPlan.Remove(toRemove);
+                            // remove from local cache so repeated unchecks don't try again
+                            plansForSlot = plansForSlot.Except(toRemove).ToList();
+                        }
+                    }
+                    catch
+                    {
+                        // ignore removal errors for now
+                    }
+                }
+            }
+            else if (e.PropertyName == nameof(RecipeSelectable.IsLeftOver))
             {
                 try
                 {
-                    var toRemove = plansForSlot.Where(p => string.Equals(p.Recipe?.Title, rs.Recipe?.Title, StringComparison.OrdinalIgnoreCase)).ToArray();
-                    if (toRemove.Length > 0)
+                    // Find existing meal plans for this slot that match the recipe
+                    var matching = plansForSlot.Where(p => string.Equals(p.Recipe?.Title, rs.Recipe?.Title, StringComparison.OrdinalIgnoreCase)).ToList();
+                    if (matching.Any())
                     {
-                        await MealPlan.Remove(toRemove);
-                        // remove from local cache so repeated unchecks don't try again
-                        plansForSlot = plansForSlot.Except(toRemove).ToList();
+                        // Update each existing plan's IsLeftOver flag
+                        foreach (var mp in matching)
+                        {
+                            await MealPlan.SetLeftOver(mp, rs.IsLeftOver);
+                        }
+                    }
+                    else if (rs.IsLeftOver && rs.IsSelected)
+                    {
+                        // No existing plan in this slot, but user marked leftover and recipe is selected -> create one and mark leftover
+                        await MealPlan.AddMealPlan(_date, rs.Recipe, _mealType, true);
+                        // refresh local cache of plans for slot
+                        var all = await MealPlan.GetAll();
+                        plansForSlot = all.Where(mp => mp.Date.Date == _date.Date && mp.MealType == _mealType).ToList();
                     }
                 }
                 catch
                 {
-                    // ignore removal errors for now
+                    // ignore errors
                 }
             }
         };
@@ -153,6 +202,7 @@ public class RecipeSelectionDialog
                     <TextBlock Text='{Binding Title}' FontWeight='SemiBold' TextWrapping='Wrap'/>
                     <TextBlock Text='{Binding Category}' Foreground='{ThemeResource TextFillColorSecondaryBrush}' Style='{StaticResource CaptionTextBlockStyle}'/>
                     <controls:RatingControl Value='{Binding Rating}' MaxRating='{Binding BindableMaxRating}' IsReadOnly='True' Margin='0,4,0,0'/>
+                                    <CheckBox Content='🍽  Mark as Leftover' IsChecked='{Binding IsLeftOver, Mode=TwoWay}' IsEnabled='{Binding IsSelected}' Margin='0,6,0,0' ToolTipService.ToolTip='Mark as leftover'/>
                 </StackPanel>
                 <CheckBox Grid.Column='2' VerticalAlignment='Center' IsChecked='{Binding IsSelected, Mode=TwoWay}' Margin='8,0,0,0'/>
             </Grid>
