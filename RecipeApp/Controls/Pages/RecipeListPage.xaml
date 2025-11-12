@@ -84,12 +84,6 @@
 
             <Button Margin="10"
                     IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
-                    Click="OnButtonChatClick">
-                <SymbolIcon Symbol="Message"/>
-            </Button>
-
-            <Button Margin="10"
-                    IsEnabled="{x:Bind CardsSelected, Mode=OneWay}"
                     Click="OnButtonRemoveClick">
                 <SymbolIcon Symbol="Delete"/>
             </Button>
@@ -97,6 +91,11 @@
             <Button Margin="10"
                     Click="OnButtonAddClick">
                 <SymbolIcon Symbol="Edit"/>
+            </Button>
+
+            <Button Margin="10"
+                    Click="OnButtonChatClick">
+                <SymbolIcon Symbol="Message"/>
             </Button>
 
             <Button Margin="10"

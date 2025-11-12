@@ -309,7 +309,7 @@ public sealed partial class RecipeListPage : NavigatorPage
     private void OnButtonChatClick(object sender, RoutedEventArgs e)
     {
         var page = new RecipeChat(Navigator);
-        Navigator.Navigate(page, "Create Ai Recipe");
+        Navigator.Navigate(page, "Recipe Generator 2000");
     }
 
     private async void OnButtonPrintClick(object sender, RoutedEventArgs e)

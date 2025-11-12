@@ -10,7 +10,9 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
     [ObservableProperty] private partial ObservableCollection<SavedTag> FilteredTags { get; set; } = [];
     [ObservableProperty] private partial ObservableCollection<SavedTag> AllTags { get; set; } = [];
     
-    public RecipeDetailsV2(Navigator? nav = null, SavedRecipe? savedRecipe = null) : base(nav)
+    [ObservableProperty] private partial bool AiEditMode { get; set; }
+    
+    public RecipeDetailsV2(Navigator? nav = null, SavedRecipe? savedRecipe = null, bool aiEditMode = false) : base(nav)
     {
         InitializeComponent();
 
@@ -18,6 +20,7 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
             _ = Navigator.TryGoBack();
         
         SavedRecipe = savedRecipe!;
+        AiEditMode = aiEditMode;
 
         _ = UpdateAllTags();
     }

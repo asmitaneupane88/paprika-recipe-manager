@@ -9,7 +9,59 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="TODO"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Border x:Name="SavedRecipeHolder" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
+                CornerRadius="8" BorderThickness="1" Margin="10"
+                BorderBrush="{ThemeResource OutlineColor}">
+            <!-- load this in constructor -->
+        </Border>
+
+        <Button Grid.Column="0" Grid.Row="1" Click="ButtonCancel_OnClick" Margin="10"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+            <StackPanel Spacing="10" Orientation="Horizontal">
+                <TextBlock Text="Cancel" VerticalAlignment="Center"/>
+                <SymbolIcon Symbol="Delete"/>
+            </StackPanel>
+        </Button>
+
+        <Button Grid.Column="2" Grid.Row="1" Click="ButtonSave_OnClick" Margin="10"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+            <StackPanel Spacing="10" Orientation="Horizontal">
+                <TextBlock Text="Save Recipe" VerticalAlignment="Center"/>
+                <SymbolIcon Symbol="Save"/>
+            </StackPanel>
+        </Button>
+
+        <ListView Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2" x:Name="ChatListView"
+                  CornerRadius="8" BorderThickness="1" Margin="10"
+                  BorderBrush="{ThemeResource OutlineColor}">
+            <ListView.ItemTemplate> <!--x:DataType="models:ChatMessage"-->
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <!--<TextBlock Text="{Binding Sender}" FontWeight="Bold" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding Message}"/>-->
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <TextBox Grid.Column="3" Grid.Row="1" Margin="10" Padding="0" MinHeight="0"/>
+
+        <Button Grid.Column="4" Grid.Row="1" Click="ButtonSend_OnClick" Margin="10"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
+                <SymbolIcon Symbol="Send"/>
+        </Button>
     </Grid>
 </local:NavigatorPage>
 

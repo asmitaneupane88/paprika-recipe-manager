@@ -22,11 +22,36 @@ namespace RecipeApp.Controls.Pages;
 /// </summary>
 public sealed partial class RecipeChat : NavigatorPage
 {
+    [ObservableProperty] public partial SavedRecipe? CurrentRecipe { get; set; }
+    
+    private RecipeDetailsV2 DetailsPage { get; set; }
+    
     public RecipeChat(Navigator? nav = null, SavedRecipe? currentRecipe = null) : base(nav)
     {
-        this.InitializeComponent();
+        InitializeComponent();
         
-        //TODO
+        if (currentRecipe?.AdvancedSteps ?? false) throw new Exception("Cannot handle advanced steps in the recipe chat page.");
+
+        CurrentRecipe = currentRecipe?.DeepCopy() ?? new SavedRecipe { Title = "New Recipe" };
+        
+        DetailsPage = new RecipeDetailsV2(Navigator, CurrentRecipe, aiEditMode: true);
+
+        SavedRecipeHolder.Child = DetailsPage;
+    }
+
+    private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
+    {
+        
+    }
+
+    private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
+    {
+        
+    }
+
+    private void ButtonSend_OnClick(object sender, RoutedEventArgs e)
+    {
+        
     }
 }
 
