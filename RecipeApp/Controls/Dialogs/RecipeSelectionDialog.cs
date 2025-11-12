@@ -262,26 +262,43 @@ public class RecipeSelectionDialog
         // Create the recipe list view
         // Create a DataTemplate for checklist items (image, title, category, rating, checkbox)
         var itemTemplateXaml = @"<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:controls='using:Microsoft.UI.Xaml.Controls'>
-            <Grid Padding='8'>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width='60'/>
-                    <ColumnDefinition Width='*'/>
-                    <ColumnDefinition Width='Auto'/>
-                </Grid.ColumnDefinitions>
-                <Border CornerRadius='4' Width='60' Height='60' Margin='0,0,12,0'>
-                    <Border.Background>
-                        <ImageBrush ImageSource='{Binding ImageUrl}' Stretch='UniformToFill'/>
-                    </Border.Background>
-                </Border>
-                <StackPanel Grid.Column='1' VerticalAlignment='Center'>
-                    <TextBlock Text='{Binding Title}' FontWeight='SemiBold' TextWrapping='Wrap'/>
-                    <TextBlock Text='{Binding Category}' Foreground='{ThemeResource TextFillColorSecondaryBrush}' Style='{StaticResource CaptionTextBlockStyle}'/>
-                    <controls:RatingControl Value='{Binding Rating}' MaxRating='{Binding BindableMaxRating}' IsReadOnly='True' Margin='0,4,0,0'/>
-                                    <CheckBox Content='🍽  Mark as Leftover' IsChecked='{Binding IsLeftOver, Mode=TwoWay}' IsEnabled='{Binding IsSelected}' Margin='0,6,0,0' ToolTipService.ToolTip='Mark as leftover'/>
-                                    <Button Content='Generate grocery list' Command='{Binding GenerateGroceryListCommand}' Margin='0,8,0,0' HorizontalAlignment='Left' Padding='8,4' />
-                </StackPanel>
-                <CheckBox Grid.Column='2' VerticalAlignment='Center' IsChecked='{Binding IsSelected, Mode=TwoWay}' Margin='8,0,0,0'/>
-            </Grid>
+            <StackPanel Orientation='Vertical' Padding='6'>
+                <Grid Padding='4'>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width='60' />
+                        <ColumnDefinition Width='*' />
+                        <ColumnDefinition Width='Auto' />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Recipe image -->
+                    <Border CornerRadius='4' Width='60' Height='60' Margin='0,0,12,0'>
+                        <Border.Background>
+                            <ImageBrush ImageSource='{Binding ImageUrl}' Stretch='UniformToFill' />
+                        </Border.Background>
+                    </Border>
+
+                    <!-- Main content: title, category, rating, actions -->
+                    <StackPanel Grid.Column='1' VerticalAlignment='Center' Spacing='2'>
+                        <TextBlock Text='{Binding Title}' FontWeight='SemiBold' TextWrapping='Wrap' FontSize='14' />
+                        <TextBlock Text='{Binding Category}' Foreground='{ThemeResource TextFillColorSecondaryBrush}' Style='{StaticResource CaptionTextBlockStyle}' />
+                        <controls:RatingControl Value='{Binding Rating}' MaxRating='{Binding BindableMaxRating}' IsReadOnly='True' Margin='0,2,0,0' />
+
+                        <!-- Action row: leftover toggle -->
+                        <StackPanel Orientation='Horizontal' Spacing='8' Margin='0,6,0,0'>
+                            <CheckBox Content='🍽 Leftover' IsChecked='{Binding IsLeftOver, Mode=TwoWay}' IsEnabled='{Binding IsSelected}' VerticalAlignment='Center' ToolTipService.ToolTip='Mark as leftover' />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Small generate button in the top-right -->
+                    <Button Grid.Column='2' Content='🛒' Command='{Binding GenerateGroceryListCommand}' ToolTipService.ToolTip='Generate grocery list' Width='32' Height='28' Padding='4' Margin='0,0,0,0' HorizontalAlignment='Right' VerticalAlignment='Top' FontSize='12' />
+
+                    <!-- Selection checkbox below the button -->
+                    <CheckBox Grid.Column='2' VerticalAlignment='Center' IsChecked='{Binding IsSelected, Mode=TwoWay}' Margin='8,0,0,0' ToolTipService.ToolTip='Select recipe' />
+                </Grid>
+
+                <!-- Divider between items -->
+                <Rectangle Height='1' Fill='#FFE0E0E0' Margin='72,8,0,0' />
+            </StackPanel>
         </DataTemplate>";
 
         var recipeListView = new ListView
