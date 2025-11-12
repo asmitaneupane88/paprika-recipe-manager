@@ -141,8 +141,22 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
         await SaveItems();
     }
     
+    /// <summary>
+    /// Should only be used in situations where it is difficult to track changes (most changes are tracked and saved automatically).
+    /// </summary>
     public static async Task SaveAll()
     {
         await SaveItems();
+    }
+    
+    /// <summary>
+    /// Converts the object to a JSON string and back to create a deep copy of the object.
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    public T DeepCopy()
+    {
+        var json = JsonSerializer.Serialize(this, _jsonOptions);
+        return JsonSerializer.Deserialize<T>(json, _jsonOptions)!;
     }
 }
