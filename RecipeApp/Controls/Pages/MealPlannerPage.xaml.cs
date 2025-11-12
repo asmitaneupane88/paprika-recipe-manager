@@ -157,58 +157,17 @@ public sealed partial class MealPlannerPage : NavigatorPage
                                 HorizontalAlignment = HorizontalAlignment.Stretch
                             };
 
-                            // Use an internal grid so we can show the recipe title and a small remove button
-                            var chipGrid = new Grid();
-                            chipGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                            chipGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
+                            // Simple chip showing the recipe title. Removal is handled from the selection dialog (uncheck + Update).
                             var mealText = new TextBlock
                             {
                                 Text = mp.Recipe.Title,
                                 TextWrapping = TextWrapping.Wrap,
-                                HorizontalAlignment = HorizontalAlignment.Stretch,
-                                VerticalAlignment = VerticalAlignment.Center,
+                                HorizontalAlignment = HorizontalAlignment.Center,
                                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                                Foreground = GetForegroundForBackground(((SolidColorBrush)chipBackground).Color),
-                                Margin = new Thickness(4,0,8,0)
+                                Foreground = GetForegroundForBackground(((SolidColorBrush)chipBackground).Color)
                             };
 
-                            Grid.SetColumn(mealText, 0);
-                            chipGrid.Children.Add(mealText);
-
-                            var removeButton = new Button
-                            {
-                                Content = "\uE711", // delete glyph
-                                FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                                Style = (Style)Application.Current.Resources["AccentButtonStyle"],
-                                Padding = new Thickness(6, 2, 6, 2),
-                                HorizontalAlignment = HorizontalAlignment.Right,
-                                VerticalAlignment = VerticalAlignment.Center,
-                                Tag = mp
-                            };
-
-                            // Async click handler removes the specific MealPlan and refreshes the UI
-                            removeButton.Click += async (s, e) =>
-                            {
-                                try
-                                {
-                                    if (s is Button btn && btn.Tag is MealPlan toRemove)
-                                    {
-                                        await MealPlan.Remove(toRemove);
-                                        // Refresh the grid so the removed recipe disappears
-                                        LoadAndInitializeMealPlans();
-                                    }
-                                }
-                                catch (Exception ex)
-                                {
-                                    System.Diagnostics.Debug.WriteLine($"Error removing meal plan: {ex.Message}");
-                                }
-                            };
-
-                            Grid.SetColumn(removeButton, 1);
-                            chipGrid.Children.Add(removeButton);
-
-                            chip.Child = chipGrid;
+                            chip.Child = mealText;
                             contentStack.Children.Add(chip);
                         }
                     }
@@ -421,10 +380,10 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 {
                     await MealPlan.AddMealPlan(date, sr, mealType);
                 }
-
-                // Refresh the grid so the newly-added recipes appear
-                LoadAndInitializeMealPlans();
             }
+
+            // Refresh the grid so any additions or removals made in the dialog are shown.
+            LoadAndInitializeMealPlans();
         }
     }
 
