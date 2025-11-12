@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Markup;
 using RecipeApp.Models;
+using System.Windows.Input;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -66,6 +67,74 @@ public class RecipeSelectionDialog
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+        // Command to generate grocery items from this recipe's ingredients
+        public ICommand? GenerateGroceryListCommand { get; set; }
+    }
+
+    // Simple ICommand wrapper to allow async handlers from XAML-bound buttons
+    private class AsyncCommand : ICommand
+    {
+        private readonly Func<object?, Task> _execute;
+        public AsyncCommand(Func<object?, Task> execute) => _execute = execute;
+        public event EventHandler? CanExecuteChanged { add { } remove { } }
+        public bool CanExecute(object? parameter) => true;
+        public async void Execute(object? parameter) => await _execute(parameter);
+    }
+
+    private async Task GenerateGroceryListFor(RecipeSelectable rs)
+    {
+        try
+        {
+            var pathInfos = rs.Recipe?.RootStepNode?.GetNestedPathInfo();
+            var ingredients = pathInfos?.SelectMany(pi => pi.MaxIngredients).Where(i => !string.IsNullOrWhiteSpace(i.Name)).ToList();
+            if (ingredients == null || ingredients.Count == 0)
+            {
+                var noneDialog = new ContentDialog
+                {
+                    Title = "No ingredients found",
+                    Content = "This recipe has no parsed ingredients to add to the grocery list.",
+                    CloseButtonText = "OK",
+                    XamlRoot = _xamlRoot
+                };
+                await noneDialog.ShowAsync();
+                return;
+            }
+
+            int added = 0;
+            foreach (var ingr in ingredients)
+            {
+                var grocery = new RecipeIngredient
+                {
+                    Name = ingr.Name,
+                    Quantity = ingr.Quantity,
+                    Unit = ingr.Unit,
+                    ModifierNote = ingr.ModifierNote,
+                    ScaleFactor = 1
+                };
+                await RecipeIngredient.Add(grocery);
+                added++;
+            }
+
+            var okDialog = new ContentDialog
+            {
+                Title = "Grocery items added",
+                Content = $"Added {added} item{(added == 1 ? string.Empty : "s")} to your grocery list.",
+                CloseButtonText = "OK",
+                XamlRoot = _xamlRoot
+            };
+            await okDialog.ShowAsync();
+        }
+        catch
+        {
+            var err = new ContentDialog
+            {
+                Title = "Error",
+                Content = "An error occurred while generating the grocery list.",
+                CloseButtonText = "OK",
+                XamlRoot = _xamlRoot
+            };
+            await err.ShowAsync();
+        }
     }
 
     /// <summary>
@@ -177,6 +246,12 @@ public class RecipeSelectionDialog
         };
     }
 
+    // Attach per-item commands (generate grocery list) so item template buttons can call into code.
+    foreach (var w in wrappers)
+    {
+        w.GenerateGroceryListCommand = new AsyncCommand(async _ => await GenerateGroceryListFor(w));
+    }
+
         // Create a ScrollViewer to ensure proper scrolling behavior
         var scrollViewer = new ScrollViewer
         {
@@ -203,6 +278,7 @@ public class RecipeSelectionDialog
                     <TextBlock Text='{Binding Category}' Foreground='{ThemeResource TextFillColorSecondaryBrush}' Style='{StaticResource CaptionTextBlockStyle}'/>
                     <controls:RatingControl Value='{Binding Rating}' MaxRating='{Binding BindableMaxRating}' IsReadOnly='True' Margin='0,4,0,0'/>
                                     <CheckBox Content='🍽  Mark as Leftover' IsChecked='{Binding IsLeftOver, Mode=TwoWay}' IsEnabled='{Binding IsSelected}' Margin='0,6,0,0' ToolTipService.ToolTip='Mark as leftover'/>
+                                    <Button Content='Generate grocery list' Command='{Binding GenerateGroceryListCommand}' Margin='0,8,0,0' HorizontalAlignment='Left' Padding='8,4' />
                 </StackPanel>
                 <CheckBox Grid.Column='2' VerticalAlignment='Center' IsChecked='{Binding IsSelected, Mode=TwoWay}' Margin='8,0,0,0'/>
             </Grid>
