@@ -157,16 +157,58 @@ public sealed partial class MealPlannerPage : NavigatorPage
                                 HorizontalAlignment = HorizontalAlignment.Stretch
                             };
 
+                            // Use an internal grid so we can show the recipe title and a small remove button
+                            var chipGrid = new Grid();
+                            chipGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                            chipGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
                             var mealText = new TextBlock
                             {
                                 Text = mp.Recipe.Title,
                                 TextWrapping = TextWrapping.Wrap,
-                                HorizontalAlignment = HorizontalAlignment.Center,
+                                HorizontalAlignment = HorizontalAlignment.Stretch,
+                                VerticalAlignment = VerticalAlignment.Center,
                                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
-                                Foreground = GetForegroundForBackground(((SolidColorBrush)chipBackground).Color)
+                                Foreground = GetForegroundForBackground(((SolidColorBrush)chipBackground).Color),
+                                Margin = new Thickness(4,0,8,0)
                             };
 
-                            chip.Child = mealText;
+                            Grid.SetColumn(mealText, 0);
+                            chipGrid.Children.Add(mealText);
+
+                            var removeButton = new Button
+                            {
+                                Content = "\uE711", // delete glyph
+                                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                                Style = (Style)Application.Current.Resources["AccentButtonStyle"],
+                                Padding = new Thickness(6, 2, 6, 2),
+                                HorizontalAlignment = HorizontalAlignment.Right,
+                                VerticalAlignment = VerticalAlignment.Center,
+                                Tag = mp
+                            };
+
+                            // Async click handler removes the specific MealPlan and refreshes the UI
+                            removeButton.Click += async (s, e) =>
+                            {
+                                try
+                                {
+                                    if (s is Button btn && btn.Tag is MealPlan toRemove)
+                                    {
+                                        await MealPlan.Remove(toRemove);
+                                        // Refresh the grid so the removed recipe disappears
+                                        LoadAndInitializeMealPlans();
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Error removing meal plan: {ex.Message}");
+                                }
+                            };
+
+                            Grid.SetColumn(removeButton, 1);
+                            chipGrid.Children.Add(removeButton);
+
+                            chip.Child = chipGrid;
                             contentStack.Children.Add(chip);
                         }
                     }
