@@ -377,9 +377,19 @@ public sealed partial class MealPlannerPage : NavigatorPage
 
             if (selectedRecipes != null && selectedRecipes.Count > 0)
             {
+                // Load existing plans for this slot so we don't create duplicates.
+                var allMealPlans = await MealPlan.GetAll();
+                var plansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
+                var existingTitles = new HashSet<string>(plansForSlot.Select(p => p.Recipe?.Title ?? string.Empty), StringComparer.OrdinalIgnoreCase);
+
                 foreach (var sr in selectedRecipes)
                 {
-                    await MealPlan.AddMealPlan(date, sr, mealType);
+                    var title = sr.Title ?? string.Empty;
+                    if (!existingTitles.Contains(title))
+                    {
+                        await MealPlan.AddMealPlan(date, sr, mealType);
+                        existingTitles.Add(title);
+                    }
                 }
             }
 
