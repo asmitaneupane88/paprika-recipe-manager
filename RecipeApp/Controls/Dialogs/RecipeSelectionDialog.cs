@@ -197,7 +197,7 @@ public class RecipeSelectionDialog
         {
             Title = $"Select Recipe for {_mealType} on {_date:MMM d}",
             Content = rootGrid,
-            PrimaryButtonText = "Add",
+            PrimaryButtonText = "Update",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = _xamlRoot
