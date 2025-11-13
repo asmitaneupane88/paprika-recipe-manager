@@ -28,6 +28,7 @@ This class uses the [IAutoSavingClass](interfaces-and-abstract-classes.md#iautos
 | Returns       | Name           | Parameters | Notes                                                                                                                                       |
 |---------------|----------------|------------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | string        | ConvertToHtml  | bool       | The parameter selfContained is used to indicate if the html should contain a header/footer or be incomplete for combining multiple together |
+
 Also has the methods from the IAutoSavingClass such as Add, Remove, GetAll.
 
 **Highlighted Properties:**
