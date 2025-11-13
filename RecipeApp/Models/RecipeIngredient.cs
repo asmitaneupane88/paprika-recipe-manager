@@ -10,7 +10,7 @@ public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
     
     [ObservableProperty] public partial double Quantity { get; set; }
     
-    [JsonConverter(typeof(UnitTypeJsonConverter))]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     [ObservableProperty] public partial UnitType Unit { get; set; }
     
     [JsonIgnore]
