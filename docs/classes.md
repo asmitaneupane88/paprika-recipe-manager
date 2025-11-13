@@ -94,6 +94,9 @@ Navigator.Navigate(detailsPage, "Recipe Details");
 
 See @RecipeApp.Models.Navigator for details.
 
+## AiMessage
+Simple class to contain the message and the sender of the message for the recipe chat page.
+
 ## Step Classes:
 These classes inherit from [IStep](interfaces-and-abstract-classes.md#istep).
 

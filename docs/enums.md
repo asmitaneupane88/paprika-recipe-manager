@@ -33,4 +33,17 @@ public enum UnitType
 }
 ```
 
-See @RecipeApp.Models.UnitType for implementation details.
+See @RecipeApp.Enums.UnitType for implementation details.
+
+## Sender Type
+Enum used with the AiMessage class to determine the sender of a message in the recipe chat page.
+```csharp
+public enum Sender
+{
+    User,
+    System,
+    Assistant,
+    Error,
+}
+```
+See @RecipeApp.Enums.Sender for implementation details.
