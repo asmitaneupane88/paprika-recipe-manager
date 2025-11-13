@@ -25,6 +25,11 @@
           href: mealdb-api.md
         - name: PDF Upload and AI Conversion Feature
           href: PdfUploaded.md
+    - name: Pantry & Grocery Management
+      items:
+        - name: Grocery -> Pantry Auto-Move (Purchased items)
+          href:
+
 
 - name: Application Architecture
   items:
