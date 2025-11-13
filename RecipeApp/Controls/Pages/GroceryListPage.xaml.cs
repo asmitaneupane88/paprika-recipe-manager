@@ -7,6 +7,11 @@ namespace RecipeApp.Controls.Pages;
 public sealed partial class GroceryListPage : NavigatorPage
 {
     [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } 
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> DairyIngredients { get; set; }
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> ProduceIngredients { get; set; }
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> MeatAndSeafoodIngredients { get; set; }
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> BakingIngredients { get; set; }
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> OtherIngredients { get; set; }
     
     public ObservableCollection<string> CategoryOptions { get; } =
     [
@@ -30,6 +35,61 @@ public sealed partial class GroceryListPage : NavigatorPage
                 IsSelected = false,
                 PIngredient = null
             })
+            .ToObservableCollection();
+        
+        DairyIngredients = (await RecipeIngredient.GetAll())
+            .Where(i => i.Category == "Dairy")
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
+            .ForEach(i => AllIngredients.Add(i))
+            .ToObservableCollection();
+        
+        ProduceIngredients = (await RecipeIngredient.GetAll())
+            .Where(i => i.Category == "Fruits" || i.Category == "Vegetables")
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
+            .ForEach(i => AllIngredients.Add(i))
+            .ToObservableCollection();
+        
+        MeatAndSeafoodIngredients = (await RecipeIngredient.GetAll())
+            .Where(i => i.Category == "Meat" || i.Category == "Seafood")
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
+            .ForEach(i => AllIngredients.Add(i))
+            .ToObservableCollection();
+        
+        BakingIngredients = (await RecipeIngredient.GetAll())
+            .Where(i => i.Category == "Baking")
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
+            .ForEach(i => AllIngredients.Add(i))
+            .ToObservableCollection();
+        
+        OtherIngredients = (await RecipeIngredient.GetAll())
+            .Where(i => i.Category == "Beverages" || i.Category == "Snacks" || i.Category == "Others" || i.Category == "Uncategorized")
+            .Select(i => new IngredientCard
+            {
+                Ingredient = i,
+                IsSelected = false,
+                PIngredient = null
+            })
+            .ForEach(i => AllIngredients.Add(i))
             .ToObservableCollection();
     }
     
