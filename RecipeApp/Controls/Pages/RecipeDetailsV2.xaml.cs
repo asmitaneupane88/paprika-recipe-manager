@@ -19,6 +19,9 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
         if (savedRecipe is null)
             _ = Navigator.TryGoBack();
         
+        // make the chicken something compatible with tags:
+        SavedRecipe?.Tags ??= [];
+        
         SavedRecipe = savedRecipe!;
         AiEditMode = aiEditMode;
 
