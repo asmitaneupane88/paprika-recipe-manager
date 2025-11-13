@@ -56,6 +56,16 @@ public abstract partial class IStep : ObservableObject
         }
     }
     
+    /// <summary>
+    /// Gets or sets the out nodes of the step.
+    /// </summary>
+    [JsonIgnore]
+    public ObservableCollection<OutNode> OutNodes
+    {
+        get => GetOutNodes();
+        set => SetOutNodes(value);
+    }
+    
     [JsonIgnore] public string BindableTitle => GetTitle();
     [JsonIgnore] public string? BindableDescription => GetDescription();
     [JsonIgnore] public ObservableCollection<OutNode> BindableGetOutNodes => GetOutNodes();
