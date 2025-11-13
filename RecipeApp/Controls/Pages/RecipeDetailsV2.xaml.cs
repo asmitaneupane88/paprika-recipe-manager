@@ -20,7 +20,7 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
             _ = Navigator.TryGoBack();
         
         // make the chicken something compatible with tags:
-        SavedRecipe?.Tags ??= [];
+        savedRecipe?.Tags ??= [];
         
         SavedRecipe = savedRecipe!;
         AiEditMode = aiEditMode;
