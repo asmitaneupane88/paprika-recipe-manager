@@ -1,4 +1,5 @@
 ﻿using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.ComponentModel.DataAnnotations;
 using NJsonSchema;
 using OpenAI;
@@ -30,10 +31,17 @@ public class AiHelper
 
         _client = new OpenAIClient(new ApiKeyCredential(string.IsNullOrWhiteSpace(settings.ApiKey) ? "api-key" : settings.ApiKey), options);
 
-        var modelsResponse = await _client.GetOpenAIModelClient().GetModelsAsync();
-        if (modelsResponse?.Value != null)
+        if (settings.LastUsedModel is null)
         {
-            _currentModel = settings.LastUsedModel ?? modelsResponse.Value.FirstOrDefault()?.Id;
+            var modelsResponse = await _client.GetOpenAIModelClient().GetModelsAsync();
+            if (modelsResponse?.Value != null)
+            {
+                _currentModel = modelsResponse.Value.FirstOrDefault()?.Id;
+            }
+        }
+        else
+        {
+            _currentModel = settings.LastUsedModel;
         }
 
         return _client;
@@ -95,8 +103,12 @@ public class AiHelper
                                           You are a converter AI designed to convert any type of data into the standard format of a recipe.
                                           Your goal is to extract as much information as possible from a given string and convert it into a recipe format.
                                           You should also maintain how the wording of the recipe, focusing on separating out the data.
+                                          
                                           The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed.
                                           {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))}
+                                          
+                                          The following list is of the Enums you can use for UnitType for an ingredient:
+                                          {string.Join(", ", Enum.GetValues<UnitType>())}
                                           """),
                     new UserChatMessage($"Convert the following to the provided schema: {content}"),
                 ],
@@ -127,7 +139,7 @@ public class AiHelper
     {
         _client ??= await InitClient();
 
-        
+
         var chatMessages = messages
             .Select<AiMessage, ChatMessage?>(m => m.Sender switch
             {
@@ -139,24 +151,32 @@ public class AiHelper
             .Prepend(
                 new SystemChatMessage(
                     $"""
-                            You are an assistant designed to help users modify and create new recipes.
-                            You should only change the parts of a recipe when requested and you should try to keep it realistic. 
-                            
-                            The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed:
-                            {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))} 
-                            
-                            The following is a list of the available ingredients in the user's pantry. You can use other ingredients, but the user could specify that they only want to use ingredients from the pantry:
-                            {string.Join(", ", (await PantryIngredient.GetAll()).Select(x => x.Name))} 
-                            
-                            The following is the current recipe that the user is working on. Your response will replace the recipe, so anything unchanged should be copied over:
-                            {JsonSerializer.Serialize(recipe, new JsonSerializerOptions
-                            {
-                                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
-                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                                WriteIndented = true
-                            })}
-                            """))
-            .Append(new UserChatMessage(prompt));
+                     You are an assistant designed to help users modify and create new recipes.
+                     You should only change the parts of a recipe when requested and you should try to keep it realistic. 
+
+                     The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed:
+                     {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))} 
+
+                     The following is a list of the available ingredients in the user's pantry. You can use other ingredients, but the user could specify that they only want to use ingredients from the pantry:
+                     {string.Join(", ", (await PantryIngredient.GetAll()).Select(x => $"(Name: {x.Name}, Quantity: {x.Quantity})"))} 
+                     
+                     The following list is of the Enums you can use for UnitType for an ingredient:
+                     {string.Join(", ", Enum.GetValues<UnitType>())}
+                     
+                     You will be given a chat history (only the prompts from the user and your responses) and the current recipe that the user is working on in the most recent response.
+                     You have the ability to not update the recipe by keeping the field "recipe" as null/empty, which will be interpreted as no changes to the recipe.
+                     Do not include the recipe as plaintext in your message, include it as the "recipe" field in the response.
+                     """))
+            .Append(new UserChatMessage($"""
+                                         The following is the user's prompt:
+                                         {prompt}
+                                         
+                                         The following is the current recipe that the user is working on. Your response will replace the recipe, so anything unchanged should be copied over. If nothing was changed, feel free to not include this (leaving it as null) which will be interpreted as no changes to the recipe.
+                                         {JsonSerializer.Serialize(recipe, new JsonSerializerOptions {
+                                                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
+                                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                                WriteIndented = true })}
+                                         """));
         
         var schema = JsonSchema
             .FromType<AiProcessedResponse>()
@@ -188,7 +208,7 @@ public class AiHelper
         var finalResponse = new AiResponse
         {
             Message = rawProcessedResponse?.Message??"",
-            Recipe = await ParseResponseRecipe(rawProcessedResponse?.recipe)
+            Recipe = await ParseResponseRecipe(rawProcessedResponse?.Recipe)
         };
 
         return finalResponse;
@@ -206,9 +226,8 @@ public class AiHelper
         [Description("The response to the user. This should be limited in size and mostly be used for questions or comments about the recipe or to the user.")]
         public string Message { get; set; } = string.Empty;
         
-        [Required]
-        [Description("The recipe that was processed. This is visible to the user to modify before the next message is sent.")]
-        public AiProcessedRecipe recipe { get; set; }
+        [Description("The recipe that was processed. This is visible to the user to modify before the next message is sent. Note that if this is not included or null, that means there is no update to the recipe which should only be used for a question before making it.")]
+        public AiProcessedRecipe? Recipe { get; set; }
     }
     
     private class AiProcessedRecipe

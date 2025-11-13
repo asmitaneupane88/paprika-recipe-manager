@@ -111,6 +111,8 @@ public sealed partial class RecipeChat : NavigatorPage
             Messages.Add(new AiMessage(Sender.User, UserInput));
             var result = await task;
             
+            UserInput = string.Empty;
+            
             Messages.Add(new AiMessage(Sender.Assistant, result.Message));
 
             if (result.Recipe is not null)
