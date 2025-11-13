@@ -1,3 +1,5 @@
+using Microsoft.UI;
+using Windows.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
@@ -19,6 +21,48 @@ public sealed partial class MealPlannerPage : NavigatorPage
     private DateTime _currentWeekStart;
     private readonly DateTime _minDate;
     private readonly DateTime _maxDate;
+    // Palette of brushes to color each saved recipe in the meal planner.
+    // We pick a set of distinct, fairly muted colors so multiple items are easy to distinguish.
+    private readonly SolidColorBrush[] _recipeBrushes = new[]
+    {
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x4C, 0xAF, 0x50)), // green
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x21, 0x96, 0xF3)), // blue
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xA7, 0x26)), // orange
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x9C, 0x27, 0xB0)), // purple
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xE5, 0x39, 0x35)), // red
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x00, 0x96, 0x88)), // teal
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xC1, 0x07)), // amber
+        new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0x8E, 0x24, 0xAA)), // deep purple
+    };
+
+    // Alternate brushes to make items easier to visually separate (even / odd)
+    private readonly SolidColorBrush _alternateBrushEven = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xE8, 0xF0, 0xFF)); // very light blue
+    private readonly SolidColorBrush _alternateBrushOdd = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xF6, 0xE0)); // very light amber
+    // Brush used for leftover meals (orange)
+    private readonly SolidColorBrush _leftoverBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0xFF, 0xA7, 0x26));
+
+    private SolidColorBrush GetBrushForRecipe(RecipeApp.Models.SavedRecipe recipe)
+    {
+    if (recipe == null) return new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+        var title = recipe.Title ?? string.Empty;
+        // Simple deterministic mapping: sum of chars mod palette size
+        int sum = 0;
+        foreach (var c in title)
+        {
+            sum = (sum + c) % _recipeBrushes.Length;
+        }
+        return _recipeBrushes[sum];
+    }
+
+    private SolidColorBrush GetForegroundForBackground(Windows.UI.Color bg)
+    {
+        // Calculate relative luminance to pick white/black foreground for contrast
+        double r = bg.R / 255.0;
+        double g = bg.G / 255.0;
+        double b = bg.B / 255.0;
+        double luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luminance > 0.6 ? new SolidColorBrush(Windows.UI.Color.FromArgb(255, 0, 0, 0)) : new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 255, 255));
+    }
 
         public MealPlannerPage(Navigator navigator) : base(navigator)
         {
@@ -75,42 +119,80 @@ public sealed partial class MealPlannerPage : NavigatorPage
                     grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
                     grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                    // Get meal plan for this slot
-                    var mealPlan = allMealPlans.FirstOrDefault(mp => mp.Date.Date == date.Date && mp.MealType == mealType);
+                    // Get all meal plans for this slot (allowing multiple recipes per meal type)
+                    var mealPlansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
 
-                    // Add meal content
-                    var contentPanel = new StackPanel
+                    // Add meal content. Wrap the stack in a ScrollViewer so a slot with many
+                    // planned recipes becomes scrollable instead of growing the cell height.
+                    var contentStack = new StackPanel
                     {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Orientation = Orientation.Vertical
                     };
 
-                    var mealText = new TextBlock
+                    var contentScroll = new ScrollViewer
                     {
-                        TextWrapping = TextWrapping.Wrap,
-                        HorizontalAlignment = HorizontalAlignment.Center
+                        Content = contentStack,
+                        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                        HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                        MaxHeight = 160 // limit height so scrollbars appear when many items
                     };
 
-                    if (mealPlan != null)
+                    if (mealPlansForSlot.Any())
                     {
-                        mealText.Text = mealPlan.Recipe.Title;
-                        mealText.FontWeight = Microsoft.UI.Text.FontWeights.SemiBold;
+                        // Show each planned recipe on its own line and alternate chip background
+                        // colors (even / odd) to make multiple items easier to distinguish.
+                        for (int i = 0; i < mealPlansForSlot.Count; i++)
+                        {
+                            var mp = mealPlansForSlot[i];
+
+                            // Use the leftover brush when the meal is marked as leftover, otherwise alternate
+                            var chipBackground = mp.IsLeftOver ? _leftoverBrush : ((i % 2 == 0) ? _alternateBrushEven : _alternateBrushOdd);
+
+                            var chip = new Border
+                            {
+                                Background = chipBackground,
+                                CornerRadius = new CornerRadius(6),
+                                Padding = new Thickness(4, 4, 4, 4),
+                                Margin = new Thickness(0, 2, 0, 2),
+                                HorizontalAlignment = HorizontalAlignment.Stretch
+                            };
+
+                            var mealText = new TextBlock
+                            {
+                                Text = mp.Recipe.Title,
+                                TextWrapping = TextWrapping.Wrap,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                                Foreground = GetForegroundForBackground(((SolidColorBrush)chipBackground).Color)
+                            };
+
+                            chip.Child = mealText;
+                            contentStack.Children.Add(chip);
+                        }
                     }
                     else
                     {
-                        mealText.Text = "No meal planned";
-                        mealText.Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"];
-                        mealText.Opacity = 0.6;
+                        var mealText = new TextBlock
+                        {
+                            Text = "No meal planned",
+                            TextWrapping = TextWrapping.Wrap,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            Foreground = (SolidColorBrush)Application.Current.Resources["TextFillColorTertiaryBrush"],
+                            Opacity = 0.6
+                        };
+                        contentStack.Children.Add(mealText);
                     }
 
-                    contentPanel.Children.Add(mealText);
-                    Grid.SetRow(contentPanel, 0);
-                    grid.Children.Add(contentPanel);
+                    Grid.SetRow(contentScroll, 0);
+                    grid.Children.Add(contentScroll);
 
                     // Add the plus button
                     var addButton = new Button
                     {
-                        Content = "\uE710",
+                        // Use the edit/pencil glyph instead of a plus
+                        Content = "\uE70F",
                         FontFamily = new FontFamily("Segoe MDL2 Assets"),
                         Style = (Style)Application.Current.Resources["AccentButtonStyle"],
                         HorizontalAlignment = HorizontalAlignment.Right,
@@ -291,46 +373,28 @@ public sealed partial class MealPlannerPage : NavigatorPage
             }
 
             var dialog = new RecipeSelectionDialog(this.XamlRoot, savedRecipes, date, mealType);
-            var savedRecipe = await dialog.ShowAsync();
-            
-            if (savedRecipe != null)
+            var selectedRecipes = await dialog.ShowAsync();
+
+            if (selectedRecipes != null && selectedRecipes.Count > 0)
             {
-                await MealPlan.AddMealPlan(date, savedRecipe, mealType);
-                
-                // Update just this specific cell
-                var border = _mealSlotsGrid?.Children
-                    .Cast<Border>()
-                    .FirstOrDefault(b => Grid.GetRow(b) == row && Grid.GetColumn(b) == col);
+                // Load existing plans for this slot so we don't create duplicates.
+                var allMealPlans = await MealPlan.GetAll();
+                var plansForSlot = allMealPlans.Where(mp => mp.Date.Date == date.Date && mp.MealType == mealType).ToList();
+                var existingTitles = new HashSet<string>(plansForSlot.Select(p => p.Recipe?.Title ?? string.Empty), StringComparer.OrdinalIgnoreCase);
 
-                if (border?.Child is Grid cellGrid)
+                foreach (var sr in selectedRecipes)
                 {
-                    // Clear existing content in the first row (keeping the add button in the second row)
-                    var itemsToRemove = cellGrid.Children.Where(c => Grid.GetRow(c) == 0).ToList();
-                    foreach (var item in itemsToRemove)
+                    var title = sr.Title ?? string.Empty;
+                    if (!existingTitles.Contains(title))
                     {
-                        cellGrid.Children.Remove(item);
+                        await MealPlan.AddMealPlan(date, sr, mealType);
+                        existingTitles.Add(title);
                     }
-
-                    // Create a stack panel to hold the recipe info and meal type
-                    var stackPanel = new StackPanel
-                    {
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    };
-
-                    var recipeInfo = new TextBlock
-                    {
-                        Text = savedRecipe.Title,
-                        TextWrapping = TextWrapping.Wrap,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
-                    };
-                    stackPanel.Children.Add(recipeInfo);
-
-                    Grid.SetRow(stackPanel, 0);
-                    cellGrid.Children.Add(stackPanel);
                 }
             }
+
+            // Refresh the grid so any additions or removals made in the dialog are shown.
+            LoadAndInitializeMealPlans();
         }
     }
 

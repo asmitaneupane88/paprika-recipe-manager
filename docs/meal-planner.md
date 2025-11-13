@@ -45,6 +45,18 @@ The meal planner uses two main data structures:
   - `Recipe`: The recipe to be prepared
   - `MealType`: When the meal will be served (breakfast, lunch, or dinner)
 
+### Leftovers (IsLeftOver)
+
+- Purpose: The `IsLeftOver` flag marks a planned meal as a leftover. Leftovers are visually highlighted in the planner so users can quickly identify meals that are intended to be reheated or reused.
+- How to set: In the `Recipe Selection Dialog` each recipe row includes a small "Leftover" checkbox (bound to `IsLeftOver`). You can also toggle leftover state on existing planned meals in the planner UI.
+- Behavior:
+  - When a meal's `IsLeftOver` property is set to `true` the application will attempt to automatically add the same recipe to the next calendar day for the same meal type. This helps you plan to reuse leftovers without manually re-adding the recipe.
+  - The auto-add logic avoids duplicates: before adding to the next day it checks whether the same recipe is already planned for that date/meal slot and will skip adding if a match exists.
+  - Unchecking `IsLeftOver` will update the stored `MealPlan` entry to clear the leftover flag. It does not automatically remove the propagated next-day entry if one was previously created.
+- Implementation notes:
+  - See `MealPlan.cs` (`SetLeftOver`) for the exact persistence and auto-add behavior.
+  - The planner uses a distinct brush for leftovers so they appear visually different in the grid (see `MealPlannerPage` for the `_leftoverBrush` color).
+
 ### MealType Enumeration
 
 Defines the possible meal categories:
