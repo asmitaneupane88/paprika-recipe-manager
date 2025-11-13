@@ -41,11 +41,65 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// </example>
     public static object GetNestedListRepresentation(IStep rootStep)
     {
-        // First step: Create a mapping of each node to its parent node(s)
-        // var nodeToParents = BuildNodeToParentsMapping(rootStep);
+        // First, get a HashSet of forward edges
+        var forwardEdges = BuildForwardEdges(rootStep);
+
+        return forwardEdges;
 
         // Second, build a mapping of each node to it's branch depth.
-        return rootStep;
+        //var branchDepth = BuildBranchDepths(forwardEdges);
+    }
+
+    /// <summary>
+    /// Generates a dictionary of { node , branch depth }.
+    /// </summary>
+    /// <param name="currentStep">The current step to build from.</param>
+    /// <param name="branchDepthMap">The working dictionary to add to.</param>
+    /// <param name="depth">The working depth to use as the value.</param>
+    /// <returns>Returns a Dictionary&lt;IStep, int&gt; that maps each step/node to its branch depth in the graph.</returns>
+    public static Dictionary<IStep, int> BuildBranchDepths(IStep currentStep, Dictionary<IStep, int>? branchDepthMap = null, int depth = 0){
+        // Initialize the branch depths dictionary if it is null.
+        branchDepthMap ??= new Dictionary<IStep, int>();
+        
+        // Guard against a null RootStepNode.
+        var rootStepIsInvalid = currentStep is StartStep && (currentStep.GetOutNodes() == null || currentStep.GetOutNodes().Count == 0);
+
+        // Fail early / break recursion
+        if (rootStepIsInvalid || currentStep is FinishStep){
+            return branchDepthMap;
+        }
+
+        var currentOutNodes = currentStep.GetOutNodes();
+        if (currentOutNodes == null)
+        {
+            return branchDepthMap;
+        }
+
+        // Add the current node to the map
+        branchDepthMap.Add(currentStep, depth);
+
+        foreach (var outNode in currentOutNodes)
+        {
+            if (outNode.Next is not null)
+            {
+                // default
+                var nextDepth = depth;
+
+                // Split steps +1 to depth
+                if(outNode.Next is SplitStep){
+                    nextDepth++;
+                }
+                // Merges decrement
+                else if(outNode.Next is MergeStep){
+                    nextDepth--;
+                }
+                
+                // Recurse
+                BuildBranchDepths(outNode.Next, branchDepthMap, nextDepth);
+            }
+        }
+        
+        return branchDepthMap;
     }
 
 
@@ -54,6 +108,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// Recursively creates a HashSet of forward graph edges.
     /// </summary>
     /// <param name="currentStep">The current step to build from.</param>
+    /// /// <param name="ForwardEdges">The current set of edges to build from.</param>
+    /// /// <param name="visited">The set of steps that have already been visited.</param>
     /// <returns>A HashSet of tuples containing each (child, parent) pair.</returns>
     public static HashSet<Tuple<IStep, IStep>> BuildForwardEdges(IStep currentStep, HashSet<Tuple<IStep, IStep>>? ForwardEdges = null, HashSet<IStep>? visited = null)
     {
@@ -70,13 +126,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         // Guard against a null RootStepNode.
         var rootStepIsInvalid = currentStep is StartStep && (currentStep.GetOutNodes() == null || currentStep.GetOutNodes().Count == 0);
 
-        // Fail early
-        if (rootStepIsInvalid){
-            return ForwardEdges;
-        }
-
-        // Break recursion
-        if (currentStep is FinishStep){
+        // Fail early / break recursion
+        if (rootStepIsInvalid || currentStep is FinishStep){
             return ForwardEdges;
         }
 
@@ -228,15 +279,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
 
         return effectiveParents;
     }
-    
-
-    // public static object RecurseGraph(IStep currentStep)
-    // {
-    //     if (currentStep is SplitStep)
-    //     {
-            
-    //     }
-    // }
     
     public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
     {
