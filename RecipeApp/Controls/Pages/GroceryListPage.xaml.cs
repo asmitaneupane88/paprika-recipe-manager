@@ -74,20 +74,41 @@ public sealed partial class GroceryListPage : NavigatorPage
 
         if (selected.Count == 0)
             return;
+        
+        var pantryItems = await PantryIngredient.GetAll();
 
         foreach (var card in selected.ToList())
         {
             var ingredient = card.Ingredient;
-
-            var pantryItem = new PantryIngredient
+            
+            if (ingredient == null)
+                continue;
+            
+            var existing = pantryItems.FirstOrDefault(p =>
+                string.Equals(p.Name?.Trim(), ingredient.Name?.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+            
+            if (existing != null)
             {
-                Name = ingredient.Name ?? "New Item",
-                Quantity = ingredient.Quantity,
-                Unit = ingredient.Unit,
-                ModifierNote = ingredient.ModifierNote
-            };
+                existing.Quantity += ingredient.Quantity;
+                await PantryIngredient.Remove(existing);
+                await PantryIngredient.Add(existing);
+            }
+            else
+            {
 
-            await PantryIngredient.Add(pantryItem);
+                var pantryItem = new PantryIngredient
+                {
+                    Name = ingredient.Name ?? "New Item",
+                    Quantity = ingredient.Quantity,
+                    Unit = ingredient.Unit,
+                    ModifierNote = ingredient.ModifierNote,
+                    Category = "Uncategorized"
+                };
+
+                await PantryIngredient.Add(pantryItem);
+            }
+
             await RecipeIngredient.Remove(ingredient);
             AllIngredients.Remove(card);
         }
