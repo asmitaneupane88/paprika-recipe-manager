@@ -27,6 +27,7 @@ public class AiHelper
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri(settings.Endpoint),
+            NetworkTimeout = TimeSpan.FromSeconds(120)
         };
 
         _client = new OpenAIClient(new ApiKeyCredential(string.IsNullOrWhiteSpace(settings.ApiKey) ? "api-key" : settings.ApiKey), options);
@@ -95,9 +96,8 @@ public class AiHelper
         var schema = JsonSchema
             .FromType<AiProcessedRecipe>()
             .ToJson();
-        
-        var response = await _client.GetChatClient(_currentModel ?? "noModel")
-            .CompleteChatAsync(
+        var response = await CompleteChatWithRetry(
+            _client.GetChatClient(_currentModel ?? "noModel"),
                 [
                     new SystemChatMessage($"""
                                           You are a converter AI designed to convert any type of data into the standard format of a recipe.
@@ -182,16 +182,16 @@ public class AiHelper
             .FromType<AiProcessedResponse>()
             .ToJson();
         
-        var chatCompletionResponse = await _client.GetChatClient(_currentModel ?? "noModel")
-            .CompleteChatAsync(
-                chatMessages,
-                new ChatCompletionOptions
-                {
-                    ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-                        jsonSchemaFormatName: "ai_response",
-                        jsonSchema: BinaryData.FromString(schema),
-                        jsonSchemaIsStrict: true)
-                });
+        var chatCompletionResponse = await CompleteChatWithRetry(
+            _client.GetChatClient(_currentModel ?? "noModel"),
+            chatMessages,
+            new ChatCompletionOptions
+            {
+                ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+                    jsonSchemaFormatName: "ai_response",
+                    jsonSchema: BinaryData.FromString(schema),
+                    jsonSchemaIsStrict: true)
+            });
 
         var jsonString = chatCompletionResponse.Value.Content[0].Text;
         
@@ -377,5 +377,29 @@ public class AiHelper
         await Task.WhenAll(tasks);
         
         return savedRecipe;
+    }
+    
+    // used copilot (not sure what model) to quickly try to fix this ai stuff (getting 503)
+    // had to modify the timing a bit to work better.
+    private static async Task<ClientResult<ChatCompletion>> CompleteChatWithRetry(
+        ChatClient chatClient,
+        IEnumerable<ChatMessage> messages,
+        ChatCompletionOptions options,
+        int maxRetries = 5)
+    {
+        int attempt = 0;
+        while (true)
+        {
+            try
+            {
+                return await chatClient.CompleteChatAsync(messages, options);
+            }
+            catch (ClientResultException ex) when (ex.Status == 503 && attempt < maxRetries)
+            {
+                attempt++;
+                var delay = TimeSpan.FromSeconds((Math.Pow(2, attempt)/10));
+                await Task.Delay(delay);
+            }
+        }
     }
 }

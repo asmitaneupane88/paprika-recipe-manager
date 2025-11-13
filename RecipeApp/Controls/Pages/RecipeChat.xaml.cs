@@ -122,8 +122,7 @@ public sealed partial class RecipeChat : NavigatorPage
         }
         catch (Exception exception)
         {
-            Console.WriteLine(exception);
-            throw;
+            Messages.Add(new AiMessage(Sender.Error, $"{exception.Message}\n{exception.StackTrace}"));
         }
 
         ProgressRing.Visibility = Visibility.Collapsed;
