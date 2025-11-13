@@ -1,8 +1,10 @@
 using System.Reflection;
 using FluentAssertions;
+using Microsoft.UI.Content;
 using RecipeApp.Interfaces;
 using RecipeApp.Models;
 using RecipeApp.Models.RecipeSteps;
+using Windows.UI.Input;
 
 namespace RecipeApp.Tests;
 
@@ -104,35 +106,6 @@ public class SavedRecipeListTests
     }
 
     [Test]
-    public void DeriveGraphEdgesReturnsCorrectEdges()
-    {
-        // Arrange
-        var recipe = BuildComplexNestedRecipe();
-        var edges = SavedRecipe.DeriveGraphEdges(recipe.RootStepNode!);
-        var expectedEdges = new List<Tuple<IStep, IStep>>();
-
-        // X -> split 1
-        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
-        var split1 = new SplitStep();
-        expectedEdges.Add(new Tuple<IStep, IStep>(X, split1));
-
-        // split 1 -> A, B
-        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
-        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
-        expectedEdges.Add(new Tuple<IStep, IStep>(split1, A));
-        expectedEdges.Add(new Tuple<IStep, IStep>(split1, B));
-
-        // Assert
-        edges.Should().NotBeNull();
-
-        // X -> split 1
-        edges.Should().Contain(new Tuple<IStep, IStep>(X, split1));
-
-        // split 1 -> A, B
-        edges.Should().Contain(new Tuple<IStep, IStep>(split1, A));
-        edges.Should().Contain(new Tuple<IStep, IStep>(split1, B));
-    }
-    [Test]
     public void HandlesStartStepWithTextStep()
     {
         // Arrange
@@ -225,167 +198,138 @@ public class SavedRecipeListTests
         result.Should().BeEquivalentTo(expected);
     }
 
-    
     [Test]
-    public void BuildNodeToParentsMapping_SimpleLinearChain_ShouldMapCorrectly()
-    {
+    public void BuildForwardEdges_SimpleGraph_ReturnsCorrectEdges(){
+        // start --> A --> B --> Finish
+
         // Arrange
-        var root = new StartStep();
-        var step1 = new TextStep { Title = "Step 1" };
-        var step2 = new TextStep { Title = "Step 2" };
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var B = new TextStep { Title = "B" };
         var finish = new FinishStep();
 
-        root.Paths = [new OutNode("Next", step1)];
-        step1.OutNodes = [new OutNode("Next", step2)];
-        step2.OutNodes = [new OutNode("Next", finish)];
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("B", B)];
+        B.OutNodes = [new OutNode("Finish", finish)];
+
+        var forwardEdges = new HashSet<Tuple<IStep, IStep>>(){
+            new Tuple<IStep, IStep>(start, A),
+            new Tuple<IStep, IStep>(A, B),
+            new Tuple<IStep, IStep>(B, finish)
+        };
+        
 
         // Act
-        var mapping = InvokeBuildNodeToParentsMapping(root);
+        var result = SavedRecipe.BuildForwardEdges(recipe.RootStepNode!);
 
         // Assert
-        mapping.Should().NotBeNull();
-        mapping.Count.Should().Be(4); // root, step1, step2, finish
-        
-        // Root should have no parents
-        mapping[root].Should().BeEmpty();
-        
-        // Step1 should have root as parent
-        mapping[step1].Should().ContainSingle().Which.Should().Be(root);
-        
-        // Step2 should have step1 as parent
-        mapping[step2].Should().ContainSingle().Which.Should().Be(step1);
-        
-        // Finish should have step2 as parent
-        mapping[finish].Should().ContainSingle().Which.Should().Be(step2);
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(forwardEdges);
     }
 
     [Test]
-    public void BuildNodeToParentsMapping_MultipleParents_ShouldMapCorrectly()
-    {
-        // Arrange - Create a merge step with multiple parents
-        var root = new StartStep();
-        var step1 = new TextStep { Title = "Step 1" };
-        var step2 = new TextStep { Title = "Step 2" };
-        var merge = new MergeStep();
-        var finish = new FinishStep();
+    public void BuildForwardEdges_SimpleGraphWithMergeAndSplit_ReturnsCorrectEdges(){
+        // start --> A --> Split +---> B ---+--> Merge --> D --> Finish
+        //                       +---> C ---+ 
 
-        root.Paths = [new OutNode("Path1", step1), new OutNode("Path2", step2)];
-        step1.OutNodes = [new OutNode("Next", merge)];
-        step2.OutNodes = [new OutNode("Next", merge)];
-        merge.NextStep = new OutNode("Next", finish);
-
-        // Act
-        var mapping = InvokeBuildNodeToParentsMapping(root);
-
-        // Assert
-        mapping.Should().NotBeNull();
-        
-        // Merge should have both step1 and step2 as parents
-        mapping[merge].Should().HaveCount(2);
-        mapping[merge].Should().Contain(step1);
-        mapping[merge].Should().Contain(step2);
-        
-        // Step1 and step2 should both have root as parent
-        mapping[step1].Should().ContainSingle().Which.Should().Be(root);
-        mapping[step2].Should().ContainSingle().Which.Should().Be(root);
-        
-        // Finish should have merge as parent
-        mapping[finish].Should().ContainSingle().Which.Should().Be(merge);
-    }
-
-    [Test]
-    public void BuildNodeToParentsMapping_ComplexGraph_ShouldMapAllNodes()
-    {
-        // Arrange - Use the same complex graph from TestSteps
-        var root = new StartStep();
-        var s1 = new TextStep { MinutesToComplete = 5 };
-        var s2 = new TextStep { MinutesToComplete = 3 };
-        var merge0 = new MergeStep();
-        var split2 = new SplitStep();
-        var s5 = new TextStep { MinutesToComplete = 8 };
-
-        root.Paths = [
-            new OutNode("Oven", merge0),
-            new OutNode("Microwave", split2),
-        ];
-
-        split2.OutNodes = [
-            new OutNode("", merge0),
-            new OutNode("", s5),
-        ];
-
-        // Act
-        var mapping = InvokeBuildNodeToParentsMapping(root);
-
-        // Assert
-        mapping.Should().NotBeNull();
-        
-        // merge0 should have both root and split2 as parents
-        mapping[merge0].Should().HaveCount(2);
-        mapping[merge0].Should().Contain(root);
-        mapping[merge0].Should().Contain(split2);
-        
-        // split2 should have root as parent
-        mapping[split2].Should().ContainSingle().Which.Should().Be(root);
-        
-        // s5 should have split2 as parent
-        mapping[s5].Should().ContainSingle().Which.Should().Be(split2);
-        
-        // Root should have no parents
-        mapping[root].Should().BeEmpty();
-    }
-
-    [Test]
-    public void BuildNodeToParentsMapping_EmptyGraph_ShouldReturnOnlyRoot()
-    {
         // Arrange
-        var root = new StartStep();
-        root.Paths = []; // No connections
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph with Merge and Split", RootStepNode = start };
 
-        // Act
-        var mapping = InvokeBuildNodeToParentsMapping(root);
-
-        // Assert
-        mapping.Should().NotBeNull();
-        mapping.Count.Should().Be(1);
-        mapping[root].Should().BeEmpty();
-    }
-
-    [Test]
-    public void BuildNodeToParentsMapping_SplitStep_ShouldMapCorrectly()
-    {
-        // Arrange
-        var root = new StartStep();
+        var A = new TextStep { Title = "A" };
         var split = new SplitStep();
-        var step1 = new TextStep { Title = "Step 1" };
-        var step2 = new TextStep { Title = "Step 2" };
+        var B = new TextStep { Title = "B" };
+        var C = new TextStep { Title = "C" };
         var merge = new MergeStep();
+        var D = new TextStep { Title = "D"};
+        var finish = new FinishStep();
 
-        root.Paths = [new OutNode("Next", split)];
-        split.OutNodes = [
-            new OutNode("Path1", step1),
-            new OutNode("Path2", step2)
-        ];
-        step1.OutNodes = [new OutNode("Next", merge)];
-        step2.OutNodes = [new OutNode("Next", merge)];
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("split", split)];
+        split.OutNodes = [new OutNode("B", B), new OutNode("C", C)];
+        B.OutNodes = [new OutNode("merge", merge)];
+        C.OutNodes = [new OutNode("merge", merge)];
+        merge.NextStep = new OutNode("D", D);
+        D.OutNodes = [new OutNode("Finish", finish)];
+
+        var forwardEdges = new HashSet<Tuple<IStep, IStep>>(){
+            new Tuple<IStep, IStep>(start, A),
+            new Tuple<IStep, IStep>(A, split),
+            new Tuple<IStep, IStep>(split, B),
+            new Tuple<IStep, IStep>(split, C),
+            new Tuple<IStep, IStep>(B, merge),
+            new Tuple<IStep, IStep>(C, merge),
+            new Tuple<IStep, IStep>(merge, D),
+            new Tuple<IStep, IStep>(D, finish)
+        };
 
         // Act
-        var mapping = InvokeBuildNodeToParentsMapping(root);
+        var result = SavedRecipe.BuildForwardEdges(recipe.RootStepNode!);
 
         // Assert
-        mapping.Should().NotBeNull();
-        
-        // Split should have root as parent
-        mapping[split].Should().ContainSingle().Which.Should().Be(root);
-        
-        // Step1 and step2 should both have split as parent
-        mapping[step1].Should().ContainSingle().Which.Should().Be(split);
-        mapping[step2].Should().ContainSingle().Which.Should().Be(split);
-        
-        // Merge should have both step1 and step2 as parents
-        mapping[merge].Should().HaveCount(2);
-        mapping[merge].Should().Contain(step1);
-        mapping[merge].Should().Contain(step2);
+        result.Should().NotBeNull();
+        // Compare tuples - they should contain the same step object references
+        // Since IStep doesn't override Equals, ComparingByValue will use reference equality
+        result.Should().BeEquivalentTo(forwardEdges, options => options
+            .ComparingByMembers<Tuple<IStep, IStep>>()
+            .ComparingByValue<IStep>());
+    }
+
+    [Test]
+    public void BuildForwardEdges_SimpleGraphWithMergeSplitTimer_ReturnsCorrectEdges(){
+         // start --> A --> Split +---> B ---+-->  Merge --> Timer --> D --> Finish
+        //                       +---> C ---+
+
+        // Arrange
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph with Merge and Split", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var split = new SplitStep();
+        var B = new TextStep { Title = "B" };
+        var C = new TextStep { Title = "C" };
+        var merge = new MergeStep();
+        var timer = new TimerStep();
+        var D = new TextStep { Title = "D"};
+        var finish = new FinishStep();
+
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("split", split)];
+        split.OutNodes = [new OutNode("B", B), new OutNode("C", C)];
+        B.OutNodes = [new OutNode("merge", merge)];
+        C.OutNodes = [new OutNode("merge", merge)];
+        merge.NextStep = new OutNode("timer", timer);
+        timer.NextStep = new OutNode("D", D);
+        D.OutNodes = [new OutNode("Finish", finish)];
+
+        var forwardEdges = new HashSet<Tuple<IStep, IStep>>(){
+            new Tuple<IStep, IStep>(start, A),
+            new Tuple<IStep, IStep>(A, split),
+            new Tuple<IStep, IStep>(split, B),
+            new Tuple<IStep, IStep>(split, C),
+            new Tuple<IStep, IStep>(B, merge),
+            new Tuple<IStep, IStep>(C, merge),
+            new Tuple<IStep, IStep>(merge, timer),
+            new Tuple<IStep, IStep>(timer, D),
+            new Tuple<IStep, IStep>(D, finish)
+        };
+
+        // Act
+        var result = SavedRecipe.BuildForwardEdges(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        // Compare tuples - they should contain the same step object references
+        // Since IStep doesn't override Equals, ComparingByValue will use reference equality
+        result.Should().BeEquivalentTo(forwardEdges, options => options
+            .ComparingByMembers<Tuple<IStep, IStep>>()
+            .ComparingByValue<IStep>());
+
     }
 
     [Test]
@@ -578,66 +522,6 @@ public class SavedRecipeListTests
         }
     }
 
-    [Test]
-    public void FilterMergeAndSplitSteps_ComplexGraph_ShouldFilterCorrectly()
-    {
-        // Arrange: Complex graph with multiple merges and splits
-        var root = new StartStep();
-        var step1 = new TextStep { Title = "Step1" };
-        var step2 = new TextStep { Title = "Step2" };
-        var split1 = new SplitStep();
-        var step3 = new TextStep { Title = "Step3" };
-        var step4 = new TextStep { Title = "Step4" };
-        var merge1 = new MergeStep();
-        var step5 = new TextStep { Title = "Step5" };
-
-        root.Paths = [new OutNode("Path1", step1), new OutNode("Path2", step2)];
-        split1.OutNodes = [new OutNode("Path1", step3), new OutNode("Path2", step4)];
-        step1.OutNodes = [new OutNode("Next", split1)];
-        step2.OutNodes = [new OutNode("Next", split1)];
-        merge1.NextStep = new OutNode("Next", step5);
-        step3.OutNodes = [new OutNode("Next", merge1)];
-        step4.OutNodes = [new OutNode("Next", merge1)];
-
-        var originalMapping = InvokeBuildNodeToParentsMapping(root);
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(split1);
-        filtered.Should().NotContainKey(merge1);
-        
-        // Step3 and Step4 should have root as parent (via step1 and step2, but since step1/step2 connect to split, they should connect directly)
-        // Actually, step1 and step2 both connect to split1, so step3 and step4 should have both step1 and step2 as parents
-        filtered[step3].Should().HaveCount(2);
-        filtered[step3].Should().Contain(step1);
-        filtered[step3].Should().Contain(step2);
-        
-        filtered[step4].Should().HaveCount(2);
-        filtered[step4].Should().Contain(step1);
-        filtered[step4].Should().Contain(step2);
-        
-        // Step5 should have both step3 and step4 as parents
-        filtered[step5].Should().HaveCount(2);
-        filtered[step5].Should().Contain(step3);
-        filtered[step5].Should().Contain(step4);
-    }
-
-    /// <summary>
-    /// Helper method to invoke the private BuildNodeToParentsMapping method using reflection.
-    /// </summary>
-    private static Dictionary<IStep, HashSet<IStep>> InvokeBuildNodeToParentsMapping(IStep rootStep)
-    {
-        var method = typeof(SavedRecipe).GetMethod(
-            "BuildNodeToParentsMapping",
-            BindingFlags.NonPublic | BindingFlags.Static);
-
-        method.Should().NotBeNull("BuildNodeToParentsMapping method should exist");
-
-        var result = method!.Invoke(null, [rootStep]);
-        return (Dictionary<IStep, HashSet<IStep>>)result!;
-    }
 
     /// <summary>
     /// Helper method to invoke the private FilterMergeAndSplitSteps method using reflection.

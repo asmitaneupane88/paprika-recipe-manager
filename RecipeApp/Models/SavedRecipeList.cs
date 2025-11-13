@@ -13,47 +13,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// </summary>
     [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
 
-    /// <summary>
-    /// Derives a list of edges from the graph. A.I. generated.
-    /// </summary>
-    public static List<Tuple<IStep, IStep>> DeriveGraphEdges(IStep root){
-        var edges = new List<Tuple<IStep, IStep>>();
-        if (root == null)
-            return edges;
-            
-        var visitedNodes = new HashSet<IStep>();
-        
-        Traverse(root, visitedNodes, edges);
-        return edges;
-    }
-    
-    /// <summary>
-    /// Recursively traverses the graph and builds a list of edges. A.I. generated.
-    /// </summary>
-    private static void Traverse(IStep currentStep, HashSet<IStep> visitedNodes, List<Tuple<IStep, IStep>> edges)
-    {
-        // Avoid infinite loops by checking if we've already visited this node
-        if (visitedNodes.Contains(currentStep))
-            return;
-
-        visitedNodes.Add(currentStep);
-
-        // Get all out nodes from the current step
-        var outNodes = currentStep.GetOutNodes();
-
-        // For each out node, create an edge if it has a next step
-        foreach (var outNode in outNodes)
-        {
-            if (outNode.Next != null)
-            {
-                // Create an edge from current step to the next step
-                edges.Add(new Tuple<IStep, IStep>(currentStep, outNode.Next));
-
-                // Recursively traverse the next step
-                Traverse(outNode.Next, visitedNodes, edges);
-            }
-        }
-    }
 
     /// <summary>
     /// Builds a deep nested list representation of the recipe steps. Parallel steps are represented as a HashSet of objects. Method assumes that the graph is acyclic.
@@ -83,68 +42,67 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     public static object GetNestedListRepresentation(IStep rootStep)
     {
         // First step: Create a mapping of each node to its parent node(s)
-        var nodeToParents = BuildNodeToParentsMapping(rootStep);
+        // var nodeToParents = BuildNodeToParentsMapping(rootStep);
 
-        // Second step: Filter out merge and split steps
-        var filteredMapping = FilterMergeAndSplitSteps(nodeToParents);
-
-        
-        // TODO: Continue with nested list representation logic
+        // Second, build a mapping of each node to it's branch depth.
         return rootStep;
     }
 
+
     
     /// <summary>
-    /// Creates a mapping of each node to its parent node(s).
-    /// Since nodes can have multiple parents (e.g., MergeStep), returns Dictionary&lt;IStep, HashSet&lt;IStep&gt;&gt;.
+    /// Recursively creates a HashSet of forward graph edges.
     /// </summary>
-    /// <param name="rootStep">The root step to start building the parent mapping from.</param>
-    /// <returns>A dictionary mapping each node to its set of parent nodes.</returns>
-    private static Dictionary<IStep, HashSet<IStep>> BuildNodeToParentsMapping(IStep rootStep)
+    /// <param name="currentStep">The current step to build from.</param>
+    /// <returns>A HashSet of tuples containing each (child, parent) pair.</returns>
+    public static HashSet<Tuple<IStep, IStep>> BuildForwardEdges(IStep currentStep, HashSet<Tuple<IStep, IStep>>? ForwardEdges = null, HashSet<IStep>? visited = null)
     {
-        var nodeToParents = new Dictionary<IStep, HashSet<IStep>>();
-        
-        if (rootStep == null)
+        // Initialize the ForwardEdges HashSet if it is null.
+        ForwardEdges ??= new HashSet<Tuple<IStep, IStep>>();
+        visited ??= new HashSet<IStep>();
+
+        // Skip if already visited
+        if (!visited.Add(currentStep))
         {
-            return nodeToParents;
+            return ForwardEdges;
+        }
+
+        // Guard against a null RootStepNode.
+        var rootStepIsInvalid = currentStep is StartStep && (currentStep.GetOutNodes() == null || currentStep.GetOutNodes().Count == 0);
+
+        // Fail early
+        if (rootStepIsInvalid){
+            return ForwardEdges;
+        }
+
+        // Break recursion
+        if (currentStep is FinishStep){
+            return ForwardEdges;
+        }
+
+        // Recursive step
+        var currentOutNodes = currentStep.GetOutNodes();
+        if (currentOutNodes == null)
+        {
+            return ForwardEdges;
+        }
+
+        foreach (var outNode in currentOutNodes)
+        {
+            if (outNode.Next is not null)
+            {
+                // Add edge: (parent: currentStep, child: outNode.Next)
+                ForwardEdges.Add(new Tuple<IStep, IStep>(currentStep, outNode.Next));
+                
+                // Recursively process the next step (will skip if already visited)
+                BuildForwardEdges(outNode.Next, ForwardEdges, visited);
+            }
         }
         
-        // Traverse the graph and build the parent mapping
-        var visitedNodes = new HashSet<IStep>();
-        var queue = new Queue<IStep>();
-        queue.Enqueue(rootStep);
-        
-        while (queue.Count > 0)
-        {
-            var currentStep = queue.Dequeue();
-            if (!visitedNodes.Add(currentStep)) continue; // Skip if already visited
+        return ForwardEdges;
             
-            // Initialize parent set for this node if it doesn't exist
-            if (!nodeToParents.ContainsKey(currentStep))
-            {
-                nodeToParents[currentStep] = new HashSet<IStep>();
-            }
-            
-            // Traverse all out nodes and build parent-child relationships
-            foreach (var outNode in currentStep.GetOutNodes() ?? [])
-            {
-                if (outNode.Next is not null)
-                {
-                    // Add currentStep as a parent of outNode.Next
-                    if (!nodeToParents.ContainsKey(outNode.Next))
-                    {
-                        nodeToParents[outNode.Next] = new HashSet<IStep>();
-                    }
-                    nodeToParents[outNode.Next].Add(currentStep);
-                    
-                    // Enqueue the next step for processing
-                    queue.Enqueue(outNode.Next);
-                }
-            }
-        }
-        
-        return nodeToParents;
     }
+
 
     /// <summary>
     /// Filters out merge steps and split steps from the parent mapping, connecting their parents directly to their children.
