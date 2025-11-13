@@ -114,6 +114,7 @@ public partial class Navigator : ObservableObject
 
         CurrentPage = page.SavedPage;
         CurrentRoute = page.PageRoute;
+        CurrentTitle = page.Name;
 
         await CurrentPage!.Restore();
             

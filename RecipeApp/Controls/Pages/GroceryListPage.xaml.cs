@@ -1,6 +1,5 @@
 ﻿using RecipeApp.Models;
 using RecipeApp.Services;
-
 namespace RecipeApp.Controls.Pages;
 
 
@@ -103,7 +102,7 @@ public sealed partial class GroceryListPage : NavigatorPage
                     Quantity = ingredient.Quantity,
                     Unit = ingredient.Unit,
                     ModifierNote = ingredient.ModifierNote,
-                    Category = "Uncategorized"
+                    Category = CategoryHelper.AutoDetectCategory(ingredient.Name)
                 };
 
                 await PantryIngredient.Add(pantryItem);
@@ -114,5 +113,109 @@ public sealed partial class GroceryListPage : NavigatorPage
         }
 
         RefreshSelected();
+    }
+
+    private async void ButtonAddRecipeIngredients_OnClick(object sender, RoutedEventArgs e)
+    {
+        var search = new SavedRecipeSearch();
+        
+        var dialog = new ContentDialog
+        {
+            Title = "Add Recipe",
+            Content = search,
+            PrimaryButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = this.XamlRoot,
+        };
+        
+        search.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(search.SelectedRecipes))
+            {
+                dialog.PrimaryButtonText = search.SelectedRecipes.Count == 0 ? "Cancel" : $"Add {search.SelectedRecipes.Count} Recipes";
+            }
+        };
+        
+        await dialog.ShowAsync();
+
+        foreach (var rc in search.SelectedRecipes.Select(r => r.SavedRecipe).Where(r => r is not null))
+        {
+            var pathInfos = rc.RootStepNode!.GetNestedPathInfo();
+
+            if (pathInfos.Count == 0)
+            {
+                var dialog2 = new ContentDialog
+                {
+                    Title = $"Error - {rc.Title}",
+                    Content =
+                        "This recipe does not have any paths and therefore does not have any ingredients to buy.",
+                    PrimaryButtonText = "Ok",
+                    XamlRoot = this.XamlRoot,
+                };
+
+                await dialog2.ShowAsync();
+                return;
+            }
+
+            ObservableCollection<RecipeIngredient> ingredients = [];
+            if (pathInfos.Count == 1)
+                ingredients = pathInfos[0].MaxIngredients;
+            else
+            {
+                // show popup to get a path:
+                // "What do you want to buy for? 'Oven' with these ingredients, 'Stove' with these ingredients."
+                // can use savedRecipe.RootStepNode.BindableDescription to show these ingredients
+
+                // set ingredients
+                var stack = new StackPanel();
+                
+                var dialog3 = new ContentDialog
+                {
+                    Title = $"Select a path to add ingredients for",
+                    PrimaryButtonText = "Cancel",
+                    XamlRoot = this.XamlRoot,
+                };
+
+                var textbox = new TextBlock()
+                {
+                    TextWrapping = TextWrapping.Wrap,
+                    Text = rc.RootStepNode.BindableDescription
+                };
+                
+                stack.Children.Add(textbox);
+                
+                foreach (var pathInfo in pathInfos)
+                {
+                    var button = new Button
+                    {
+                        Content = pathInfo.OutNode.Title,
+                    };
+                    
+                    button.Click += (_, _) =>
+                    {
+                        ingredients = pathInfo.MaxIngredients;
+                        dialog3.Hide();
+                    };
+                    
+                    stack.Children.Add(button);
+                }
+                
+                dialog3.Content = stack;
+                
+                await dialog3.ShowAsync();
+            }
+
+            // TODO maybe selecting which ingredients to buy or checking what is in the pantry already.
+
+            List<Task> tasks = [];
+            
+            foreach (var ingredient in ingredients)
+            {
+                tasks.Add(RecipeIngredient.Add(ingredient));
+            }
+
+            await Task.WhenAll(tasks);
+            await ShowIngredients();
+        }
     }
 }

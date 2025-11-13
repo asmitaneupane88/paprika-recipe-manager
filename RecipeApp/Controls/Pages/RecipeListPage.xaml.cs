@@ -80,9 +80,9 @@ public sealed partial class RecipeListPage : NavigatorPage
     {
         FilteredRecipes = AllRecipes
             .Where(r => r.SavedRecipe.Title.Contains(SearchText.Trim(), StringComparison.CurrentCultureIgnoreCase))
-            .Where(r => SelectedTags.All(tag => r.SavedRecipe.Tags
+            .Where(r => SelectedTags.All(tag => r.SavedRecipe.Tags?
                 .Any(recipeTag => recipeTag.Trim()
-                    .Equals(tag.Name.Trim(), StringComparison.CurrentCultureIgnoreCase))))
+                    .Equals(tag.Name.Trim(), StringComparison.CurrentCultureIgnoreCase))??false))
             .ToObservableCollection();
     }
     

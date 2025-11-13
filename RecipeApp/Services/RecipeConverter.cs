@@ -58,7 +58,9 @@ namespace RecipeApp.Services
 
                 currentStep = nextStep;
             }
-
+            
+            if (currentStep is TextStep lastStep)
+                lastStep.OutNodes = [new OutNode("Finish", new FinishStep())];
 
             var savedRecipe = new SavedRecipe
             {
