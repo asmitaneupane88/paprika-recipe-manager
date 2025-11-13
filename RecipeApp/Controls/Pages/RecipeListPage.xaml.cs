@@ -156,7 +156,7 @@ public sealed partial class RecipeListPage : NavigatorPage
 
             await SavedRecipe.Add(newRecipe);
 
-            Navigator.Navigate(new RecipeDetailsV2(Navigator, newRecipe), title:$"Edit {newRecipe.Title}");
+            Navigator.Navigate(new RecipeDetailsV2(Navigator, newRecipe), title:$"Recipe Details: {newRecipe.Title}");
         }
     }
 

@@ -13,6 +13,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using RecipeApp.Enums;
+using RecipeApp.Services;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -23,7 +24,10 @@ namespace RecipeApp.Controls.Pages;
 /// </summary>
 public sealed partial class RecipeChat : NavigatorPage
 {
-    [ObservableProperty] public partial SavedRecipe? CurrentRecipe { get; set; }
+    [ObservableProperty] public partial SavedRecipe? OriginalRecipe { get; set; }
+
+    
+    [ObservableProperty] public partial SavedRecipe CurrentRecipe { get; set; }
     
     [ObservableProperty] public partial ObservableCollection<AiMessage> Messages { get; set; } = [];
     
@@ -50,37 +54,98 @@ public sealed partial class RecipeChat : NavigatorPage
         
         if (currentRecipe?.AdvancedSteps ?? false) throw new Exception("Cannot handle advanced steps in the recipe chat page.");
 
+        OriginalRecipe = currentRecipe;
         CurrentRecipe = currentRecipe?.DeepCopy() ?? new SavedRecipe { Title = "New Recipe" };
         
         DetailsPage = new RecipeDetailsV2(Navigator, CurrentRecipe, aiEditMode: true);
 
         SavedRecipeHolder.Child = DetailsPage;
 
+        DataContext = this;
+        
         RefreshVisibility();
-    }
-
-    private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
-    {
         
+        this.Unloaded += async (s, e) => await CleanupTags();
     }
 
-    private void ButtonSave_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
     {
+        var dialog = new ContentDialog
+        {
+            Title = "Cancel Recipe Creation",
+            Content = "Are you sure you want to cancel? All progress will be lost.",
+            PrimaryButtonText = "Yes",
+            CloseButtonText = "No"
+        };
         
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await CleanupTags();
+            await Navigator.TryGoBack();
+        }
     }
 
-    private void ButtonSend_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonSave_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (OriginalRecipe is not null)
+            await SavedRecipe.Remove(OriginalRecipe);
+        
+        await SavedRecipe.Add(CurrentRecipe);
+        
+        await Navigator.TryGoBack();
+        var newRecipePage = new RecipeDetailsV2(Navigator, CurrentRecipe);
+        Navigator.Navigate(newRecipePage, $"Recipe Details: {CurrentRecipe.Title}");
+        
+        await CleanupTags();
+    }
+
+    private async void ButtonSend_OnClick(object sender, RoutedEventArgs e)
     {
         IsResponding = Visibility.Visible;
         IsNotResponding = Visibility.Collapsed;
         SendButtonEnabled = false;
-        
-        Messages.Add(new AiMessage(Sender.User, UserInput));
+
+        try
+        {
+            var task = AiHelper.RunPrompt(UserInput, Messages, CurrentRecipe);
+            Messages.Add(new AiMessage(Sender.User, UserInput));
+            var result = await task;
+            
+            Messages.Add(new AiMessage(Sender.Assistant, result.Message));
+
+            if (result.Recipe is not null)
+                CurrentRecipe = result.Recipe;
+            
+            DetailsPage = new RecipeDetailsV2(Navigator, CurrentRecipe, aiEditMode: true);
+            SavedRecipeHolder.Child = DetailsPage;
+
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine(exception);
+            throw;
+        }
+
+        IsResponding = Visibility.Collapsed;
+        IsNotResponding = Visibility.Visible;
+        SendButtonEnabled = true;
     }
     
     private void RefreshVisibility()
     {
         SendButtonEnabled = !string.IsNullOrWhiteSpace(UserInput) && IsResponding != Visibility.Visible;
     }
-}
 
+    private async Task CleanupTags()
+    {
+        var tags = await SavedTag.GetAll();
+        var recipes = await SavedRecipe.GetAll();
+        foreach (var tag in tags)
+        {
+            if (recipes.All(r => r.Tags.All(t => t != tag.Name)))
+            {
+                await SavedTag.Remove(tag);
+            }
+        }
+    }
+}

@@ -11,9 +11,9 @@ public partial class AiMessage
     
     public Thickness Margin => Sender switch
     {
-        Sender.User => new Thickness(0, 0, 50, 0),
-        Sender.Assistant => new Thickness(50, 0, 0, 0),
-        _ => new Thickness(100, 0, 100, 0),
+        Sender.User => new Thickness(10, 10, 50, 10),
+        Sender.Assistant => new Thickness(50, 10, 10, 10),
+        _ => new Thickness(100, 10, 100, 10),
     };
     
     public AiMessage(Sender sender, string message)
