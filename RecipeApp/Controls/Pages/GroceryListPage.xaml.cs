@@ -1,6 +1,5 @@
 ﻿using RecipeApp.Models;
 using RecipeApp.Services;
-
 namespace RecipeApp.Controls.Pages;
 
 
@@ -103,7 +102,7 @@ public sealed partial class GroceryListPage : NavigatorPage
                     Quantity = ingredient.Quantity,
                     Unit = ingredient.Unit,
                     ModifierNote = ingredient.ModifierNote,
-                    Category = "Uncategorized"
+                    Category = CategoryHelper.AutoDetectCategory(ingredient.Name)
                 };
 
                 await PantryIngredient.Add(pantryItem);
