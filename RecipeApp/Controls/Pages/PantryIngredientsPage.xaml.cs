@@ -20,7 +20,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     public ObservableCollection<string> CategoryOptions { get; } =
     [
         "All Categories", "Vegetables", "Fruits", "Dairy", "Meat", "Seafood",
-        "Baking", "Beverages", "Snacks", "Chicken", "Pasta", "Others", "Uncategorized"
+        "Baking", "Beverages", "Snacks", "Others", "Uncategorized"
     ];
 
     
