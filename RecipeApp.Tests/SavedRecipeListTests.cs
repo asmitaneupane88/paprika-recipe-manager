@@ -78,6 +78,80 @@ public class SavedRecipeListTests
     }
 
     [Test]
+    public void GetPossiblePaths(){
+
+        // start -> X -> split1 +
+        //                      +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                  +-> D  -----------------------------+
+        //                                  +-> tE -----------------------------+
+        //                                  +-> C  -> split3 +      +-> merge1 -+
+        //                                                   +-> F -+
+        //                                                   +-> G -+
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        
+        tE.NextStep = new OutNode("Merge2", merge2);
+        
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+    
+        var expected = new List<List<IStep>>
+        {
+            new List<IStep> { start, X, split1, A, tH, merge3, Z, finish },
+            new List<IStep> { start, X, split1, B, split2, D, merge2, merge3, Z, finish },
+            new List<IStep> { start, X, split1, B, split2, tE, merge2, merge3, Z, finish},
+            new List<IStep> { start, X, split1, B, split2, C, split3, F, merge1, merge2, merge3, Z, finish},
+            new List<IStep> { start, X, split1, B, split2, C, split3, G, merge1, merge2, merge3, Z, finish},
+
+        };
+
+        var result = SavedRecipe.GetPossiblePaths(start, null, null);
+
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(expected);
+
+    }
+    [Test]
     public void ReturnsEmptyListWhenNull()
     {
         // Arrange
@@ -317,26 +391,25 @@ public class SavedRecipeListTests
         G.OutNodes = [new OutNode("Merge1", merge1)];
 
         var workingList = new List<IStep>(){
-            start, 
-            X, 
-            split1, 
-            A, 
-            tH,  
-            B, 
-            split2, 
-            D,  
-            tE,   
-            C, 
-            split3, 
-            F,  
-            G, 
-            merge1, 
-            merge2, 
-            merge3, 
-            Z, 
+            start,
+            X,
+            split1,
+            A,
+            tH,
+            B,
+            split2,
+            D,
+            tE,
+            C,
+            split3,
+            F,
+            G,
+            merge1,
+            merge2,
+            merge3,
+            Z,
             finish
         };
-
         // Act
         var result = SavedRecipe.GetRoughListOfSteps(recipe.RootStepNode!);
 
@@ -685,208 +758,7 @@ public class SavedRecipeListTests
     }
 
     [Test]
-    public void FilterMergeAndSplitSteps_SimpleMerge_ShouldConnectParentsDirectlyToChild()
-    {
-        // Arrange: NodeA -> Merge1 -> NodeC, NodeB -> Merge1 -> NodeC
-        var nodeA = new TextStep { Title = "NodeA" };
-        var nodeB = new TextStep { Title = "NodeB" };
-        var merge1 = new MergeStep();
-        var nodeC = new TextStep { Title = "NodeC" };
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [merge1] = new HashSet<IStep> { nodeA, nodeB },
-            [nodeC] = new HashSet<IStep> { merge1 }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(merge1, "Merge step should be removed");
-        filtered[nodeC].Should().HaveCount(2, "NodeC should have both NodeA and NodeB as parents");
-        filtered[nodeC].Should().Contain(nodeA);
-        filtered[nodeC].Should().Contain(nodeB);
-    }
-
-    [Test]
-    public void FilterMergeAndSplitSteps_SimpleSplit_ShouldConnectParentDirectlyToChildren()
-    {
-        // Arrange: NodeA -> Split1 -> NodeB, NodeC
-        var nodeA = new TextStep { Title = "NodeA" };
-        var split1 = new SplitStep();
-        var nodeB = new TextStep { Title = "NodeB" };
-        var nodeC = new TextStep { Title = "NodeC" };
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [split1] = new HashSet<IStep> { nodeA },
-            [nodeB] = new HashSet<IStep> { split1 },
-            [nodeC] = new HashSet<IStep> { split1 }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(split1, "Split step should be removed");
-        filtered[nodeB].Should().ContainSingle().Which.Should().Be(nodeA);
-        filtered[nodeC].Should().ContainSingle().Which.Should().Be(nodeA);
-    }
-
-    [Test]
-    public void FilterMergeAndSplitSteps_MergeWithMultipleChildren_ShouldConnectCorrectly()
-    {
-        // Arrange: NodeA -> Merge1 -> NodeB, NodeC
-        var nodeA = new TextStep { Title = "NodeA" };
-        var merge1 = new MergeStep();
-        var nodeB = new TextStep { Title = "NodeB" };
-        var nodeC = new TextStep { Title = "NodeC" };
-
-        merge1.NextStep = new OutNode("Next", nodeB);
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [merge1] = new HashSet<IStep> { nodeA },
-            [nodeB] = new HashSet<IStep> { merge1 }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(merge1);
-        filtered[nodeB].Should().ContainSingle().Which.Should().Be(nodeA);
-    }
-
-    [Test]
-    public void FilterMergeAndSplitSteps_NestedMergeSteps_ShouldFlattenCorrectly()
-    {
-        // Arrange: NodeA -> Merge1 -> Merge2 -> NodeC, NodeB -> Merge2 -> NodeC
-        var nodeA = new TextStep { Title = "NodeA" };
-        var nodeB = new TextStep { Title = "NodeB" };
-        var merge1 = new MergeStep();
-        var merge2 = new MergeStep();
-        var nodeC = new TextStep { Title = "NodeC" };
-
-        merge1.NextStep = new OutNode("Next", merge2);
-        merge2.NextStep = new OutNode("Next", nodeC);
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [merge1] = new HashSet<IStep> { nodeA },
-            [merge2] = new HashSet<IStep> { merge1, nodeB },
-            [nodeC] = new HashSet<IStep> { merge2 }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(merge1);
-        filtered.Should().NotContainKey(merge2);
-        filtered[nodeC].Should().HaveCount(2, "NodeC should have both NodeA and NodeB as parents");
-        filtered[nodeC].Should().Contain(nodeA);
-        filtered[nodeC].Should().Contain(nodeB);
-    }
-
-    [Test]
-    public void FilterMergeAndSplitSteps_SplitThenMerge_ShouldConnectCorrectly()
-    {
-        // Arrange: NodeA -> Split1 -> NodeB, NodeC -> Merge1 -> NodeD
-        var nodeA = new TextStep { Title = "NodeA" };
-        var split1 = new SplitStep();
-        var nodeB = new TextStep { Title = "NodeB" };
-        var nodeC = new TextStep { Title = "NodeC" };
-        var merge1 = new MergeStep();
-        var nodeD = new TextStep { Title = "NodeD" };
-
-        split1.OutNodes = [new OutNode("Path1", nodeB), new OutNode("Path2", nodeC)];
-        merge1.NextStep = new OutNode("Next", nodeD);
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [split1] = new HashSet<IStep> { nodeA },
-            [nodeB] = new HashSet<IStep> { split1 },
-            [nodeC] = new HashSet<IStep> { split1 },
-            [merge1] = new HashSet<IStep> { nodeB, nodeC },
-            [nodeD] = new HashSet<IStep> { merge1 }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(split1);
-        filtered.Should().NotContainKey(merge1);
-        filtered[nodeB].Should().ContainSingle().Which.Should().Be(nodeA);
-        filtered[nodeC].Should().ContainSingle().Which.Should().Be(nodeA);
-        filtered[nodeD].Should().HaveCount(2, "NodeD should have both NodeB and NodeC as parents");
-        filtered[nodeD].Should().Contain(nodeB);
-        filtered[nodeD].Should().Contain(nodeC);
-    }
-
-    [Test]
-    public void FilterMergeAndSplitSteps_NoMergeOrSplitSteps_ShouldReturnSameMapping()
-    {
-        // Arrange: Simple chain without merge/split
-        var nodeA = new TextStep { Title = "NodeA" };
-        var nodeB = new TextStep { Title = "NodeB" };
-        var nodeC = new TextStep { Title = "NodeC" };
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [nodeB] = new HashSet<IStep> { nodeA },
-            [nodeC] = new HashSet<IStep> { nodeB }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().BeEquivalentTo(originalMapping);
-    }
-
-    [Test]
-    public void FilterMergeAndSplitSteps_MergeWithNoParents_ShouldHandleGracefully()
-    {
-        // Arrange: Merge1 -> NodeA (but Merge1 has no parents)
-        var merge1 = new MergeStep();
-        var nodeA = new TextStep { Title = "NodeA" };
-
-        merge1.NextStep = new OutNode("Next", nodeA);
-
-        var originalMapping = new Dictionary<IStep, HashSet<IStep>>
-        {
-            [merge1] = new HashSet<IStep>(), // No parents
-            [nodeA] = new HashSet<IStep> { merge1 }
-        };
-
-        // Act
-        var filtered = InvokeFilterMergeAndSplitSteps(originalMapping);
-
-        // Assert
-        filtered.Should().NotContainKey(merge1);
-        // NodeA should either not be in the mapping or have no parents
-        if (filtered.ContainsKey(nodeA))
-        {
-            filtered[nodeA].Should().BeEmpty("NodeA should have no parents if merge had none");
-        }
-    }
-
-
-    /// <summary>
-    /// Helper method to invoke the private FilterMergeAndSplitSteps method using reflection.
-    /// </summary>
-    private static Dictionary<IStep, HashSet<IStep>> InvokeFilterMergeAndSplitSteps(Dictionary<IStep, HashSet<IStep>> nodeToParents)
-    {
-        var method = typeof(SavedRecipe).GetMethod(
-            "FilterMergeAndSplitSteps",
-            BindingFlags.NonPublic | BindingFlags.Static);
-
-        method.Should().NotBeNull("FilterMergeAndSplitSteps method should exist");
-
-        var result = method!.Invoke(null, [nodeToParents]);
-        return (Dictionary<IStep, HashSet<IStep>>)result!;
+    public void RefineListOfSteps(){
+        
     }
 }

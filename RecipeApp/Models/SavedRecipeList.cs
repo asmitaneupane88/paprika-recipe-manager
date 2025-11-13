@@ -14,6 +14,36 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// </summary>
     [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
 
+    public static List<List<IStep>> GetPossiblePaths(IStep currentStep, List<List<IStep>>? possiblePaths, List<IStep>? currentPath){
+        possiblePaths ??= [];
+        currentPath ??= [];
+
+        // Guard against a null RootStepNode.
+        var rootStepIsInvalid = currentStep is StartStep && (currentStep.GetOutNodes() == null);
+
+        // Fail early / break recursion
+        if (rootStepIsInvalid){
+            return [];
+        }
+
+        // If the node has no children, it's a leaf node.
+        if (currentStep.GetOutNodes().Count == 0){
+            currentPath.Add(currentStep);
+            possiblePaths.Add(currentPath);
+            return possiblePaths;
+        }
+
+        foreach (var node in currentStep.GetOutNodes())
+        {
+            var branchPath = new List<IStep>(currentPath) { currentStep };
+            if (node.Next is not null)
+            {
+                GetPossiblePaths(node.Next, possiblePaths, branchPath);
+            }
+        }
+
+        return possiblePaths;
+    }
 
     /// <summary>
     /// Builds a deep nested list representation of the recipe steps. Parallel steps are represented as a HashSet of objects. Method assumes that the graph is acyclic.
@@ -70,14 +100,11 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         {
             workingList.Remove(currentStep);
         }
-        
+
         // Add current step to the list (or re-add if it was already there)
         workingList.Add(currentStep);
 
-        // Fail early / break recursion
-        if (rootStepIsInvalid || currentStep is FinishStep){
-            return workingList;
-        }
+        
 
         var currentOutNodes = currentStep.GetOutNodes();
         if (currentOutNodes == null)
@@ -210,7 +237,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// For example, if NodeA and NodeB both connect to Merge1, and Merge1 connects to NodeC,
     /// the result will be NodeA and NodeB both connect directly to NodeC.
     /// </summary>
-    /// <param name="nodeToParents">The original parent mapping dictionary.</param>
+    /// /// <param name="nodeToParents">The original parent mapping dictionary.</param>
     /// <returns>A new dictionary with merge and split steps removed, and their parents connected directly to their children.</returns>
     private static Dictionary<IStep, HashSet<IStep>> FilterMergeAndSplitSteps(Dictionary<IStep, HashSet<IStep>> nodeToParents)
     {
