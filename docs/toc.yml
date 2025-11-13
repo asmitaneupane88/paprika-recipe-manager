@@ -28,8 +28,9 @@
     - name: Pantry & Grocery Management
       items:
         - name: Grocery -> Pantry Auto-Move (Purchased items)
-          href:
-
+          href: PantryAutoMove.md
+        - name: Pantry Grouping by Category
+          href: PantryGrouping.md
 
 - name: Application Architecture
   items:
