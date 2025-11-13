@@ -32,20 +32,21 @@ Also has the methods from the IAutoSavingClass such as Add, Remove, GetAll.
 
 **Highlighted Properties:**
 
-| Type                         | Name              | Notes                                                                                    |
-|------------------------------|-------------------|------------------------------------------------------------------------------------------|
-| int                          | BindableMaxRating | Ignored in Json, used to bind to a max rating value for displaying properly.             |
-| string                       | Title             | None                                                                                     |
-| string                       | Description       | None                                                                                     |
-| string                       | ImageUrl          | None                                                                                     |
-| string?                      | SourceUrl         | None                                                                                     |
-| string                       | UserNote          | None                                                                                     |
-| ObservableCollection<string> | Tags              | None                                                                                     |
-| bool                         | AdvancedSteps     | Are advanced steps enabled? This is needed as it is difficult to go back to being simple |
-| bool                         | IsFromPdf         | None                                                                                     |
-| int                          | Rating            | None                                                                                     |
-| string?                      | PdfPath           | None                                                                                     |
-| string?                      | HtmlPath          | None                                                                                     |
+| Type                         | Name                     | Notes                                                                                    |
+|------------------------------|-------------------       |------------------------------------------------------------------------------------------|
+| int                          | BindableMaxRating        | Ignored in Json, used to bind to a max rating value for displaying properly.             |
+| string                       | Title                    | None                                                                                     |
+| string                       | Description              | None                                                                                     |
+| string                       | ImageUrl                 | None                                                                                     |
+| string?                      | SourceUrl                | None                                                                                     |
+| string                       | UserNote                 | None                                                                                     |
+| ObservableCollection<string> | Tags                     | None                                                                                     |
+| bool                         | AdvancedSteps            | Are advanced steps enabled? This is needed as it is difficult to go back to being simple |
+| bool                         | IsFromPdf                | None                                                                                     |
+| int                          | Rating                   | None                                                                                     |
+| string?                      | PdfPath                  | None                                                                                     |
+| string?                      | HtmlPath                 | None                                                                                     |
+| List<object>                 | NestedListRepresentation | All steps besides TextSteps and TimerSteps are filtered out from the resulting object.   | 
 
 **Example Usage:**
 TODO

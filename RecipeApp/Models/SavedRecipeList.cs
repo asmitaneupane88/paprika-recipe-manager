@@ -1,6 +1,4 @@
 using RecipeApp.Models.RecipeSteps;
-using System.Linq;
-using UglyToad.PdfPig.Core;
 
 namespace RecipeApp.Models;
 
@@ -13,7 +11,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// <summary>
     /// Returns a deep nested list representation of the recipe steps.
     /// </summary>
-    [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep(), null, null);
+    [JsonIgnore] public object NestedListRepresentation => GetFilteredNestedListRepresentation();
 
 
     /// <summary>
@@ -183,16 +181,108 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     }
 
     /// <summary>
+    /// Removes StartStep, MergeStep, SplitStep, and FinishStep nodes from a deep nested list of recipe steps.
+    /// </summary>
+    /// <returns>
+    /// A cleaned deep nested list representation of the recipe steps.
+    /// </returns>
+    public static List<object> FilterNestedList(bool isStart, List<object>? nestedList)
+    {
+        // On start, create a new nestedList
+        if (isStart && nestedList == null)
+        {
+            nestedList = new List<object>();
+        }
+
+        // Return early for empty lists
+        if (!isStart && nestedList?.Count == 0)
+        {
+            return new List<object>();
+        }
+
+        // Return early if nestedList is null (shouldn't happen when isStart is true, but handle it)
+        if (nestedList == null)
+        {
+            return new List<object>();
+        }
+
+        // Build a new result list
+        var result = new List<object>();
+
+        foreach (var item in nestedList)
+        {
+            // If the item is a List
+            if (item is List<object> nestedItem)
+            {
+                // Recurse
+                var cleanList = FilterNestedList(false, nestedItem);
+
+                // Check if the list is empty
+                if (cleanList.Count > 0)
+                {
+                    result.Add(cleanList);
+                }
+            }
+            // Otherwise
+            else
+            {
+                if (item is IStep step && isActualStep(step))
+                {
+                    result.Add(item);
+                }
+
+            }
+        }
+
+        return result;
+    }
+
+
+    /// <summary>
+    /// Helper method to determine if a given step is actual step.
+    /// </summary>
+    /// <returns>
+    /// Boolean indicating if recipeStep is an actual step.
+    /// </returns>
+    public static bool isActualStep(IStep recipeStep) {
+        if (recipeStep is TextStep || recipeStep is TimerStep)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Recursively builds a deep nested list representation of the recipe steps, then filters the list and returns it. Method assumes that the graph is acyclic.
+    /// </summary>
+    /// <returns>
+    /// A clean deep nested list representation of the recipe steps.
+    /// </returns>
+    public List<object> GetFilteredNestedListRepresentation()
+    {
+        if (RootStepNode is null)
+        {
+            return new List<object>();
+        }
+        
+        var nestedList = GetNestedListRepresentation(RootStepNode, null, null);
+        return FilterNestedList(true, nestedList);
+    }
+
+    /// <summary>
     /// Builds a deep nested list representation of the recipe steps. Method assumes that the graph is acyclic.
     /// </summary>
     /// <returns>
     /// A deep nested list representation of the recipe steps.
     /// </returns>
-    public static object GetNestedListRepresentation(IStep? currentStep, List<List<IStep>>? possiblePaths, List<IStep>? workingList)
+    public static List<object> GetNestedListRepresentation(IStep? currentStep, List<List<IStep>>? possiblePaths, List<IStep>? workingList)
     {
         workingList ??= [];
         possiblePaths ??= GetPossiblePaths(currentStep!, null, null);
-        
+
         var refinedList = new List<object>();
 
         // recomputed after recursing
@@ -201,7 +291,8 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         var uncommonElements = GetUncommonElements(possiblePaths, commonParents, commonDescendants);
 
         // Start
-        if (commonParents.Count > 0){
+        if (commonParents.Count > 0)
+        {
             foreach (var item in commonParents)
             {
                 refinedList.Add(item);
@@ -209,18 +300,21 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         }
 
         // Middle of the paths
-        if (uncommonElements.Count > 0){
+        if (uncommonElements.Count > 0)
+        {
             // group by first uncommon element
-            var uniqueNodes = new HashSet<IStep>();
-            foreach (var path in uncommonElements){
-                if (path.Count > 0)
+            var uniqueNodes = new List<IStep>();
+            foreach (var path in uncommonElements)
+            {
+                if (path.Count > 0 && !uniqueNodes.Contains(path[0]))
                 {
                     uniqueNodes.Add(path[0]);
                 }
             }
 
             var parallelPaths = new List<object>();
-            foreach (var node in uniqueNodes){
+            foreach (var node in uniqueNodes)
+            {
                 var nodePaths = new List<List<IStep>>();
 
                 // Create a new path for each unique 1st element
@@ -231,12 +325,14 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
                 }
 
                 // only recurse if there are valid paths
-                if(nodePaths.Count > 0){
+                if (nodePaths.Count > 0)
+                {
                     parallelPaths.Add(GetNestedListRepresentation(null, nodePaths, workingList));
                 }
             }
 
-            if (parallelPaths.Count > 0){
+            if (parallelPaths.Count > 0)
+            {
                 refinedList.Add(parallelPaths);
             }
         }
@@ -252,12 +348,9 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
                 }
             }
         }
-        
+
         return refinedList;
     }
-
-    
-    
     public Dictionary<IStep, Dictionary<string, object>> GetNodeProperties()
     {
         // store the result
