@@ -385,7 +385,7 @@ public class AiHelper
         ChatClient chatClient,
         IEnumerable<ChatMessage> messages,
         ChatCompletionOptions options,
-        int maxRetries = 5)
+        int maxRetries = 6)
     {
         int attempt = 0;
         while (true)
