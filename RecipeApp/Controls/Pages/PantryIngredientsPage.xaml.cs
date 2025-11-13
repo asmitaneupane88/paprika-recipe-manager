@@ -183,12 +183,12 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
 
          
             await RecipeIngredient.Add(groceryItem);
-            await PantryIngredient.Remove(pantry);
-            var group = GroupedPantry.FirstOrDefault(g => g.Contains(card));
-            group?.Remove(card);
+            // await PantryIngredient.Remove(pantry);
+            // var group = GroupedPantry.FirstOrDefault(g => g.Contains(card));
+            // group?.Remove(card);
         }
-        foreach (var empty in GroupedPantry.Where(g => g.Count == 0).ToList())
-            GroupedPantry.Remove(empty);
+        // foreach (var empty in GroupedPantry.Where(g => g.Count == 0).ToList())
+        //     GroupedPantry.Remove(empty);
 
         RefreshSelected();
     }
