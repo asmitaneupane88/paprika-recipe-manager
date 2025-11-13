@@ -22,6 +22,11 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
         SavedRecipe = savedRecipe!;
         AiEditMode = aiEditMode;
 
+        if (aiEditMode)
+        {
+            AiButton.Visibility = Visibility.Collapsed;
+        }
+        
         _ = UpdateAllTags();
     }
     
@@ -171,6 +176,12 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
                 await UpdateAllTags();
             }
         }
+    }
+
+    private void ButtonRecipeAiEdit_OnClick(object sender, RoutedEventArgs e)
+    {
+        var chatPage = new RecipeChat(Navigator, SavedRecipe);
+        Navigator.Navigate(chatPage, $"Recipe Generator 2000: {SavedRecipe.Title}");
     }
 }
 

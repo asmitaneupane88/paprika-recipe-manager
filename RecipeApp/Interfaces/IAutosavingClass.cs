@@ -156,7 +156,7 @@ public abstract class IAutosavingClass<T> : ObservableObject where T : Observabl
     /// <returns></returns>
     public T DeepCopy()
     {
-        var json = JsonSerializer.Serialize(this, _jsonOptions);
+        var json = JsonSerializer.Serialize((T)(object)this, _jsonOptions);
         return JsonSerializer.Deserialize<T>(json, _jsonOptions)!;
     }
 }
