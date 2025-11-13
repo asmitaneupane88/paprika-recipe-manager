@@ -199,6 +199,38 @@ public class SavedRecipeListTests
     }
 
     [Test]
+    public void BuildBranchDepths_SimpleGraph_ReturnsCorrectDepths(){
+        // start --> A --> B --> Finish
+
+        // Arrange
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var B = new TextStep { Title = "B" };
+        var finish = new FinishStep();
+
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("B", B)];
+        B.OutNodes = [new OutNode("Finish", finish)];
+
+        var branchDepths = new Dictionary<IStep, int> {
+            { start, 0 },
+            { A, 0 },
+            { B, 0 },
+            { finish, 0 }
+        };
+
+        // Act
+        var result = SavedRecipe.BuildBranchDepths(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(branchDepths);
+    }
+
+    [Test]
     public void BuildForwardEdges_SimpleGraph_ReturnsCorrectEdges(){
         // start --> A --> B --> Finish
 

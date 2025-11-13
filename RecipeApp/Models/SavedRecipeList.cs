@@ -61,6 +61,9 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         // Initialize the branch depths dictionary if it is null.
         branchDepthMap ??= new Dictionary<IStep, int>();
         
+        // Add the current node to the map (use indexer to allow overwriting if already exists)
+        branchDepthMap[currentStep] = depth;
+        
         // Guard against a null RootStepNode.
         var rootStepIsInvalid = currentStep is StartStep && (currentStep.GetOutNodes() == null || currentStep.GetOutNodes().Count == 0);
 
@@ -74,9 +77,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         {
             return branchDepthMap;
         }
-
-        // Add the current node to the map
-        branchDepthMap.Add(currentStep, depth);
 
         foreach (var outNode in currentOutNodes)
         {
