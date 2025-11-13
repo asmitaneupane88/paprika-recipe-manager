@@ -1,24 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections.ObjectModel;
-
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-
-using Windows.Storage;
-using Windows.Storage.Pickers;
-
-using RecipeApp.Models;
+﻿using Microsoft.UI.Xaml.Input;
 using RecipeApp.Services;
-using Uno.Extensions;
-
-using System.Drawing.Printing;
-using Windows.Devices.Midi;
-using Windows.Graphics.Printing;
 
 namespace RecipeApp.Controls.Pages;
 
@@ -175,7 +156,7 @@ public sealed partial class RecipeListPage : NavigatorPage
 
             await SavedRecipe.Add(newRecipe);
 
-            Navigator.Navigate(new RecipeDetailsV2(Navigator, newRecipe), title:$"Edit {newRecipe.Title}");
+            Navigator.Navigate(new RecipeDetailsV2(Navigator, newRecipe), title:$"Recipe Details: {newRecipe.Title}");
         }
     }
 
@@ -325,9 +306,10 @@ public sealed partial class RecipeListPage : NavigatorPage
 
     }
     
-    private void OnButtonGroceryListClick(object sender, RoutedEventArgs e)
+    private void OnButtonChatClick(object sender, RoutedEventArgs e)
     {
-        //TODO: create list from selected and open it
+        var page = new RecipeChat(Navigator);
+        Navigator.Navigate(page, "Recipe Generator 2000");
     }
 
     private async void OnButtonPrintClick(object sender, RoutedEventArgs e)

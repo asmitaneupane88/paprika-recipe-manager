@@ -27,26 +27,6 @@ This feature allows users to upload recipe PDFs, convert them into readable text
 ## Example Code
 ```csharp
 // // RecipeListPage.xaml.cs
-private async void OnButtonUploadPdfClick(object sender, RoutedEventArgs e)
-    => await UploadRecipePdfAsync();
-
-private async Task UploadRecipePdfAsync()
-{
-    var picker = new FileOpenPicker();
-    picker.FileTypeFilter.Add(".pdf");
-    picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-
-#if WINDOWS
-    WinRT.Interop.InitializeWithWindow.Initialize(picker,
-        WinRT.Interop.WindowNative.GetWindowHandle(App.Instance));
-#endif
-
-    var file = await picker.PickSingleFileAsync();
-    if (file == null)
-        return;
-
-    try
-    {
         // Step 1 – Save PDF
         var localFolderPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -90,27 +70,6 @@ private async Task UploadRecipePdfAsync()
                 XamlRoot = this.XamlRoot
             }.ShowAsync();
         }
-
-        // Step 4 – Confirmation
-        await new ContentDialog
-        {
-            Title = "PDF Upload & Converted",
-            Content = $"File saved:\n{savedFilePath}\n\nHTML created:\n{htmlPath}",
-            CloseButtonText = "OK",
-            XamlRoot = this.XamlRoot
-        }.ShowAsync();
-    }
-    catch (Exception ex)
-    {
-        await new ContentDialog
-        {
-            Title = "PDF Upload Failed",
-            Content = ex.Message,
-            CloseButtonText = "OK",
-            XamlRoot = this.XamlRoot
-        }.ShowAsync();
-    }
-}
   ```
 ## LM Studio Configuration
 
@@ -159,11 +118,51 @@ If AI succeeds, a new recipe appears in Saved Recipes:
   "HtmlPath": "C:\\Users\\<user>\\Documents\\RecipeAppFiles\\chicken_pasta.html"
 }
 ```
-## Next Steps
-1. Implement `HasPdf` property to display 📄 icon on recipe cards.
-2. Add offline detection when LM Studio server is not running (Optional)
-3. Merge duplicate recipes created from identical PDFs.
+## Implement `HasPdf` Property for Saved Recipe Cards
+The recipes originate from imported PDFs. To help users quickly distinguish them in the UI, we show a small 📄 icon on each recipe card that has an associated PDF file.
+1. Add a new boolean property `HasPdf` to the `RecipeIngredient` receive model that indicates whether the recipe has an attached PDF.
+2. Update data loading logic so the flag is automatically computed when:
+   * A recipe is imported from PDF.
+   * A PDF file is added or removed
+   3. Display the icon (📄) on the recipe list cards when `HasPdf == true`
+### Notes:
+* Use `IAutosavingClass` to auto-save this field
+* PDF storage may live inside local app or external file path, define this clearly before implemetation.
 
+## Merge Duplicate Recipes created from identical PDF
+Model extension
+```csharp
+[ObservableProperty]
+public partial string PdfHash { get; set; }
+```
+Import flow:
+1. `existing` refers to an already stored recipe whose `PdfPath` ends with the same filename
+2. If found -> system shows a dialog and stops processing
+```csharp
+if (existing != null)
+            {
+                await new ContentDialog
+                {
+                    Title = "Duplicate PDF Detected",
+                    Content = $"A recipe for {Path.GetFileName(savedFilePath)} already exists: {existing.SavedRecipe.Title}",
+                    CloseButtonText = "OK",
+                    XamlRoot = this.XamlRoot
+                }.ShowAsync();
+                return;
+            }
+```
+If no duplicate is found, the app attaches the PDF and its HTML conversion to the currently selected recipe
+```csharp
+var selectedRecipe = GetSelectedRecipes().FirstOrDefault();
+if (selectedRecipe != null)
+{
+    selectedRecipe.PdfPath = savedFilePath;
+    selectedRecipe.HtmlPath = htmlPath;
+
+    await SavedRecipe.Update(selectedRecipe);
+}
+
+```
 
 
 

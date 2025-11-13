@@ -27,8 +27,6 @@ public partial class PantryIngredient: IAutosavingClass<PantryIngredient>
             "Baking",
             "Beverages",
             "Snacks",
-            "Chicken",
-            "Pasta",
             "Others"
         };
     
@@ -52,19 +50,4 @@ public partial class PantryIngredient: IAutosavingClass<PantryIngredient>
     /// </summary>
     [ObservableProperty]
     public partial double ScaleFactor { get; set; } = 1.0;
-}
-
-// had Claude 4.5 Sonnet quickly generate this converter to fix an issue
-public partial class UnitTypeJsonConverter : JsonConverter<UnitType>
-{
-    public override UnitType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-    {
-        var value = reader.GetString();
-        return Enum.TryParse<UnitType>(value, true, out var result) ? result : UnitType.Box;
-    }
-
-    public override void Write(Utf8JsonWriter writer, UnitType value, JsonSerializerOptions options)
-    {
-        writer.WriteStringValue(value.ToString());
-    }
 }

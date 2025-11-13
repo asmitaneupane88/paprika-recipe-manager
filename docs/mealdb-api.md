@@ -3,7 +3,7 @@
 ## Overview
 Implements live recipe search using [TheMealDB API](https://www.themealdb.com/).
 
-Developed by **Hoang My Le**, this feature connects the UI, ViewModel, and API service to fetch and display meal data dynamically.
+This feature connects the UI, ViewModel, and API service to fetch and display meal data dynamically.
 
 ## Architecture
 **Flow:**

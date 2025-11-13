@@ -11,7 +11,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
 {
     [JsonIgnore] public int BindableMaxRating => MaxRating;
 
-    [ObservableProperty] public required partial string Title { get; set; }
+    [ObservableProperty] public partial string Title { get; set; }
     [ObservableProperty] public partial string Description { get; set; } = string.Empty;
     [ObservableProperty] public partial string ImageUrl { get; set; } = string.Empty;
     [ObservableProperty] public partial string? SourceUrl { get; set; }

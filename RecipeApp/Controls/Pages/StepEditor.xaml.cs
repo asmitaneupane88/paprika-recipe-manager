@@ -227,13 +227,14 @@ public sealed partial class StepEditor : NavigatorPage
 
     private void WidgetOnInNodeMouseUp(Ellipse arg1, InNode arg2, IStepControl arg3)
     {
-        if (arg2.Source is null && _draggingNode is { Item4: { } stepControl } && stepControl != arg3)
+        if (arg2.Source is null && _draggingNode is { } node && node.Item4 is { } stepControl && stepControl != arg3)
         {
-            _draggingNode?.Item3.SetEndLocation(null, arg1);
+            node.Item3.SetEndLocation(null, arg1);
+            arg2.Source = node.Item1;
             
-            arg2.Source = _draggingNode?.Item1;
-            _draggingNode?.Item2.Next = arg3.Step;
-            NodeLines.Add(_draggingNode?.Item1!, (_draggingNode?.Item3!, _draggingNode?.Item2!, arg2, _draggingNode?.Item4!));
+            node.Item2.Next = arg3.Step;
+            
+            NodeLines.Add(node.Item1, (node.Item3, node.Item2, arg2, node.Item4));
         }
 
         PointerUp();
@@ -345,7 +346,8 @@ public sealed partial class StepEditor : NavigatorPage
         {
             if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == outNode) is var lineToRemove)
             {
-                lineToRemove.Value.Item3?.Source = null;
+                if (lineToRemove.Value.Item3?.Source is not null)
+                    lineToRemove.Value.Item3.Source = null;
                 lineToRemove.Value.Item1?.Dispose();
                 if (lineToRemove.Key is not null)
                     NodeLines.Remove(lineToRemove.Key);
@@ -384,10 +386,12 @@ public sealed partial class StepEditor : NavigatorPage
                 textStep.OutNodes.Remove(node);
             else return;
 
-            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { } lineToRemove)
+            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { Key: { }, } lineToRemove)
             {
-                lineToRemove.Value.Item3.Source = null;
-                lineToRemove.Value.Item1.Dispose();
+                if (lineToRemove.Value.Item3 is not null)
+                    lineToRemove.Value.Item3.Source = null;
+                
+                lineToRemove.Value.Item1?.Dispose();
                 NodeLines.Remove(lineToRemove.Key);
             }
         }
@@ -395,13 +399,16 @@ public sealed partial class StepEditor : NavigatorPage
 
     private void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
+        if (_selectedStep?.Step is null) return;
+        _selectedStep.Step.IngredientsToUse ??= new System.Collections.ObjectModel.ObservableCollection<RecipeIngredient>();
         if (sender is FrameworkElement { Tag: RecipeIngredient ingredient })
-            _selectedStep?.Step.IngredientsToUse.Remove(ingredient);
+            _selectedStep.Step.IngredientsToUse.Remove(ingredient);
     }
 
     private void ButtonAddIngredient_OnClick(object sender, RoutedEventArgs e)
     {
-        _selectedStep?.Step.IngredientsToUse.Add(new RecipeIngredient());
+        if (_selectedStep?.Step is null) return;
+        _selectedStep.Step.IngredientsToUse ??= new System.Collections.ObjectModel.ObservableCollection<RecipeIngredient>();
+        _selectedStep.Step.IngredientsToUse.Add(new RecipeIngredient());
     }
 }
-
