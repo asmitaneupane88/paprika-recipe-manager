@@ -20,10 +20,60 @@ public abstract partial class IStep : ObservableObject
     /// <returns></returns>
     public abstract ObservableCollection<OutNode> GetOutNodes();
 
+    /// <summary>
+    /// sets the out nodes of the step.
+    /// finish step cannot have out nodes.
+    /// timer and merge step must have zero or one out node.
+    /// </summary>
+    /// <param name="outNodes"></param>
+    /// <exception cref="Exception"></exception>
+    public void SetOutNodes(params ObservableCollection<OutNode> outNodes)
+    {
+        switch (this)
+        {
+            case StartStep start:
+                start.Paths = outNodes;
+                break;
+            case TextStep text:
+                text.OutNodes = outNodes;
+                break;
+            case TimerStep time:
+                if (outNodes.Count > 1) 
+                    throw new Exception("Timer cannot have more than one out node");
+                time.NextStep = outNodes.FirstOrDefault() ?? new OutNode("Next", null);
+                break;
+            case SplitStep split:
+                split.OutNodes = outNodes;
+                break;
+            case MergeStep merge:
+                if (outNodes.Count > 1) 
+                    throw new Exception("Merge cannot have more than one out node");
+                merge.NextStep = outNodes.FirstOrDefault() ?? new OutNode("Next", null);
+                break;
+            case FinishStep finish:
+                throw new Exception("Finish step cannot have out nodes");
+                break;
+        }
+    }
+    
+    /// <summary>
+    /// Gets or sets the out nodes of the step.
+    /// </summary>
+    [JsonIgnore]
+    public ObservableCollection<OutNode> OutNodes
+    {
+        get => GetOutNodes();
+        set => SetOutNodes(value);
+    }
     
     [JsonIgnore] public string BindableTitle => GetTitle();
     [JsonIgnore] public string? BindableDescription => GetDescription();
     [JsonIgnore] public ObservableCollection<OutNode> BindableGetOutNodes => GetOutNodes();
+
+    /// <summary>
+    /// A dictionary of this step's properties.
+    /// </summary>
+    [JsonIgnore] public Dictionary<string, object> StepProperties => GetStepProperties();
 
     /// <summary>
     /// The X coordinate of where the step is on the edit canvas
@@ -137,6 +187,25 @@ public abstract partial class IStep : ObservableObject
         }
     }
     
+    /// <summary>
+    /// Packages the step's properties into a dictionary.
+    /// </summary>
+    /// <returns>
+    /// A dictionary of this step's properties
+    /// </returns>
+    private Dictionary<string, object> GetStepProperties(){
+        return new Dictionary<string, object>
+        {
+            ["Title"] = GetTitle(),
+            ["Description"] = GetDescription(),
+            ["MinutesToComplete"] = MinutesToComplete,
+            ["Ingredients"] = IngredientsToUse,
+            ["LocX"] = X,
+            ["LocY"] = Y,
+            ["StepType"] = GetType().Name,
+            ["IngredientsToUse"] = IngredientsToUse,
+        };
+    }
     private ObservableCollection<RecipeIngredient> CombineIngredients(ObservableCollection<RecipeIngredient> x, ObservableCollection<RecipeIngredient> y)
     {
         foreach (var ingredient in y??[])
