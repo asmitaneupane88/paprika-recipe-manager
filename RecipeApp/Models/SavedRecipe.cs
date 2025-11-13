@@ -1,6 +1,5 @@
 ﻿using System.Collections.Specialized;
 using RecipeApp.Models.RecipeSteps;
-using Uno.UI.RemoteControl.Messaging.IdeChannel;
 
 namespace RecipeApp.Models;
 
@@ -52,7 +51,6 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     [JsonIgnore] public bool HasHtml => !String.IsNullOrEmpty(HtmlPath);
 
     [ObservableProperty] public partial StartStep? RootStepNode { get; set; }
-
 
     public const string HtmlHeader =
         "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Recipe</title></head><body>";
