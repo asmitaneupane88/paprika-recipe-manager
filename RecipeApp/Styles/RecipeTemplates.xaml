@@ -22,18 +22,19 @@
 
             <StackPanel Grid.Column="1"
                         VerticalAlignment="Center">
-                <TextBlock Text="{Binding Title}"
-                           FontWeight="SemiBold"
-                           TextWrapping="Wrap"
-                           Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                <TextBlock Text="{Binding Category}"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                           Style="{StaticResource CaptionTextBlockStyle}"/>
-                <RatingControl
-                    Value="{Binding Rating}"
-                    MaxRating="{Binding BindableMaxRating}"
-                    IsReadOnly="True"
-                    Margin="0,4,0,0"/>
+                <TextBlock Text="{Binding Title}" 
+                          FontWeight="SemiBold"
+                          TextWrapping="Wrap"
+                          Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock Text="{Binding Category}" 
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                          Style="{StaticResource CaptionTextBlockStyle}"/>
+        <RatingControl
+            Value="{Binding Rating}"
+            MaxRating="{Binding BindableMaxRating}"
+            IsReadOnly="True"
+            Margin="0,4,0,0"
+            />
             </StackPanel>
         </Grid>
     </DataTemplate>

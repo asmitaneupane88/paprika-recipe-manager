@@ -1,17 +1,22 @@
-﻿using RecipeApp.Models;
-using RecipeApp.Services;
+
+
+
 namespace RecipeApp.Controls.Pages;
 
 
 public sealed partial class GroceryListPage : NavigatorPage
 {
     [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
     public GroceryListPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
 
         _ = ShowIngredients();
+        _ = ShowIngredients();
     }
+
+    private async Task ShowIngredients()
 
     private async Task ShowIngredients()
     {
@@ -58,6 +63,7 @@ public sealed partial class GroceryListPage : NavigatorPage
         await RecipeIngredient.Add(newIngredient);
     }
 
+
     private async void ButtonRemoveIngredient_OnClick(object sender, RoutedEventArgs e)
     {
         var selected = GetSelectedIngredientCards();
@@ -65,53 +71,10 @@ public sealed partial class GroceryListPage : NavigatorPage
         await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
         selected.ForEach(i => AllIngredients.Remove(i));
         RefreshSelected();
-    }
-    
-    private async void ButtonPurchased_OnClick(object sender, RoutedEventArgs e)
-    {
         var selected = GetSelectedIngredientCards();
-
-        if (selected.Count == 0)
-            return;
         
-        var pantryItems = await PantryIngredient.GetAll();
-
-        foreach (var card in selected.ToList())
-        {
-            var ingredient = card.Ingredient;
-            
-            if (ingredient == null)
-                continue;
-            
-            var existing = pantryItems.FirstOrDefault(p =>
-                string.Equals(p.Name?.Trim(), ingredient.Name?.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-            
-            if (existing != null)
-            {
-                existing.Quantity += ingredient.Quantity;
-                await PantryIngredient.Remove(existing);
-                await PantryIngredient.Add(existing);
-            }
-            else
-            {
-
-                var pantryItem = new PantryIngredient
-                {
-                    Name = ingredient.Name ?? "New Item",
-                    Quantity = ingredient.Quantity,
-                    Unit = ingredient.Unit,
-                    ModifierNote = ingredient.ModifierNote,
-                    Category = CategoryHelper.AutoDetectCategory(ingredient.Name)
-                };
-
-                await PantryIngredient.Add(pantryItem);
-            }
-
-            await RecipeIngredient.Remove(ingredient);
-            AllIngredients.Remove(card);
-        }
-
+        await Task.WhenAll(selected.Select(c => RecipeIngredient.Remove(c.Ingredient)));
+        selected.ForEach(i => AllIngredients.Remove(i));
         RefreshSelected();
     }
 

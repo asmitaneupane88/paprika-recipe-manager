@@ -152,8 +152,13 @@
                                                VerticalAlignment="Center"/>
                                     <FontIcon
                                         Grid.Column="0"
+<<<<<<< HEAD
                                         Glyph="&#xE7C3;"
                                         Foreground="Indigo"
+=======
+                                        Glyph="&#xE8A7;"
+                                        Foreground="DarkRed"
+>>>>>>> 834accd (fix(recipes): ensure uploaded PDF recipes set PdfPath and show document icon)
                                         FontSize="18"
                                         VerticalAlignment="Center"
                                         Margin="4,0,0,0"
