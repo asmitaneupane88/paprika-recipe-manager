@@ -101,17 +101,15 @@ public sealed partial class RecipeChat : NavigatorPage
 
     private async void ButtonSend_OnClick(object sender, RoutedEventArgs e)
     {
-        IsResponding = Visibility.Visible;
-        IsNotResponding = Visibility.Collapsed;
-        SendButtonEnabled = false;
+        ProgressRing.Visibility = Visibility.Visible;
+        SendButton.Visibility = Visibility.Collapsed;
 
         try
         {
             var task = AiHelper.RunPrompt(UserInput, Messages, CurrentRecipe);
             Messages.Add(new AiMessage(Sender.User, UserInput));
-            var result = await task;
-            
             UserInput = string.Empty;
+            var result = await task;
             
             Messages.Add(new AiMessage(Sender.Assistant, result.Message));
 
@@ -128,14 +126,13 @@ public sealed partial class RecipeChat : NavigatorPage
             throw;
         }
 
-        IsResponding = Visibility.Collapsed;
-        IsNotResponding = Visibility.Visible;
-        SendButtonEnabled = true;
+        ProgressRing.Visibility = Visibility.Collapsed;
+        SendButton.Visibility = Visibility.Visible;
     }
     
     private void RefreshVisibility()
     {
-        SendButtonEnabled = !string.IsNullOrWhiteSpace(UserInput) && IsResponding != Visibility.Visible;
+        SendButtonEnabled = !string.IsNullOrWhiteSpace(UserInput);
     }
 
     private async Task CleanupTags()

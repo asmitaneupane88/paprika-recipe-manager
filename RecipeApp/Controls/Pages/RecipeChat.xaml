@@ -60,13 +60,14 @@
 
         <TextBox Grid.Column="3" Grid.Row="1" Margin="10" Padding="0" MinHeight="0" Text="{x:Bind UserInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"/>
 
-        <Button Grid.Column="4" Grid.Row="1" Click="ButtonSend_OnClick" Margin="10"
-                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsEnabled="{Binding SendButtonEnabled, Mode=OneWay}">
-                <Grid>
-                    <SymbolIcon Symbol="Send" Visibility="{Binding IsNotResponding, Mode=OneWay}"/>
-                    <ProgressRing IsActive="True" Visibility="{Binding IsResponding, Mode=OneWay}" Width="50" Height="50" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </Grid>
+        <Button Grid.Column="4" Grid.Row="1" x:Name="SendButton" Click="ButtonSend_OnClick" Margin="10"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsEnabled="{x:Bind SendButtonEnabled, Mode=OneWay}">
+            <SymbolIcon Symbol="Send"/>
         </Button>
+
+        <ProgressRing Grid.Column="4" Grid.Row="1" x:Name="ProgressRing" IsActive="True" Width="30" Height="30" Margin="10"
+                      VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="Collapsed"/>
+
     </Grid>
 </local:NavigatorPage>
 
