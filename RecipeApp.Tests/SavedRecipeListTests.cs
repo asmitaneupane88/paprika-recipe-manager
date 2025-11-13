@@ -231,6 +231,51 @@ public class SavedRecipeListTests
     }
 
     [Test]
+    public void BuildBranchDepths_SimpleGraphWithMergeAndSplit_ReturnsCorrectEdges(){
+        // start --> A --> Split +---> B ---+--> Merge --> D --> Finish
+        //                       +---> C ---+ 
+
+        // Arrange
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph with Merge and Split", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var split = new SplitStep();
+        var B = new TextStep { Title = "B" };
+        var C = new TextStep { Title = "C" };
+        var merge = new MergeStep();
+        var D = new TextStep { Title = "D"};
+        var finish = new FinishStep();
+
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("split", split)];
+        split.OutNodes = [new OutNode("B", B), new OutNode("C", C)];
+        B.OutNodes = [new OutNode("merge", merge)];
+        C.OutNodes = [new OutNode("merge", merge)];
+        merge.NextStep = new OutNode("D", D);
+        D.OutNodes = [new OutNode("Finish", finish)];
+
+        var branchDepths = new Dictionary<IStep, int> {
+            { start, 0 },
+            { A, 0 },
+            { split, 0 },
+            { B, 1 },
+            { C, 1},
+            { merge, 0},
+            { D, 0},
+            { finish, 0}
+        };
+
+        // Act
+        var result = SavedRecipe.BuildBranchDepths(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(branchDepths);
+    }
+
+    [Test]
     public void BuildForwardEdges_SimpleGraph_ReturnsCorrectEdges(){
         // start --> A --> B --> Finish
 

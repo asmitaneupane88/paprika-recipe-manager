@@ -82,15 +82,17 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         {
             if (outNode.Next is not null)
             {
-                // default
+                // Calculate depth for the next step
                 var nextDepth = depth;
 
-                // Split steps +1 to depth
-                if(outNode.Next is SplitStep){
+                // If current step is a SplitStep, entering its children increases depth
+                if (currentStep is SplitStep)
+                {
                     nextDepth++;
                 }
-                // Merges decrement
-                else if(outNode.Next is MergeStep){
+                // If next step is a MergeStep, entering it decreases depth (merging branches back)
+                if (outNode.Next is MergeStep)
+                {
                     nextDepth--;
                 }
                 
