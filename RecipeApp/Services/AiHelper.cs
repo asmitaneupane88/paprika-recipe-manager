@@ -1,13 +1,8 @@
 ﻿using System.ClientModel;
-using System.ClientModel.Primitives;
-using System.ComponentModel.DataAnnotations;
-using NJsonSchema;
 using OpenAI;
 using OpenAI.Chat;
 using RecipeApp.Enums;
 using RecipeApp.Models.RecipeSteps;
-
-
 
 namespace RecipeApp.Services;
 
@@ -27,22 +22,14 @@ public class AiHelper
         var options = new OpenAIClientOptions
         {
             Endpoint = new Uri(settings.Endpoint),
-            NetworkTimeout = TimeSpan.FromSeconds(120)
         };
 
         _client = new OpenAIClient(new ApiKeyCredential(string.IsNullOrWhiteSpace(settings.ApiKey) ? "api-key" : settings.ApiKey), options);
 
-        if (settings.LastUsedModel is null)
+        var modelsResponse = await _client.GetOpenAIModelClient().GetModelsAsync();
+        if (modelsResponse?.Value != null)
         {
-            var modelsResponse = await _client.GetOpenAIModelClient().GetModelsAsync();
-            if (modelsResponse?.Value != null)
-            {
-                _currentModel = modelsResponse.Value.FirstOrDefault()?.Id;
-            }
-        }
-        else
-        {
-            _currentModel = settings.LastUsedModel;
+            _currentModel = settings.LastUsedModel ?? modelsResponse.Value.FirstOrDefault()?.Id;
         }
 
         return _client;
@@ -93,227 +80,113 @@ public class AiHelper
     {
         _client ??= await InitClient();
         
-        var schema = JsonSchema
-            .FromType<AiProcessedRecipe>()
-            .ToJson();
-        var response = await CompleteChatWithRetry(
-            _client.GetChatClient(_currentModel ?? "noModel"),
+        // this schema is a mix of claude sonnet 4.5 and me trying to make it work.
+        // an original basic one was made by it which gave me a base to learn a bit of the syntax and finish this
+        
+        var response = await _client.GetChatClient(_currentModel ?? "noModel")
+            .CompleteChatAsync(
                 [
-                    new SystemChatMessage($"""
+                    new SystemChatMessage("""
                                           You are a converter AI designed to convert any type of data into the standard format of a recipe.
-                                          Your goal is to extract as much information as possible from a given string and convert it into a recipe format.
-                                          You should also maintain how the wording of the recipe, focusing on separating out the data.
-                                          
-                                          The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed.
-                                          {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))}
-                                          
-                                          The following list is of the Enums you can use for UnitType for an ingredient:
-                                          {string.Join(", ", Enum.GetValues<UnitType>())}
+                                          You should not make up too much information, only small changes that still reflect the original data.
+                                          If you are missing too much information to make an accurate guess of what something is, leave the field blank instead.
                                           """),
-                    new UserChatMessage($"Convert the following to the provided schema: {content}"),
+                    new UserChatMessage($"Convert: {content}"),
                 ],
                 new ChatCompletionOptions
                 {
                     ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
                         jsonSchemaFormatName: "saved_recipe",
-                        jsonSchema: BinaryData.FromString(schema),
+                        jsonSchema: BinaryData.FromString(
+                            """
+                            {
+                              "$schema": "http://json-schema.org/draft/2020-12/schema#",
+                              "properties": {
+                                "recipe": {
+                                  "$ref": "#/$defs/SavedRecipe"
+                                }
+                              },
+                              "required": ["recipe"],
+                              "additionalProperties": false,
+                              "$defs": {
+                                "SavedRecipe": {
+                                  "type": "object",
+                                  "properties": {
+                                    "Title": { "type": "string", "description": "The title of the recipe. This should match the title of the original recipe as closely as possible." },
+                                    "Description": { "type": "string", "description": "A description of the recipe such as what the dish is and a very brief overview of the ingredients and steps." },
+                                    "ImageUrl": { "type": "string", "description": "url to the image of the recipe, leave this blank if there is no image, but try to find a url for the image within the given text or html." },
+                                    "SourceUrl": { "type": ["string", "null"], "description": "Should be null/empty, this will be added by the system." },
+                                    "UserNote": { "type": ["string", "null"], "description": "Should be null/empty, this will be added by the user." },
+                                    "Category": { "type": ["string", "null"], "description": "This is probably going to be a guess based on the title and description, but for now use breakfast, lunch, dinner, dessert, or snack as the category. This will later be replaced by category tags." },
+                                    "Rating": { "type": "integer", "minimum": 0, "maximum": 5, "description": "should be 0 stars unless it is specified already in the original recipe." },
+                                    "Steps": {
+                                      "type": "array",
+                                      "items": { "$ref": "#/$defs/RecipeStep" },
+                                      "description": "a list of steps which the user can use. The ingredients listed in each step are the ones used in that step and all used ingredients should reflect the total ingredients of the original recipe."
+                                    }
+                                  },
+                                  "required": ["Title", "Description", "Steps"],
+                                  "additionalProperties": false
+                                },
+                                "RecipeStep": {
+                                  "type": "object",
+                                  "description": "This represents an action by the user to prepare the dish. These actions can be broken up further from the original recipe so that it is easier to follow. Make sure to include a title for each step, a time for each step, and instruction steps should always have instructions attached to them",
+                                  "properties": {
+                                    "Type": { "type": "string", "enum": ["Instruction", "Timer"], "description": "Used for the UI, a Timer will show as a timer such as waiting for something to cook in a oven, while an Instruction will show as a text box with the instructions." },
+                                    "Title": { "type": "string", "description": "This is the title of the step, it should be a few words." },
+                                    "Instruction": { "type": ["string", "null"], "description": "Used only in instructions, this is the text of the instruction." },
+                                    "MinutesToComplete": { "type": "number", "description": "This is used for both instructions and timers, the number of minutes it takes to complete the step which is used to calculate the total time to complete the recipe." },
+                                    "Ingredients": {
+                                      "type": ["array", "null"],
+                                      "items": { "$ref": "#/$defs/RecipeIngredient" },
+                                      "description": "ingredients used by this step, if any. Keep in mind that if the same ingredient is being used across steps, it should only be listed once so that the total ingredients reflects the original recipe."
+                                    }
+                                  },
+                                  "required": ["Type", "Title", "Instruction", "MinutesToComplete"],
+                                  "additionalProperties": false
+                                },
+                                "RecipeIngredient": {
+                                  "type": "object",
+                                  "properties": {
+                                    "Name": { "type": "string", "description": "The common name of the ingredient, this is what the user will see in the UI and this is used to add up ingredients, so keep it as a standard/common name." },
+                                    "ModifierNote": { "type": ["string", "null"], "description": "an optional note about how the ingredient should be. For example, if the ingredient is a tomato, you can add a note that it should be diced or chopped." },
+                                    "Quantity": { "type": "number", "description": "How many of these are needed" },
+                                    "Unit": { "type": "string", "enum": ["TSP", "TBSP", "CUP", "PINT", "QUART", "GALLON", "OZ", "LB", "KG", "ITEM"], "description": "This is the unit of measurement for the ingredient, if it is not specified, use ITEM which is for just how many such as use 2 ITEMs of onions, but the UI will hide this specific unit if it is ITEM." }
+                                  },
+                                  "required": ["Name", "Quantity", "Unit"],
+                                  "additionalProperties": false
+                                }
+                              }
+                            }
+                            
+                            """),
                         jsonSchemaIsStrict: true)
                 });
 
         var jsonString = response.Value.Content[0].Text;
         
-        var recipe = JsonSerializer.Deserialize<AiProcessedRecipe>(
+        var recipe = JsonSerializer.Deserialize<AiProcessedResponse>(
             jsonString,
             new JsonSerializerOptions
             {
                 Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString
+                PropertyNameCaseInsensitive = true
             }
-        );
-
-        return await ParseResponseRecipe(recipe);
-    }
-    
-    public static async Task<AiResponse> RunPrompt(string prompt, IEnumerable<AiMessage> messages, SavedRecipe recipe)
-    {
-        _client ??= await InitClient();
-
-
-        var chatMessages = messages
-            .Select<AiMessage, ChatMessage?>(m => m.Sender switch
-            {
-                Sender.Assistant => new AssistantChatMessage(m.Message),
-                Sender.User => new UserChatMessage(m.Message),
-                _ => null
-            })
-            .Where(m => m is not null)
-            .Prepend(
-                new SystemChatMessage(
-                    $"""
-                     You are an assistant designed to help users modify and create new recipes.
-                     You should only change the parts of a recipe when requested and you should try to keep it realistic. 
-
-                     The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed:
-                     {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))} 
-
-                     The following is a list of the available ingredients in the user's pantry. You can use other ingredients, but the user could specify that they only want to use ingredients from the pantry:
-                     {string.Join(", ", (await PantryIngredient.GetAll()).Select(x => $"(Name: {x.Name}, Quantity: {x.Quantity})"))} 
-                     
-                     The following list is of the Enums you can use for UnitType for an ingredient:
-                     {string.Join(", ", Enum.GetValues<UnitType>())}
-                     
-                     You will be given a chat history (only the prompts from the user and your responses) and the current recipe that the user is working on in the most recent response.
-                     You have the ability to not update the recipe by keeping the field "recipe" as null/empty, which will be interpreted as no changes to the recipe.
-                     Do not include the recipe as plaintext in your message, include it as the "recipe" field in the response.
-                     """))
-            .Append(new UserChatMessage($"""
-                                         The following is the user's prompt:
-                                         {prompt}
-                                         
-                                         The following is the current recipe that the user is working on. Your response will replace the recipe, so anything unchanged should be copied over. If nothing was changed, feel free to not include this (leaving it as null) which will be interpreted as no changes to the recipe.
-                                         {JsonSerializer.Serialize(recipe, new JsonSerializerOptions {
-                                                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
-                                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                                                WriteIndented = true })}
-                                         """));
+        )?.recipe;
         
-        var schema = JsonSchema
-            .FromType<AiProcessedResponse>()
-            .ToJson();
-        
-        var chatCompletionResponse = await CompleteChatWithRetry(
-            _client.GetChatClient(_currentModel ?? "noModel"),
-            chatMessages,
-            new ChatCompletionOptions
-            {
-                ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-                    jsonSchemaFormatName: "ai_response",
-                    jsonSchema: BinaryData.FromString(schema),
-                    jsonSchemaIsStrict: true)
-            });
-
-        var jsonString = chatCompletionResponse.Value.Content[0].Text;
-        
-        var rawProcessedResponse = JsonSerializer.Deserialize<AiProcessedResponse>(
-            jsonString,
-            new JsonSerializerOptions
-            {
-                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = JsonNumberHandling.AllowReadingFromString
-            }
-        );
-
-        var finalResponse = new AiResponse
-        {
-            Message = rawProcessedResponse?.Message??"",
-            Recipe = await ParseResponseRecipe(rawProcessedResponse?.Recipe)
-        };
-
-        return finalResponse;
-    }
-        
-    public class AiResponse
-    {
-        public string Message { get; set; } = string.Empty;
-        public SavedRecipe? Recipe { get; set; }
-    }
-
-    private class AiProcessedResponse
-    {
-        [Required]
-        [Description("The response to the user. This should be limited in size and mostly be used for questions or comments about the recipe or to the user.")]
-        public string Message { get; set; } = string.Empty;
-        
-        [Description("The recipe that was processed. This is visible to the user to modify before the next message is sent. Note that if this is not included or null, that means there is no update to the recipe which should only be used for a question before making it.")]
-        public AiProcessedRecipe? Recipe { get; set; }
-    }
-    
-    private class AiProcessedRecipe
-    {
-        
-        [Required]
-        [MinLength(1)]
-        public string Title { get; set; } = string.Empty;
-    
-        [Required]
-        public string Description { get; set; } = string.Empty;
-    
-        [Url]
-        [Description("URL to the recipe's image")]
-        public string ImageUrl { get; set; } = string.Empty;
-        
-        [Description("Category Tags of the recipe. These should try to match the tags used in the app, but can be new tags as well.")]
-        public string[] Tags { get; set; } = [];
-        
-        [Range(0, int.MaxValue)]
-        public int Rating { get; set; } = 0;
-    
-        [Description("The steps to make a recipe, these should be seperated out into seperate steps that are displayed one at a time.")]
-        public List<AiProcessedStep> Steps { get; set; } = [];
-    }
-    
-    private class AiProcessedStep
-    {
-        [Required]
-        [Description("The type of step. This should be either 'Instruction' or 'Timer'. The Timer step is used for when something needs to cook for a certain amount of time (example is having something in the oven for a certain amount of time), and the Instruction step is used for everything else.")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public StepType Type { get; set; }
-        
-        [Required]
-        public string Title { get; set; } = string.Empty;
-        
-        [Description("The instruction to follow for this step. This should be left blank if the step is a timer.")]
-        public string? Instruction { get; set; }
-        
-        [Range(0, double.MaxValue)]
-        [Description("The time in minutes to complete this step. This should have a time for both step types and is added up for the total recipe time. For timer steps, this is used for the timer UI.")]
-        public double MinutesToComplete { get; set; }
-        
-        
-        [Description("The ingredients to use for this step only. These ingredients are added up to get total ingredients for the recipe. Keep in mind that timer steps cannot have instructions attached and that the titles should match the original instructions, just seperated out.")]
-        public List<RecipeIngredient>? Ingredients { get; set; }
-    }
-    
-    private enum StepType
-    {
-        Instruction,
-        Timer
-    }
-
-    private static async Task<SavedRecipe?> ParseResponseRecipe(AiProcessedRecipe? recipe)
-    {
         if (recipe is null) return null;
 
-        // 1-1 properties and basic creation of the saved recipe
-        
         var savedRecipe = new SavedRecipe()
         {
             Title = recipe.Title,
             Description = recipe.Description,
             ImageUrl = recipe.ImageUrl,
+            SourceUrl = recipe.SourceUrl,
+            UserNote = recipe?.UserNote ?? string.Empty,
+            // Category = recipe?.Category ?? string.Empty, TODO fix
+            Tags = [], //TODO: another task will revamp some of this.
             Rating = recipe?.Rating ?? 0,
         };
-        
-        // map tags, adding ot tag list if new
-        
-        var allTags = await SavedTag.GetAll();
-        savedRecipe.Tags = [];
-        
-        List<Task> tasks = [];
-        
-        foreach (var tag in recipe?.Tags ?? [])
-        {
-            savedRecipe.Tags.Add(tag);
-
-            if (allTags.All(x => x.Name != tag))
-            {
-                tasks.Add(SavedTag.Add(new SavedTag { Name = tag }));
-            }
-        }
-        
-        // map steps to the graph structure
 
         var rootStep = new StartStep()
         {
@@ -327,14 +200,14 @@ public class AiHelper
         {
             IStep newStep = step.Type switch
             {
-                StepType.Instruction => new TextStep()
+                "Instruction" => new TextStep()
                 {
                     MinutesToComplete = step.MinutesToComplete,
                     Title = step.Title,
                     Instructions = step.Instruction ?? string.Empty,
                     IngredientsToUse = step.Ingredients?.ToObservableCollection() ?? [],
                 },
-                StepType.Timer => new TimerStep()
+                "Timer" => new TimerStep()
                 {
                     MinutesToComplete = step.MinutesToComplete,
                     Title = step.Title,
@@ -373,33 +246,44 @@ public class AiHelper
                 startS.Paths = [new OutNode("Start", finishStep)];
                 break;
         }
-
-        await Task.WhenAll(tasks);
         
         return savedRecipe;
     }
-    
-    // used copilot (not sure what model) to quickly try to fix this ai stuff (getting 503)
-    // had to modify the timing a bit to work better.
-    private static async Task<ClientResult<ChatCompletion>> CompleteChatWithRetry(
-        ChatClient chatClient,
-        IEnumerable<ChatMessage> messages,
-        ChatCompletionOptions options,
-        int maxRetries = 6)
+
+    private class AiProcessedResponse
     {
-        int attempt = 0;
-        while (true)
-        {
-            try
-            {
-                return await chatClient.CompleteChatAsync(messages, options);
-            }
-            catch (ClientResultException ex) when (ex.Status == 503 && attempt < maxRetries)
-            {
-                attempt++;
-                var delay = TimeSpan.FromSeconds((Math.Pow(2, attempt)/10));
-                await Task.Delay(delay);
-            }
-        }
+        public AiProcessedRecipe recipe { get; set; }
+    }
+    
+    // used Claude Sonnet 4.5 for generating these classes from the schema 
+    private class AiProcessedRecipe
+    {
+        public string Title { get; set; } = string.Empty;
+    
+        public string Description { get; set; } = string.Empty;
+    
+        public string ImageUrl { get; set; } = string.Empty;
+    
+        public string? SourceUrl { get; set; }
+    
+        public string? UserNote { get; set; }
+    
+        public string? Category { get; set; }
+    
+        public int Rating { get; set; }
+    
+        public List<AiProcessedStep> Steps { get; set; } = new();
+    }
+    private class AiProcessedStep
+    {
+        public string Type { get; set; } = string.Empty;
+        
+        public string Title { get; set; } = string.Empty;
+        
+        public string? Instruction { get; set; }
+        
+        public double MinutesToComplete { get; set; }
+        
+        public List<RecipeIngredient>? Ingredients { get; set; }
     }
 }
