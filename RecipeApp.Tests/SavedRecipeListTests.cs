@@ -434,9 +434,24 @@ public class SavedRecipeListTests
     [Test]
     public void HandlesComplexNestedStructure()
     {
-        // Arrange
+        // start -> X -> split1 +
+        //                      +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                  +-> D  -----------------------------+
+        //                                  +-> tE -----------------------------+
+        //                                  +-> C  -> split3 +      +-> merge1 -+
+        //                                                   +-> F -+
+        //                                                   +-> G -+
+        var start = new StartStep();
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
         var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
-        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
         var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
         var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
         var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
@@ -445,30 +460,58 @@ public class SavedRecipeListTests
         var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
         var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
         var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        
+        tE.NextStep = new OutNode("Merge2", merge2);
+        
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+
+        G.OutNodes = [new OutNode("Merge1", merge1)];
 
         // Act
-        var result = BuildComplexNestedRecipe().NestedListRepresentation;
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+        var result = recipe.NestedListRepresentation;
 
         var expected = new List<object> {
+            start,
             X,
-            new HashSet<object>{
-                new List<object> { A, tH },
-                new List<object> {
+            split1,
+            new List<object>{
+                new List<object>{
                     B,
-                    new HashSet<object>{
-                        tE,
-                        D,
-                        new List<object>{
-                            C,
-                            new HashSet<object>{
-                                F,
-                                G,
-                            }
-                        },
-                    }
-                }
+                    split2,
+                    new List<object>{
+                        new List<object>{C, split3, new List<object>{ new List<object>{F}, new List<object>{G} }, merge1},
+                        new List<object>{D},
+                        new List<object>{tE}
+                    },
+                    merge2
+                },
+                new List<object>{A, tH}
             },
-            Z
+            merge3,
+            Z,
+            finish
         };
         
         // Assert

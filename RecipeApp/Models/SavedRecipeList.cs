@@ -13,7 +13,7 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// <summary>
     /// Returns a deep nested list representation of the recipe steps.
     /// </summary>
-    [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
+    [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep(), null, null);
 
 
     /// <summary>
@@ -183,43 +183,77 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     }
 
     /// <summary>
-    /// Builds a deep nested list representation of the recipe steps. Parallel steps are represented as a HashSet of objects. Method assumes that the graph is acyclic.
+    /// Builds a deep nested list representation of the recipe steps. Method assumes that the graph is acyclic.
     /// </summary>
     /// <returns>
     /// A deep nested list representation of the recipe steps.
     /// </returns>
-    /// <example>
-    ///     new List&lt;object&gt;{
-    ///     A,
-    ///     new List&lt;object&gt; {
-    ///         B,
-    ///         new HashSet&lt;object&gt;{
-    ///             tE,
-    ///             D,
-    ///             new List&lt;object&gt;{
-    ///                 C,
-    ///                 new HashSet&lt;object&gt;{
-    ///                     F,
-    ///                     G,
-    ///                 }
-    ///             },
-    ///         }
-    ///     }
-    /// };
-    /// </example>
-    public static object GetNestedListRepresentation(IStep rootStep)
+    public static object GetNestedListRepresentation(IStep? currentStep, List<List<IStep>>? possiblePaths, List<IStep>? workingList)
     {
-        // First, get a HashSet of forward edges
-        //var forwardEdges = BuildForwardEdges(rootStep);
-
-        // Second, build a mapping of each node to it's branch depth.
-        //var branchDepths = BuildBranchDepths(rootStep);
-
-        return new List<IStep>();
-
-        // {start, A, split1, B, D, ~, }
-        // [start, A, split1, B, D, MERGE, C, split2, E, merge2, F, G, END]
+        workingList ??= [];
+        possiblePaths ??= GetPossiblePaths(currentStep!, null, null);
         
+        var refinedList = new List<object>();
+
+        // recomputed after recursing
+        var commonParents = GetCommonParents(possiblePaths);
+        var commonDescendants = GetCommonDescendants(possiblePaths);
+        var uncommonElements = GetUncommonElements(possiblePaths, commonParents, commonDescendants);
+
+        // Start
+        if (commonParents.Count > 0){
+            foreach (var item in commonParents)
+            {
+                refinedList.Add(item);
+            }
+        }
+
+        // Middle of the paths
+        if (uncommonElements.Count > 0){
+            // group by first uncommon element
+            var uniqueNodes = new HashSet<IStep>();
+            foreach (var path in uncommonElements){
+                if (path.Count > 0)
+                {
+                    uniqueNodes.Add(path[0]);
+                }
+            }
+
+            var parallelPaths = new List<object>();
+            foreach (var node in uniqueNodes){
+                var nodePaths = new List<List<IStep>>();
+
+                // Create a new path for each unique 1st element
+                foreach (var path in uncommonElements){
+                    if (path.Count > 0 && ReferenceEquals(path[0], node)){
+                        nodePaths.Add(path);
+                    }
+                }
+
+                // only recurse if there are valid paths
+                if(nodePaths.Count > 0){
+                    parallelPaths.Add(GetNestedListRepresentation(null, nodePaths, workingList));
+                }
+            }
+
+            if (parallelPaths.Count > 0){
+                refinedList.Add(parallelPaths);
+            }
+        }
+
+        // End of the list
+        if (commonDescendants.Count > 0)
+        {
+            foreach (var item in commonDescendants)
+            {
+                if (!refinedList.Contains(item))
+                {
+                    refinedList.Add(item);
+                }
+            }
+        }
+        
+        return refinedList;
     }
 
     
