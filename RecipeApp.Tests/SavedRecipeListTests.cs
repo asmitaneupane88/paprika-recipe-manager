@@ -223,6 +223,213 @@ public class SavedRecipeListTests
 
     }
 
+    [Test]
+    public void GetCommonParents(){
+        // start -> X -> split1 +
+        //                      +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                  +-> D  -----------------------------+
+        //                                  +-> tE -----------------------------+
+        //                                  +-> C  -> split3 +      +-> merge1 -+
+        //                                                   +-> F -+
+        //                                                   +-> G -+
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        
+        tE.NextStep = new OutNode("Merge2", merge2);
+        
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+    
+        var expected = new List<IStep> { start, X, split1};
+        var possiblePaths = SavedRecipe.GetPossiblePaths(start, null, null);
+        var result = SavedRecipe.GetCommonParents(possiblePaths);
+
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(expected);
+
+    }
+
+    [Test]
+    public void GetCommonDescendants(){
+        // start -> X -> split1 +
+        //                      +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                  +-> D  -----------------------------+
+        //                                  +-> tE -----------------------------+
+        //                                  +-> C  -> split3 +      +-> merge1 -+
+        //                                                   +-> F -+
+        //                                                   +-> G -+
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        
+        tE.NextStep = new OutNode("Merge2", merge2);
+        
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+    
+        var expected = new List<IStep> { merge3, Z, finish};
+        var possiblePaths = SavedRecipe.GetPossiblePaths(start, null, null);
+        var result = SavedRecipe.GetCommonDescendants(possiblePaths);
+
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(expected);
+
+    }
+
+    [Test]
+    public void GetUncommonElements(){
+        // start -> X -> split1 +
+        //                      +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                  +-> D  -----------------------------+
+        //                                  +-> tE -----------------------------+
+        //                                  +-> C  -> split3 +      +-> merge1 -+
+        //                                                   +-> F -+
+        //                                                   +-> G -+
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        
+        tE.NextStep = new OutNode("Merge2", merge2);
+        
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+    
+        var expected = new List<List<IStep>>
+        {
+            new List<IStep> { A, tH},
+            new List<IStep> { B, split2, D, merge2},
+            new List<IStep> { B, split2, tE, merge2},
+            new List<IStep> { B, split2, C, split3, F, merge1, merge2},
+            new List<IStep> { B, split2, C, split3, G, merge1, merge2},
+        };
+
+        var possiblePaths = SavedRecipe.GetPossiblePaths(start, null, null);
+        var commonParents = SavedRecipe.GetCommonParents(possiblePaths);
+        var commonDescendants = SavedRecipe.GetCommonDescendants(possiblePaths);
+
+        var result = SavedRecipe.GetUncommonElements(possiblePaths,commonParents,commonDescendants);
+
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(expected);
+    }
 
     [Test]
     public void HandlesComplexNestedStructure()

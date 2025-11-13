@@ -1,4 +1,5 @@
 using RecipeApp.Models.RecipeSteps;
+using System.Linq;
 using UglyToad.PdfPig.Core;
 
 namespace RecipeApp.Models;
@@ -14,7 +15,16 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
     /// </summary>
     [JsonIgnore] public object NestedListRepresentation => GetNestedListRepresentation(RootStepNode ?? new StartStep());
 
+
+    /// <summary>
+    /// Returns a list of all possible paths that could be taken in the graph.
+    /// </summary>
+    /// <param name="currentStep">The current step node being visited in the graph traversal.</param>
+    /// <param name="possiblePaths">A list to collect all identified possible paths; may be null if starting fresh.</param>
+    /// <param name="currentPath">The current path being constructed during traversal; may be null if starting fresh.</param>
     public static List<List<IStep>> GetPossiblePaths(IStep currentStep, List<List<IStep>>? possiblePaths, List<IStep>? currentPath){
+         // A.I. translation of A.I. generated python code
+
         possiblePaths ??= [];
         currentPath ??= [];
 
@@ -43,6 +53,133 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         }
 
         return possiblePaths;
+    }
+
+    /// <summary>
+    /// Finds the longest common prefix (common parents) among all paths.
+    /// </summary>
+    /// <param name="paths">List of paths to analyze.</param>
+    /// <returns>List of steps that are common to the beginning of all paths.</returns>
+    public static List<IStep> GetCommonParents(List<List<IStep>> paths)
+    {
+        // A.I. translation of A.I. generated python code
+        
+        if (paths == null || paths.Count == 0)
+        {
+            return [];
+        }
+
+        // Find the longest common prefix among all paths
+        var commonPrefix = new List<IStep>(paths[0]);
+
+        for (int i = 1; i < paths.Count; i++)
+        {
+            var tempPrefix = new List<IStep>();
+            var path = paths[i];
+
+            for (int j = 0; j < Math.Min(commonPrefix.Count, path.Count); j++)
+            {
+                if (ReferenceEquals(commonPrefix[j], path[j]))
+                {
+                    tempPrefix.Add(commonPrefix[j]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            commonPrefix = tempPrefix;
+        }
+
+        return commonPrefix;
+    }
+
+    /// <summary>
+    /// Finds the longest common suffix (common descendants) among all paths.
+    /// </summary>
+    /// <param name="paths">List of paths to analyze.</param>
+    /// /// <returns>List of steps that are common to the end of all paths.</returns>
+    public static List<IStep> GetCommonDescendants(List<List<IStep>> paths)
+    {
+        // A.I. translation of A.I. generated python code
+
+        if (paths == null || paths.Count == 0)
+        {
+            return [];
+        }
+
+        // Find the longest common suffix among all paths
+        var firstPath = paths[0];
+        var commonSuffix = new List<IStep>(firstPath);
+        commonSuffix.Reverse();
+
+        for (int i = 1; i < paths.Count; i++)
+        {
+            var tempSuffix = new List<IStep>();
+            var path = paths[i];
+            var reversedPath = new List<IStep>(path);
+            reversedPath.Reverse();
+
+            for (int j = 0; j < Math.Min(commonSuffix.Count, reversedPath.Count); j++)
+            {
+                if (ReferenceEquals(commonSuffix[j], reversedPath[j]))
+                {
+                    tempSuffix.Add(commonSuffix[j]);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            commonSuffix = tempSuffix;
+        }
+
+        commonSuffix.Reverse();
+        return commonSuffix;
+    }
+
+    /// <summary>
+    /// Extracts the uncommon elements from each path (the portion between common parents and common descendants).
+    /// </summary>
+    /// <param name="paths">List of paths to analyze.</param>
+    /// <param name="commonParents">Common prefix steps.</param>
+    /// <param name="commonDescendants">Common suffix steps.</param>
+    /// <returns>List of paths containing only the uncommon portions.</returns>
+    public static List<List<IStep>> GetUncommonElements(
+        List<List<IStep>> paths,
+        List<IStep> commonParents,
+        List<IStep> commonDescendants)
+    {
+        // A.I. translation of A.I. generated python code
+
+        var uncommonElements = new List<List<IStep>>();
+
+        foreach (var path in paths)
+        {
+            // Extract the portion of the path between common parents and common descendants
+            var startIndex = commonParents.Count;
+            var endIndex = path.Count - commonDescendants.Count;
+
+            if (startIndex < endIndex)
+            {
+                // Python: path[start_index:end_index] - slice from startIndex to endIndex (exclusive)
+                var uncommonPortion = new List<IStep>();
+                for (int i = startIndex; i < endIndex; i++)
+                {
+                    uncommonPortion.Add(path[i]);
+                }
+                uncommonElements.Add(uncommonPortion);
+            }
+            else
+            {
+                // Add empty list when there's no uncommon portion
+                uncommonElements.Add([]);
+            }
+        }
+
+        return uncommonElements;
     }
 
     /// <summary>
