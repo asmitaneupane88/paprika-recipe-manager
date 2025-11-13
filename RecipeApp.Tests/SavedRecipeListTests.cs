@@ -199,6 +199,153 @@ public class SavedRecipeListTests
     }
 
     [Test]
+    public void GetRoughListOfSteps_SimpleGraph(){
+        // start --> A --> B --> Finish
+
+        // Arrange
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var B = new TextStep { Title = "B" };
+        var finish = new FinishStep();
+
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("B", B)];
+        B.OutNodes = [new OutNode("Finish", finish)];
+
+        var workingList = new List<IStep>(){
+            start, A, B, finish
+        };
+
+        // Act
+        var result = SavedRecipe.GetRoughListOfSteps(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(workingList);
+
+    }
+
+    [Test]
+    public void GetRoughListOfSteps_SimpleGraphWithMergeAndSplit(){
+        // start --> A --> Split +---> B ---+--> Merge --> D --> Finish
+        //                       +---> C ---+ 
+
+        // Arrange
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph with Merge and Split", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var split = new SplitStep();
+        var B = new TextStep { Title = "B" };
+        var C = new TextStep { Title = "C" };
+        var merge = new MergeStep();
+        var D = new TextStep { Title = "D"};
+        var finish = new FinishStep();
+
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("split", split)];
+        split.OutNodes = [new OutNode("B", B), new OutNode("C", C)];
+        B.OutNodes = [new OutNode("merge", merge)];
+        C.OutNodes = [new OutNode("merge", merge)];
+        merge.NextStep = new OutNode("D", D);
+        D.OutNodes = [new OutNode("Finish", finish)];
+
+        var workingList = new List<IStep>(){
+            start, A, split, B, C, merge, D, finish
+        };
+
+        // Act
+        var result = SavedRecipe.GetRoughListOfSteps(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(workingList);
+    }
+
+    [Test]
+    public void GetRoughListOfSteps_ComplexRecipeGraph(){
+        // start -> X -> split1 +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                       +-> D  -----------------------------+
+        //                                       +-> tE -----------------------------+
+        //                                       +-> C  -> split3 +      +-> merge1 -+
+        //                                                        +-> F -+
+        //                                                        +-> G -+
+
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        tE.NextStep = new OutNode("Merge2", merge2);
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+
+        var workingList = new List<IStep>(){
+            start, 
+            X, 
+            split1, 
+            A, 
+            tH,  
+            B, 
+            split2, 
+            D,  
+            tE,   
+            C, 
+            split3, 
+            F,  
+            G, 
+            merge1, 
+            merge2, 
+            merge3, 
+            Z, 
+            finish
+        };
+
+        // Act
+        var result = SavedRecipe.GetRoughListOfSteps(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(workingList);
+    }
+
+    [Test]
     public void BuildBranchDepths_SimpleGraph_ReturnsCorrectDepths(){
         // start --> A --> B --> Finish
 

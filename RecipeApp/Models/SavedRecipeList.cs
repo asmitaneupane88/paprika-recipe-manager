@@ -1,4 +1,5 @@
 using RecipeApp.Models.RecipeSteps;
+using UglyToad.PdfPig.Core;
 
 namespace RecipeApp.Models;
 
@@ -44,10 +45,57 @@ public partial class SavedRecipe : IAutosavingClass<SavedRecipe>
         // First, get a HashSet of forward edges
         var forwardEdges = BuildForwardEdges(rootStep);
 
-        return forwardEdges;
-
         // Second, build a mapping of each node to it's branch depth.
-        //var branchDepth = BuildBranchDepths(forwardEdges);
+        var branchDepths = BuildBranchDepths(rootStep);
+
+        return branchDepths;
+
+        // {start, A, split1, B, D, ~, }
+        // [start, A, split1, B, D, MERGE, C, split2, E, merge2, F, G, END]
+        
+    }
+
+    public static List<IStep> GetRoughListOfSteps(IStep currentStep, List<IStep>? workingList = null){
+        // Initialize the workingList if it is null.
+        if (workingList == null)
+        {
+            workingList = new List<IStep>();
+        }
+        
+        // Guard against a null RootStepNode.
+        var rootStepIsInvalid = currentStep is StartStep && (currentStep.GetOutNodes() == null || currentStep.GetOutNodes().Count == 0);
+
+        // Should move merge nodes farthest forward
+        if (workingList.Contains(currentStep))
+        {
+            workingList.Remove(currentStep);
+        }
+        
+        // Add current step to the list (or re-add if it was already there)
+        workingList.Add(currentStep);
+
+        // Fail early / break recursion
+        if (rootStepIsInvalid || currentStep is FinishStep){
+            return workingList;
+        }
+
+        var currentOutNodes = currentStep.GetOutNodes();
+        if (currentOutNodes == null)
+        {
+            return workingList;
+        }
+
+        foreach (var outNode in currentOutNodes)
+        {
+            if (outNode.Next is not null)
+            {
+                // Recurse
+                GetRoughListOfSteps(outNode.Next, workingList);
+            }
+        }
+        
+        return workingList;
+
     }
 
     /// <summary>
