@@ -231,7 +231,7 @@ public class SavedRecipeListTests
     }
 
     [Test]
-    public void BuildBranchDepths_SimpleGraphWithMergeAndSplit_ReturnsCorrectEdges(){
+    public void BuildBranchDepths_SimpleGraphWithMergeAndSplit_ReturnsCorrectDepths(){
         // start --> A --> Split +---> B ---+--> Merge --> D --> Finish
         //                       +---> C ---+ 
 
@@ -265,6 +265,134 @@ public class SavedRecipeListTests
             { merge, 0},
             { D, 0},
             { finish, 0}
+        };
+
+        // Act
+        var result = SavedRecipe.BuildBranchDepths(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(branchDepths);
+    }
+
+    [Test]
+    public void BuildBranchDepths_SimpleGraphWithMergeSplitTimer_ReturnsCorrectDepths(){
+         // start --> A --> Split +---> B ---+-->  Merge --> Timer --> D --> Finish
+        //                       +---> C ---+
+
+        // Arrange
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Simple Graph with Merge and Split", RootStepNode = start };
+
+        var A = new TextStep { Title = "A" };
+        var split = new SplitStep();
+        var B = new TextStep { Title = "B" };
+        var C = new TextStep { Title = "C" };
+        var merge = new MergeStep();
+        var timer = new TimerStep();
+        var D = new TextStep { Title = "D"};
+        var finish = new FinishStep();
+
+        // Assign forward edges
+        start.Paths = [new OutNode("A", A)];
+        A.OutNodes = [new OutNode("split", split)];
+        split.OutNodes = [new OutNode("B", B), new OutNode("C", C)];
+        B.OutNodes = [new OutNode("merge", merge)];
+        C.OutNodes = [new OutNode("merge", merge)];
+        merge.NextStep = new OutNode("timer", timer);
+        timer.NextStep = new OutNode("D", D);
+        D.OutNodes = [new OutNode("Finish", finish)];
+
+        var branchDepths = new Dictionary<IStep, int> {
+            { start, 0 },
+            { A, 0 },
+            { split, 0 },
+            { B, 1 },
+            { C, 1},
+            { merge, 0},
+            { timer, 0},
+            { D, 0},
+            { finish, 0}
+        };
+
+        // Act
+        var result = SavedRecipe.BuildBranchDepths(recipe.RootStepNode!);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeEquivalentTo(branchDepths);
+
+    }
+
+    [Test]
+    public void BuildBranchDepths_ComplexRecipeGraph_ReturnsCorrectDepths(){
+        // start -> X -> split1 +-> A -> tH -----------------------------------------------------+-> merge3 -> Z -> finish
+        //                      +-> B -> split2 -+                                   +-> merge2 -+
+        //                                       +-> D  -----------------------------+
+        //                                       +-> tE -----------------------------+
+        //                                       +-> C  -> split3 +      +-> merge1 -+
+        //                                                        +-> F -+
+        //                                                        +-> G -+
+
+        var start = new StartStep();
+        var recipe = new SavedRecipe { Title = "Complex Nested Recipe", RootStepNode = start };
+
+        var split1 = new SplitStep();
+        var split2 = new SplitStep();
+        var split3 = new SplitStep();
+        var merge1 = new MergeStep();
+        var merge2 = new MergeStep();
+        var merge3 = new MergeStep();
+        var finish = new FinishStep();
+        var X = new TextStep { Title = "Step X", MinutesToComplete = 5 };
+        var A = new TextStep { Title = "Step A", MinutesToComplete = 5 };
+        var B = new TextStep { Title = "Step B", MinutesToComplete = 10 };
+        var C = new TextStep { Title = "Step C", MinutesToComplete = 15 };
+        var D = new TextStep { Title = "Step D", MinutesToComplete = 20 };
+        var F = new TextStep { Title = "Step F", MinutesToComplete = 30 };
+        var G = new TextStep { Title = "Step G", MinutesToComplete = 35 };
+        var tE = new TimerStep { Title = "Step E", MinutesToComplete = 25 };
+        var tH = new TimerStep { Title = "Step H", MinutesToComplete = 40 };
+        var Z = new TextStep { Title = "Step Z", MinutesToComplete = 45 };
+
+        // connections line by line
+        start.Paths = [new OutNode("Step X", X)];
+        X.OutNodes = [new OutNode("Split1", split1)];
+        split1.OutNodes = [new OutNode("A", A), new OutNode("B", B)];
+        A.OutNodes = [new OutNode("tH", tH)];
+        tH.NextStep = new OutNode("Merge3", merge3);
+        merge3.NextStep = new OutNode("Step Z", Z);
+        Z.OutNodes = [new OutNode("Finish", finish)];
+        B.OutNodes = [new OutNode("Split2", split2)];
+        split2.OutNodes = [new OutNode("D", D), new OutNode("tE", tE), new OutNode("C", C)];
+        merge2.NextStep = new OutNode("Merge3", merge3);
+        D.OutNodes = [new OutNode("Merge2", merge2)];
+        tE.NextStep = new OutNode("Merge2", merge2);
+        C.OutNodes = [new OutNode("Split3", split3)];
+        split3.OutNodes = [new OutNode("F", F), new OutNode("G", G)];
+        merge1.NextStep = new OutNode("Merge2", merge2);
+        F.OutNodes = [new OutNode("Merge1", merge1)];
+        G.OutNodes = [new OutNode("Merge1", merge1)];
+
+        var branchDepths = new Dictionary<IStep, int> {
+            { start, 0 },
+            { X, 0 },
+            { split1, 0 },
+            { A, 1 },
+            { B, 1},
+            {split2, 1},
+            { tH, 1},
+            {D, 2},
+            {tE, 2},
+            {C, 2},
+            {split3, 2},
+            {F, 3},
+            {G,3},
+            {merge1, 2},
+            {merge2, 1},
+            {merge3, 0},
+            {Z, 0},
+            {finish, 0},
         };
 
         // Act
