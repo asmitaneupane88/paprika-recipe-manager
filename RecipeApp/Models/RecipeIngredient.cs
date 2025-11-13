@@ -4,6 +4,11 @@ namespace RecipeApp.Models;
 
 public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
 {
+    public RecipeIngredient()
+    {
+        Category = "Uncategorized";
+    }
+
     [ObservableProperty] public partial string Name { get; set; }
     
     [ObservableProperty] public partial string ModifierNote { get; set; }
@@ -12,6 +17,22 @@ public partial class RecipeIngredient : IAutosavingClass<RecipeIngredient>
     
     [JsonConverter(typeof(UnitTypeJsonConverter))]
     [ObservableProperty] public partial UnitType Unit { get; set; }
+    [ObservableProperty] public partial string Category { get; set; } = "Uncategorized";
+    
+    [JsonIgnore]
+    public ObservableCollection<string> CategoryOptions { get; } =
+        new()
+        {
+            "Vegetables",
+            "Fruits",
+            "Dairy",
+            "Meat",
+            "Seafood",
+            "Baking",
+            "Beverages",
+            "Snacks",
+            "Others"
+        };
     
     [JsonIgnore]
     public ObservableCollection<UnitType> RecipeUnitOptions { get; } = new(Enum.GetValues<UnitType>());

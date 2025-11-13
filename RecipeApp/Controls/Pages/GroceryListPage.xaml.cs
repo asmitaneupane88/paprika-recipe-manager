@@ -6,7 +6,14 @@ namespace RecipeApp.Controls.Pages;
 
 public sealed partial class GroceryListPage : NavigatorPage
 {
-    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } = [];
+    [ObservableProperty] private partial ObservableCollection<IngredientCard> AllIngredients { get; set; } 
+    
+    public ObservableCollection<string> CategoryOptions { get; } =
+    [
+        "All Categories", "Vegetables", "Fruits", "Dairy", "Meat", "Seafood",
+        "Baking", "Beverages", "Snacks", "Others", "Uncategorized"
+    ];
+    
     public GroceryListPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
@@ -84,7 +91,8 @@ public sealed partial class GroceryListPage : NavigatorPage
                 Name = ingredient.Name ?? "New Item",
                 Quantity = ingredient.Quantity,
                 Unit = ingredient.Unit,
-                ModifierNote = ingredient.ModifierNote
+                ModifierNote = ingredient.ModifierNote,
+                Category = ingredient.Category
             };
 
             await PantryIngredient.Add(pantryItem);

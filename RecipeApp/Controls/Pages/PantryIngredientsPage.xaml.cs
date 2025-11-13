@@ -131,7 +131,8 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
                 Quantity = pantry.Quantity,
                 Unit = pantry.Unit,
                 ModifierNote = pantry.ModifierNote,
-                ScaleFactor = pantry.ScaleFactor
+                ScaleFactor = pantry.ScaleFactor,
+                Category = pantry.Category
             };
 
          
