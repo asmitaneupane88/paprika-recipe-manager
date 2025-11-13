@@ -9,6 +9,25 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
     public PantryIngredientsPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
+        
+        PantryIngredients.CollectionChanged += (s, e) =>
+        {
+            if (e.NewItems != null)
+            {
+                foreach (IngredientCard card in e.NewItems)
+                {
+                    // When user types, auto-set category
+                    card.PIngredient.PropertyChanged += (sender, args) =>
+                    {
+                        if (args.PropertyName == nameof(PantryIngredient.Name))
+                        {
+                            var ing = (PantryIngredient)sender;
+                            ing.Category = AutoDetectCategory(ing.Name);
+                        }
+                    };
+                }
+            }
+        };
 
         _ = ShowIngredients();
     }

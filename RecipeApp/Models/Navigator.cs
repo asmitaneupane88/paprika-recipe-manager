@@ -61,6 +61,12 @@ public partial class Navigator : ObservableObject
             Name = "MealDB Recipes",
             PageFactory = nav => new MealDbSearchPage(nav),
         },
+        new()
+        {
+            Icon = Symbol.Setting,
+            Name = "Settings",
+            PageFactory = nav => new Settings(nav),
+        },
     ];
     
     /// <summary>
@@ -108,6 +114,7 @@ public partial class Navigator : ObservableObject
 
         CurrentPage = page.SavedPage;
         CurrentRoute = page.PageRoute;
+        CurrentTitle = page.Name;
 
         await CurrentPage!.Restore();
             

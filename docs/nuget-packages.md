@@ -35,3 +35,6 @@ Used to convert PDF to HTML.
 
 ## OpenAi - Latest
 Used to call the OpenAI API service for converting text such as HTML to a SavedRecipe.
+
+## NJsonSchema - Latest
+Used to generate a schema to pass to the ai model from a C# class.

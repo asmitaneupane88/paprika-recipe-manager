@@ -10,15 +10,26 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
     [ObservableProperty] private partial ObservableCollection<SavedTag> FilteredTags { get; set; } = [];
     [ObservableProperty] private partial ObservableCollection<SavedTag> AllTags { get; set; } = [];
     
-    public RecipeDetailsV2(Navigator? nav = null, SavedRecipe? savedRecipe = null) : base(nav)
+    [ObservableProperty] private partial bool AiEditMode { get; set; }
+    
+    public RecipeDetailsV2(Navigator? nav = null, SavedRecipe? savedRecipe = null, bool aiEditMode = false) : base(nav)
     {
         InitializeComponent();
 
         if (savedRecipe is null)
             _ = Navigator.TryGoBack();
         
+        // make the chicken something compatible with tags:
+        savedRecipe?.Tags ??= [];
+        
         SavedRecipe = savedRecipe!;
+        AiEditMode = aiEditMode;
 
+        if (aiEditMode)
+        {
+            AiButton.Visibility = Visibility.Collapsed;
+        }
+        
         _ = UpdateAllTags();
     }
     
@@ -168,6 +179,12 @@ public sealed partial class RecipeDetailsV2 : NavigatorPage
                 await UpdateAllTags();
             }
         }
+    }
+
+    private void ButtonRecipeAiEdit_OnClick(object sender, RoutedEventArgs e)
+    {
+        var chatPage = new RecipeChat(Navigator, SavedRecipe);
+        Navigator.Navigate(chatPage, $"Recipe Generator 2000: {SavedRecipe.Title}");
     }
 }
 

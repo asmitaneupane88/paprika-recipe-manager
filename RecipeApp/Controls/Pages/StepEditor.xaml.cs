@@ -386,7 +386,7 @@ public sealed partial class StepEditor : NavigatorPage
                 textStep.OutNodes.Remove(node);
             else return;
 
-            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { } lineToRemove)
+            if (NodeLines.FirstOrDefault(pair => pair.Value.Item2 == node) is { Key: { }, } lineToRemove)
             {
                 if (lineToRemove.Value.Item3 is not null)
                     lineToRemove.Value.Item3.Source = null;
@@ -412,4 +412,3 @@ public sealed partial class StepEditor : NavigatorPage
         _selectedStep.Step.IngredientsToUse.Add(new RecipeIngredient());
     }
 }
-

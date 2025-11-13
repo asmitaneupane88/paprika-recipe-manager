@@ -189,7 +189,8 @@ public sealed partial class MealPlannerPage : NavigatorPage
                     // Add the plus button
                     var addButton = new Button
                     {
-                        Content = "\uE710",
+                        // Use the edit/pencil glyph instead of a plus
+                        Content = "\uE70F",
                         FontFamily = new FontFamily("Segoe MDL2 Assets"),
                         Style = (Style)Application.Current.Resources["AccentButtonStyle"],
                         HorizontalAlignment = HorizontalAlignment.Right,
@@ -382,6 +383,9 @@ public sealed partial class MealPlannerPage : NavigatorPage
                 // Refresh the grid so the newly-added recipes appear
                 LoadAndInitializeMealPlans();
             }
+
+            // Refresh the grid so any additions or removals made in the dialog are shown.
+            LoadAndInitializeMealPlans();
         }
     }
 

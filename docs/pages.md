@@ -32,4 +32,14 @@ This page allows the user to search for recipes through the MealDB API.
 
 see @RecipeApp.Controls.Pages.MealDbSearchPage for more details.
 
+## Recipe Chat
+This page shows the recipe details on the left and a chat dialog on the right for prompting the ai to modify the recipe.
+
+see @RecipeApp.Controls.Pages.RecipeChat for more details.
+
+## Settings
+This page allows the user to edit settings for the ai model's endpoint and api key.
+
+see @RecipeApp.Controls.Pages.Settings for more details.
+
 

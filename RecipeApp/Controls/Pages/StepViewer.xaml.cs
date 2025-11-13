@@ -162,7 +162,23 @@ public sealed partial class StepViewer : NavigatorPage
         switch (node.Next)
             {
                 case FinishStep finishStep:
-                    //TODO we have the ingredients used, remove from pantry
+                    var pantryItems = await PantryIngredient.GetAll();
+                    
+                    foreach (var ingredient in step.IngredientsUsed.SelectMany(i => i.Ingredients))
+                    {
+            
+                        if (ingredient == null)
+                            continue;
+            
+                        var existing = pantryItems.FirstOrDefault(p =>
+                            string.Equals(p.Name?.Trim(), ingredient.Name?.Trim(),
+                                StringComparison.OrdinalIgnoreCase));
+            
+                        if (existing != null)
+                        {
+                            existing.Quantity -= ingredient.Quantity;
+                        }
+                    }
                     
                     Steps.Remove(step);
                     await ActiveStepInfo.Remove(step);

@@ -143,6 +143,8 @@
                     <!--TODO: list of recipe steps here if simple editor and allow for one time toggle to advanced editor-->
                 </Grid>
             </StackPanel>
+
+            <Button Content="Modify Recipe With AI" Margin="10" HorizontalAlignment="Stretch" Click="ButtonRecipeAiEdit_OnClick" x:Name="AiButton"/>
         </StackPanel>
     </ScrollViewer>
 </pages:NavigatorPage>

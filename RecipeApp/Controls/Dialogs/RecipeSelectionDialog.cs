@@ -3,8 +3,10 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Markup;
 using RecipeApp.Models;
+using System.Windows.Input;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -135,7 +137,7 @@ public class RecipeSelectionDialog
         {
             Title = $"Select Recipe for {_mealType} on {_date:MMM d}",
             Content = rootGrid,
-            PrimaryButtonText = "Add",
+            PrimaryButtonText = "Update",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
             XamlRoot = _xamlRoot
