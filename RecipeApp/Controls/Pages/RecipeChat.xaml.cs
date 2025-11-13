@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
+using RecipeApp.Enums;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -23,6 +24,23 @@ namespace RecipeApp.Controls.Pages;
 public sealed partial class RecipeChat : NavigatorPage
 {
     [ObservableProperty] public partial SavedRecipe? CurrentRecipe { get; set; }
+    
+    [ObservableProperty] public partial ObservableCollection<AiMessage> Messages { get; set; } = [];
+    
+    public string UserInput { 
+        get;
+        set
+        {
+            SetProperty( ref field, value);
+            RefreshVisibility();
+        }
+    } = string.Empty;
+    
+    [ObservableProperty] public partial bool SendButtonEnabled { get; set; } = true;
+    
+    [ObservableProperty] public partial Visibility IsResponding { get; set; } = Visibility.Collapsed;
+    [ObservableProperty] public partial Visibility IsNotResponding { get; set; } = Visibility.Visible;
+
     
     private RecipeDetailsV2 DetailsPage { get; set; }
     
@@ -37,6 +55,8 @@ public sealed partial class RecipeChat : NavigatorPage
         DetailsPage = new RecipeDetailsV2(Navigator, CurrentRecipe, aiEditMode: true);
 
         SavedRecipeHolder.Child = DetailsPage;
+
+        RefreshVisibility();
     }
 
     private void ButtonCancel_OnClick(object sender, RoutedEventArgs e)
@@ -51,7 +71,16 @@ public sealed partial class RecipeChat : NavigatorPage
 
     private void ButtonSend_OnClick(object sender, RoutedEventArgs e)
     {
+        IsResponding = Visibility.Visible;
+        IsNotResponding = Visibility.Collapsed;
+        SendButtonEnabled = false;
         
+        Messages.Add(new AiMessage(Sender.User, UserInput));
+    }
+    
+    private void RefreshVisibility()
+    {
+        SendButtonEnabled = !string.IsNullOrWhiteSpace(UserInput) && IsResponding != Visibility.Visible;
     }
 }
 

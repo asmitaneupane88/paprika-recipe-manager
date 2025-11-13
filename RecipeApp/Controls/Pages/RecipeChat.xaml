@@ -5,6 +5,7 @@
     xmlns:local="using:RecipeApp.Controls.Pages"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:RecipeApp.Models"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -45,22 +46,26 @@
 
         <ListView Grid.Column="3" Grid.Row="0" Grid.ColumnSpan="2" x:Name="ChatListView"
                   CornerRadius="8" BorderThickness="1" Margin="10"
-                  BorderBrush="{ThemeResource OutlineColor}">
-            <ListView.ItemTemplate> <!--x:DataType="models:ChatMessage"-->
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="5">
-                        <!--<TextBlock Text="{Binding Sender}" FontWeight="Bold" Margin="0,0,5,0"/>
-                        <TextBlock Text="{Binding Message}"/>-->
+                  BorderBrush="{ThemeResource OutlineColor}"
+                  ItemsSource="{x:Bind Messages}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:AiMessage">
+                    <StackPanel Background="{ThemeResource SurfaceColor}" Margin="{x:Bind Margin, Mode=OneWay}" HorizontalAlignment="Stretch">
+                        <TextBlock Text="{x:Bind Sender}" FontWeight="Bold"/>
+                        <TextBlock Text="{x:Bind Message}" TextWrapping="Wrap"/>
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
 
-        <TextBox Grid.Column="3" Grid.Row="1" Margin="10" Padding="0" MinHeight="0"/>
+        <TextBox Grid.Column="3" Grid.Row="1" Margin="10" Padding="0" MinHeight="0" Text="{x:Bind UserInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"/>
 
         <Button Grid.Column="4" Grid.Row="1" Click="ButtonSend_OnClick" Margin="10"
-                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center">
-                <SymbolIcon Symbol="Send"/>
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" IsEnabled="{x:Bind SendButtonEnabled, Mode=OneWay}">
+                <Grid>
+                    <SymbolIcon Symbol="Send" Visibility="{x:Bind IsNotResponding, Mode=OneWay}"/>
+                    <ProgressRing IsActive="True" Visibility="{x:Bind IsResponding, Mode=OneWay}"/>
+                </Grid>
         </Button>
     </Grid>
 </local:NavigatorPage>

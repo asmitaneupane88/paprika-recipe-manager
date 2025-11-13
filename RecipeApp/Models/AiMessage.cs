@@ -4,19 +4,19 @@ namespace RecipeApp.Models;
 
 
 [ObservableObject]
-public partial class RecipeMessege
+public partial class AiMessage
 {
     [ObservableProperty] public partial Sender Sender { get; set; }
     [ObservableProperty] public partial string Message { get; set; }
     
     public Thickness Margin => Sender switch
     {
-        Sender.User => new Thickness(0, 0, 10, 0),
-        Sender.Assistant => new Thickness(10, 0, 0, 0),
-        _ => new Thickness(20, 0, 20, 0),
+        Sender.User => new Thickness(0, 0, 50, 0),
+        Sender.Assistant => new Thickness(50, 0, 0, 0),
+        _ => new Thickness(100, 0, 100, 0),
     };
     
-    public RecipeMessege(Sender sender, string message)
+    public AiMessage(Sender sender, string message)
     {
         Sender = sender;
         Message = message;

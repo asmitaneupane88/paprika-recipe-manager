@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using NJsonSchema;
 using OpenAI;
 using OpenAI.Chat;
+using RecipeApp.Enums;
 using RecipeApp.Models.RecipeSteps;
 
 
@@ -122,18 +123,39 @@ public class AiHelper
         return await ParseResponseRecipe(recipe);
     }
     
-    public static async Task<AiResponse> RunPrompt(string prompt, IEnumerable<ChatMessage> messages)
+    public static async Task<AiResponse> RunPrompt(string prompt, IEnumerable<AiMessage> messages, SavedRecipe recipe)
     {
         _client ??= await InitClient();
 
-        messages = messages.Prepend(new SystemChatMessage($"""
-                                                           You are an assistant designed to help users modify and create new recipes.
-                                                           You should only change the parts of a recipe when requested and you should try to keep it realistic.
-                                                           The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed.
-                                                           {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))}
-                                                           The following is a list of the available ingredients in the user's pantry. You can use other ingredients, but the user could specify that they only want to use ingredients from the pantry.
-                                                           {string.Join(", ", (await PantryIngredient.GetAll()).Select(x => x.Name))}
-                                                           """))
+        
+        var chatMessages = messages
+            .Select<AiMessage, ChatMessage?>(m => m.Sender switch
+            {
+                Sender.Assistant => new AssistantChatMessage(m.Message),
+                Sender.User => new UserChatMessage(m.Message),
+                _ => null
+            })
+            .Where(m => m is not null)
+            .Prepend(
+                new SystemChatMessage(
+                    $"""
+                            You are an assistant designed to help users modify and create new recipes.
+                            You should only change the parts of a recipe when requested and you should try to keep it realistic. 
+                            
+                            The following is the list of the available recipe tags for the property "Tags". You should try to match these as much as possible, but you can also add new tags if needed:
+                            {string.Join(", ", (await SavedTag.GetAll()).Select(x => x.Name))} 
+                            
+                            The following is a list of the available ingredients in the user's pantry. You can use other ingredients, but the user could specify that they only want to use ingredients from the pantry:
+                            {string.Join(", ", (await PantryIngredient.GetAll()).Select(x => x.Name))} 
+                            
+                            The following is the current recipe that the user is working on. Your response will replace the recipe, so anything unchanged should be copied over:
+                            {JsonSerializer.Serialize(recipe, new JsonSerializerOptions
+                            {
+                                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase), new UnitTypeJsonConverter() },
+                                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                WriteIndented = true
+                            })}
+                            """))
             .Append(new UserChatMessage(prompt));
         
         var schema = JsonSchema
@@ -142,7 +164,7 @@ public class AiHelper
         
         var chatCompletionResponse = await _client.GetChatClient(_currentModel ?? "noModel")
             .CompleteChatAsync(
-                messages,
+                chatMessages,
                 new ChatCompletionOptions
                 {
                     ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
