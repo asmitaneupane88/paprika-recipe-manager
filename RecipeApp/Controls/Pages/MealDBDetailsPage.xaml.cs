@@ -56,7 +56,7 @@ public sealed partial class MealDBDetailsPage : NavigatorPage, INotifyPropertyCh
             await SavedRecipe.Add(savedRecipe);
             
             await Navigator.TryGoBack();
-            Navigator.Navigate(new RecipeDetailsV2(Navigator, savedRecipe), $"Edit Recipe: {savedRecipe.Title}");
+            Navigator.Navigate(new RecipeDetailsV2(Navigator, savedRecipe), $"Recipe Details: {savedRecipe.Title}");
             
         }
     }
