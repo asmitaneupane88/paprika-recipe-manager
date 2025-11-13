@@ -22,11 +22,58 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
         "All Categories", "Vegetables", "Fruits", "Dairy", "Meat", "Seafood",
         "Baking", "Beverages", "Snacks", "Others", "Uncategorized"
     ];
+    
+    private string AutoDetectCategory(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "Uncategorized";
+
+        string lower = name.ToLower();
+
+        if (lower.Contains("milk") || lower.Contains("cheese") || lower.Contains("yogurt"))
+            return "Dairy";
+
+        if (lower.Contains("chicken") || lower.Contains("beef") || lower.Contains("pork"))
+            return "Meat";
+
+        if (lower.Contains("apple") || lower.Contains("banana") || lower.Contains("orange"))
+            return "Fruits";
+
+        if (lower.Contains("broccoli") || lower.Contains("onion") || lower.Contains("carrot"))
+            return "Vegetables";
+
+        if (lower.Contains("shrimp") || lower.Contains("fish"))
+            return "Seafood";
+
+        if (lower.Contains("flour") || lower.Contains("sugar"))
+            return "Baking";
+
+        return "Uncategorized";
+    }
 
     
     public PantryIngredientsPage(Navigator? nav) : base(nav)
     {
         this.InitializeComponent();
+        
+        PantryIngredients.CollectionChanged += (s, e) =>
+        {
+            if (e.NewItems != null)
+            {
+                foreach (IngredientCard card in e.NewItems)
+                {
+                    // When user types, auto-set category
+                    card.PIngredient.PropertyChanged += (sender, args) =>
+                    {
+                        if (args.PropertyName == nameof(PantryIngredient.Name))
+                        {
+                            var ing = (PantryIngredient)sender;
+                            ing.Category = AutoDetectCategory(ing.Name);
+                        }
+                    };
+                }
+            }
+        };
 
         _ = ShowIngredients();
     }
@@ -132,7 +179,7 @@ public sealed partial class PantryIngredientsPage : NavigatorPage
                 Unit = pantry.Unit,
                 ModifierNote = pantry.ModifierNote,
                 ScaleFactor = pantry.ScaleFactor
-            };
+                };
 
          
             await RecipeIngredient.Add(groceryItem);
