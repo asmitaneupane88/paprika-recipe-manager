@@ -75,7 +75,14 @@
         <DependentUpon>GroceryListPage.xaml</DependentUpon>
         <IsDefaultItem>true</IsDefaultItem>
       </Compile>
-      <Compile Remove="Controls\Pages\RecipeDetailsV2.xaml.cs" />
+        <Compile Update="Controls\Pages\RecipeDetailsV2.xaml.cs">
+            <DependentUpon>RecipeDetailsV2.xaml</DependentUpon>
+            <IsDefaultItem>true</IsDefaultItem>
+        </Compile>
+        <Compile Update="Controls\Pages\Settings.xaml.cs">
+          <DependentUpon>Settings.xaml</DependentUpon>
+          <IsDefaultItem>true</IsDefaultItem>
+        </Compile>
     </ItemGroup>
     <ItemGroup>
       <Content Include="Platforms\Android\AndroidManifest.xml" />
